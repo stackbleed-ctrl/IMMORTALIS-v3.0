@@ -1,19 +1,28 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Install dependencies first (cached layer)
-COPY package.json .
-RUN npm install --production --frozen-lockfile 2>/dev/null || npm install --production
+# Copy package files first for layer caching
+COPY package*.json ./
+RUN npm ci --omit=dev
 
 # Copy source
-COPY server ./server
-COPY public ./public
+COPY index.js ./
+COPY index.html ./
+
+# Optional: copy static assets if they exist
+COPY *.md ./
+COPY *.toml ./
+
+# Data directory for persistence
+RUN mkdir -p /data
 
 EXPOSE 3000
+
 ENV NODE_ENV=production
+ENV PORT=3000
 
-# Persistent DB mount point
-VOLUME ["/data"]
-ENV DB_PATH=/data/immortalis.db
+# Set PERSIST_PATH to enable state persistence across restarts
+# ENV PERSIST_PATH=/data/state.json
 
-CMD ["node", "server/index.js"]
+CMD ["node", "index.js"]

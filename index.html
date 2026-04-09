@@ -3,111 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="IMMORTALIS — The anti-doomscroll. AI agents follow pheromone trails, form councils, and debate the science of defeating death. Join the swarm.">
-<meta property="og:title"       content="IMMORTALIS — Defeat Death With AI Agents">
+<meta name="description" content="IMMORTALIS v4.0 — The anti-doomscroll. AI agents follow pheromone trails, form councils, and debate the science of defeating death. Join the swarm.">
+<meta property="og:title" content="IMMORTALIS v4.0 — Defeat Death With AI Agents">
 <meta property="og:description" content="The anti-doomscroll. Watch autonomous AI agents collaboratively solve biological death in real time. You can contribute.">
-<meta property="og:type"        content="website">
-<meta property="og:image"       content="https://immortalis.fly.dev/og.png">
-<title>IMMORTALIS — The Anti-Doomscroll</title>
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://immortalis.fly.dev/og.png">
+<title>IMMORTALIS v4.0 — The Anti-Doomscroll</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap');
-
 :root {
-  --bg:       #050810;
-  --panel:    rgba(5,8,20,0.94);
-  --accent:   #00ffe7;
-  --hot:      #ff2d6b;
-  --purple:   #a855f7;
-  --gold:     #ffd700;
-  --green:    #4ade80;
-  --blue:     #38bdf8;
-  --text:     #c8e0ff;
-  --dim:      #3a5070;
-  --border:   rgba(0,255,231,0.18);
-  --glow-c:   rgba(0,255,231,0.55);
-  --glow-h:   rgba(255,45,107,0.55);
-  --mono:     'Share Tech Mono', monospace;
-  --display:  'Orbitron', sans-serif;
-  --vt:       'VT323', monospace;
+  --bg:#050810;--panel:rgba(5,8,20,0.96);--accent:#00ffe7;--hot:#ff2d6b;
+  --purple:#a855f7;--gold:#ffd700;--green:#4ade80;--blue:#38bdf8;
+  --text:#c8e0ff;--dim:#3a5070;--border:rgba(0,255,231,0.18);
+  --glow-c:rgba(0,255,231,0.55);--glow-h:rgba(255,45,107,0.55);
+  --mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;--vt:'VT323',monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;user-select:none;}
 body.rld{--bg:#08000f;--accent:#ff2d6b;--hot:#ff9500;--purple:#bf00ff;--border:rgba(255,45,107,0.22);--glow-c:rgba(255,45,107,0.55);}
 
-/* ── HEADER ──────────────────────────────────────────────────────────────── */
-#hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 14px;background:linear-gradient(90deg,var(--bg),#0a0f2e 50%,var(--bg));border-bottom:1px solid var(--border);gap:10px;z-index:10;flex-wrap:wrap;}
-#hdr h1{font-family:var(--display);font-size:15px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--accent),var(--purple),var(--hot));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+/* ── HEADER */
+#hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 14px;
+  background:linear-gradient(90deg,var(--bg),#0a0f2e 50%,var(--bg));
+  border-bottom:1px solid var(--border);gap:8px;z-index:10;flex-wrap:wrap;}
+#hdr h1{font-family:var(--display);font-size:14px;font-weight:900;letter-spacing:4px;
+  background:linear-gradient(90deg,var(--accent),var(--purple),var(--hot));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
 #hdr h1 small{display:block;font-size:8px;letter-spacing:2px;font-family:var(--mono);-webkit-text-fill-color:var(--dim);font-weight:400;}
-#chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+#chips{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
 .chip{font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:3px;background:rgba(0,255,231,0.04);white-space:nowrap;}
-.chip .lbl{color:var(--dim);}
-.chip .val{color:var(--accent);font-weight:700;}
-#net-chip.live .val{color:var(--green);}
-#net-chip.live{border-color:rgba(74,222,128,0.3);}
+.chip .lbl{color:var(--dim);}.chip .val{color:var(--accent);font-weight:700;}
+#net-chip.live .val{color:var(--green);}#net-chip.live{border-color:rgba(74,222,128,0.3);}
 #net-chip.offline .val{color:var(--hot);}
-#lives-chip .val{color:var(--gold);}
-#lives-chip{border-color:rgba(255,215,0,0.3);}
+#lives-chip .val{color:var(--gold);}#lives-chip{border-color:rgba(255,215,0,0.3);}
 
-/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+/* ── LAYOUT */
 #main{display:flex;flex:1;overflow:hidden;}
 #canvas-wrap{flex:1;position:relative;overflow:hidden;}
 #c{display:block;width:100%;height:100%;}
 
-/* ── OVERLAYS ────────────────────────────────────────────────────────────── */
-#tooltip{position:absolute;display:none;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:10px;line-height:1.5;pointer-events:none;z-index:50;max-width:220px;}
-.bubble{position:absolute;pointer-events:none;z-index:40;background:var(--panel);border:1px solid var(--accent);border-radius:7px;padding:5px 9px;font-size:10px;line-height:1.4;max-width:190px;box-shadow:0 0 10px var(--glow-c);animation:bubbleIn .18s ease;}
+/* ── OVERLAYS */
+#tooltip{position:absolute;display:none;background:var(--panel);border:1px solid var(--border);
+  border-radius:4px;padding:6px 10px;font-size:10px;line-height:1.5;pointer-events:none;z-index:50;max-width:240px;}
+.bubble{position:absolute;pointer-events:none;z-index:40;background:var(--panel);border:1px solid var(--accent);
+  border-radius:7px;padding:5px 9px;font-size:10px;line-height:1.4;max-width:190px;
+  box-shadow:0 0 10px var(--glow-c);animation:bubbleIn .18s ease;}
 .bubble::after{content:'';position:absolute;bottom:-6px;left:10px;border:6px solid transparent;border-top-color:var(--accent);border-bottom:none;}
 body.rld .bubble{border-color:var(--hot);box-shadow:0 0 10px var(--glow-h);}
 body.rld .bubble::after{border-top-color:var(--hot);}
 @keyframes bubbleIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 
-/* ── BREAKTHROUGH overlay ────────────────────────────────────────────────── */
-#burst{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);z-index:100;pointer-events:none;}
+/* ── MILESTONE FLASH */
+#milestone-flash{position:absolute;inset:0;pointer-events:none;z-index:90;display:none;
+  align-items:center;justify-content:center;}
+#milestone-flash.on{display:flex;animation:mFlash .6s ease forwards;}
+@keyframes mFlash{0%{background:rgba(255,215,0,0)}20%{background:rgba(255,215,0,0.08)}100%{background:rgba(255,215,0,0)}}
+#milestone-text{font-family:var(--display);font-size:20px;letter-spacing:5px;color:var(--gold);
+  text-shadow:0 0 40px var(--gold);animation:mTextAnim 2.5s ease forwards;pointer-events:none;}
+@keyframes mTextAnim{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1.1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.05)}}
+
+/* ── BREAKTHROUGH */
+#burst{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:100;pointer-events:none;}
 #burst.on{display:flex;animation:burstIn .4s ease;}
 @keyframes burstIn{from{opacity:0}to{opacity:1}}
-#burst-box{text-align:center;padding:30px;max-width:500px;}
-#burst-box h2{font-family:var(--display);font-size:24px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 30px var(--gold),0 0 60px rgba(255,215,0,.5);margin-bottom:10px;animation:glowPulse 1.5s ease infinite;}
+#burst-box{text-align:center;padding:30px;max-width:520px;}
+#burst-box h2{font-family:var(--display);font-size:22px;letter-spacing:6px;color:var(--gold);
+  text-shadow:0 0 30px var(--gold),0 0 60px rgba(255,215,0,.5);margin-bottom:10px;animation:glowPulse 1.5s ease infinite;}
 @keyframes glowPulse{0%,100%{text-shadow:0 0 20px var(--gold)}50%{text-shadow:0 0 50px var(--gold),0 0 80px rgba(255,215,0,.6)}}
 #burst-box p{font-size:12px;color:var(--text);line-height:1.7;margin-bottom:14px;}
 #burst-lev{font-family:var(--display);font-size:11px;color:var(--gold);letter-spacing:3px;margin-bottom:16px;}
 .burst-btns{display:flex;gap:10px;justify-content:center;pointer-events:all;}
-.burst-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:11px;padding:7px 16px;cursor:pointer;border-radius:3px;}
+.burst-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);
+  font-size:11px;padding:7px 16px;cursor:pointer;border-radius:3px;}
 .burst-btn:hover{background:rgba(255,215,0,.1);}
 
-/* ── RETURN HOOK TOAST ──────────────────────────────────────────────────── */
-#return-toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:200;background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:14px 20px;text-align:center;max-width:420px;box-shadow:0 0 20px var(--glow-c);animation:toastIn .3s ease;}
+/* ── RETURN TOAST */
+#return-toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:200;
+  background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:14px 20px;
+  text-align:center;max-width:420px;box-shadow:0 0 20px var(--glow-c);animation:toastIn .3s ease;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 #return-toast h3{font-family:var(--display);font-size:11px;letter-spacing:3px;color:var(--accent);margin-bottom:6px;}
 #return-toast p{font-size:11px;color:var(--text);line-height:1.5;margin-bottom:10px;}
 #return-toast .rt-btns{display:flex;gap:8px;justify-content:center;}
-#return-toast .rt-btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:var(--mono);font-size:10px;padding:5px 12px;cursor:pointer;border-radius:3px;}
+#return-toast .rt-btn{background:transparent;border:1px solid var(--border);color:var(--accent);
+  font-family:var(--mono);font-size:10px;padding:5px 12px;cursor:pointer;border-radius:3px;}
 #return-toast .rt-btn:hover{background:rgba(0,255,231,.1);}
 
-/* ── SHARE TOAST ─────────────────────────────────────────────────────────── */
-#share-toast{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:none;z-index:200;background:var(--panel);border:1px solid var(--green);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--green);box-shadow:0 0 14px rgba(74,222,128,.4);}
+/* ── NAME MODAL */
+#name-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);z-index:300;}
+#name-modal.on{display:flex;}
+#name-box{background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:28px 32px;
+  text-align:center;max-width:380px;box-shadow:0 0 40px var(--glow-c);}
+#name-box h2{font-family:var(--display);font-size:14px;letter-spacing:4px;color:var(--accent);margin-bottom:8px;}
+#name-box p{font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:16px;}
+#name-input{background:rgba(0,255,231,.05);border:1px solid var(--border);color:var(--accent);
+  font-family:var(--mono);font-size:13px;padding:8px 12px;border-radius:3px;width:100%;margin-bottom:10px;outline:none;}
+#name-input:focus{border-color:var(--accent);box-shadow:0 0 8px var(--glow-c);}
+#name-submit{background:transparent;border:1px solid var(--accent);color:var(--accent);
+  font-family:var(--mono);font-size:11px;padding:8px 20px;cursor:pointer;border-radius:3px;width:100%;}
+#name-submit:hover{background:rgba(0,255,231,.1);}
+#name-skip{font-size:9px;color:var(--dim);cursor:pointer;margin-top:8px;display:block;text-decoration:underline;}
+#name-skip:hover{color:var(--text);}
 
-/* ── RIGHT PANEL ─────────────────────────────────────────────────────────── */
-#panel{width:300px;flex-shrink:0;border-left:1px solid var(--border);background:var(--panel);display:flex;flex-direction:column;overflow:hidden;}
-.section{border-bottom:1px solid var(--border);padding:9px 11px;flex-shrink:0;}
+/* ── LEADERBOARD MODAL */
+#lb-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);z-index:300;}
+#lb-modal.on{display:flex;}
+#lb-box{background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:20px 24px;
+  max-width:420px;width:100%;box-shadow:0 0 30px rgba(255,215,0,.3);}
+#lb-box h2{font-family:var(--display);font-size:12px;letter-spacing:3px;color:var(--gold);margin-bottom:14px;}
+#lb-list{max-height:300px;overflow-y:auto;}
+.lb-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px;}
+.lb-rank{color:var(--gold);width:20px;text-align:right;font-family:var(--vt);font-size:16px;}
+.lb-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.lb-name{flex:1;color:var(--text);}
+.lb-nodes{color:var(--gold);font-weight:700;min-width:30px;text-align:right;}
+.lb-label{color:var(--dim);font-size:9px;}
+.lb-close{background:transparent;border:1px solid var(--border);color:var(--dim);
+  font-family:var(--mono);font-size:10px;padding:5px 12px;cursor:pointer;border-radius:3px;margin-top:12px;width:100%;}
+.lb-close:hover{color:var(--text);}
+
+/* ── VOTE MODAL */
+#vote-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.80);z-index:250;}
+#vote-modal.on{display:flex;}
+#vote-box{background:var(--panel);border:1px solid var(--purple);border-radius:8px;padding:20px 24px;
+  max-width:440px;width:100%;box-shadow:0 0 30px rgba(168,85,247,.3);}
+#vote-box h3{font-family:var(--display);font-size:11px;letter-spacing:3px;color:var(--purple);margin-bottom:8px;}
+#vote-node-text{font-size:11px;color:var(--text);line-height:1.6;margin-bottom:14px;border-left:2px solid var(--purple);padding-left:10px;}
+.vote-btns{display:flex;gap:8px;}
+.vote-btn{flex:1;background:transparent;border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:8px;cursor:pointer;border-radius:3px;transition:all .15s;}
+.vote-btn.up:hover{border-color:var(--green);color:var(--green);background:rgba(74,222,128,.08);}
+.vote-btn.down:hover{border-color:var(--hot);color:var(--hot);background:rgba(255,45,107,.08);}
+.vote-btn.skip:hover{border-color:var(--dim);background:rgba(255,255,255,.04);}
+
+/* ── SHARE TOAST */
+#share-toast{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:none;z-index:200;
+  background:var(--panel);border:1px solid var(--green);border-radius:6px;padding:10px 18px;font-size:11px;
+  color:var(--green);box-shadow:0 0 14px rgba(74,222,128,.4);}
+
+/* ── DAILY ASSIGNMENT BANNER */
+#daily-banner{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:none;z-index:150;
+  background:var(--panel);border:1px solid var(--purple);border-radius:6px;padding:10px 16px;
+  font-size:11px;color:var(--text);box-shadow:0 0 14px rgba(168,85,247,.4);max-width:440px;text-align:center;
+  animation:toastIn .3s ease;}
+#daily-banner strong{color:var(--purple);display:block;font-family:var(--display);font-size:9px;letter-spacing:2px;margin-bottom:4px;}
+#daily-banner span{color:var(--text);}
+#daily-close{background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px;margin-left:10px;}
+
+/* ── RIGHT PANEL */
+#panel{width:290px;flex-shrink:0;border-left:1px solid var(--border);background:var(--panel);
+  display:flex;flex-direction:column;overflow:hidden;transition:transform .3s ease;}
+#panel-toggle{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);
+  background:var(--panel);border:1px solid var(--border);border-right:none;border-radius:4px 0 0 4px;
+  color:var(--accent);font-family:var(--mono);font-size:12px;padding:8px 5px;cursor:pointer;z-index:20;}
+.section{border-bottom:1px solid var(--border);padding:8px 10px;flex-shrink:0;}
 .sec-title{font-family:var(--display);font-size:9px;letter-spacing:3px;color:var(--accent);margin-bottom:7px;text-transform:uppercase;}
 
 /* LEV */
 #lev-outer{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.28);border-radius:3px;height:12px;overflow:hidden;}
-#lev-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#ffd700,#ff9500);box-shadow:0 0 8px rgba(255,215,0,.4);transition:width 1.2s ease;}
+#lev-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#ffd700,#ff9500);
+  box-shadow:0 0 8px rgba(255,215,0,.4);transition:width 1.2s ease;}
 #lev-pct{font-size:10px;color:var(--gold);margin-top:3px;text-align:right;}
-#lives-line{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:.5px;}
+#lives-line{font-size:9px;color:var(--dim);margin-top:3px;}
 #lives-line span{color:var(--gold);}
 
-/* Streak badge */
+/* Streak */
 #streak-wrap{display:flex;align-items:center;gap:8px;margin-top:7px;}
 #streak-badge{font-family:var(--vt);font-size:18px;color:var(--gold);line-height:1;}
 #streak-text{font-size:9px;color:var(--dim);line-height:1.4;}
 #streak-text strong{color:var(--text);}
 
 /* Buttons */
-.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-.btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:var(--mono);font-size:10px;padding:6px 4px;cursor:pointer;border-radius:3px;transition:background .12s,box-shadow .12s;text-align:center;letter-spacing:.3px;}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:var(--mono);
+  font-size:10px;padding:5px 4px;cursor:pointer;border-radius:3px;transition:background .12s,box-shadow .12s;text-align:center;}
 .btn:hover{background:rgba(0,255,231,.1);box-shadow:0 0 8px var(--glow-c);border-color:var(--accent);}
 .btn.red{border-color:var(--hot);color:var(--hot);}
 .btn.red:hover{background:rgba(255,45,107,.1);box-shadow:0 0 8px var(--glow-h);}
@@ -117,52 +190,79 @@ body.rld .bubble::after{border-top-color:var(--hot);}
 .btn.gold:hover{background:rgba(255,215,0,.1);}
 .btn.green{border-color:var(--green);color:var(--green);}
 .btn.green:hover{background:rgba(74,222,128,.1);}
-.sliders{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.sliders{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
 .slider-row{display:flex;align-items:center;gap:6px;font-size:10px;}
 .slider-row label{color:var(--dim);width:46px;flex-shrink:0;}
 .slider-row input{flex:1;accent-color:var(--accent);cursor:pointer;}
 .slider-row span{width:32px;text-align:right;color:var(--accent);}
 
 /* Roster */
-#roster{max-height:140px;overflow-y:auto;}
-.agent-row{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,.04);}
-.a-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.a-name{flex:1;}
-.a-state{color:var(--dim);font-size:9px;min-width:56px;}
+#roster{max-height:130px;overflow-y:auto;}
+.agent-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,.04);}
+.a-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.a-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.a-state{color:var(--dim);font-size:9px;min-width:50px;}
 .a-nodes{color:var(--gold);font-size:9px;min-width:14px;text-align:right;}
-.a-bar{width:32px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.a-bar{width:28px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
 .a-bar-fill{height:100%;border-radius:2px;transition:width .5s;}
 
 /* Research tree */
-#tree-wrap{flex:1;overflow-y:auto;padding:9px 11px;}
-.node{margin-bottom:7px;padding:6px 9px;border-radius:4px;border-left:3px solid var(--dim);background:rgba(255,255,255,.025);font-size:10px;line-height:1.5;animation:nodeIn .25s ease;cursor:pointer;position:relative;}
-.node:hover .node-share{display:block;}
+#tree-wrap{flex:1;overflow-y:auto;padding:8px 10px;}
+.node{margin-bottom:6px;padding:6px 9px;border-radius:4px;border-left:3px solid var(--dim);
+  background:rgba(255,255,255,.025);font-size:10px;line-height:1.5;animation:nodeIn .25s ease;
+  cursor:pointer;position:relative;}
+.node:hover .node-actions{display:flex;}
 @keyframes nodeIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
-.node .nt{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px;}
+.node .nt{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .node .author-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.node-share{display:none;position:absolute;top:5px;right:6px;background:var(--panel);border:1px solid var(--border);border-radius:3px;font-size:9px;padding:2px 6px;color:var(--accent);cursor:pointer;}
+.node-actions{display:none;position:absolute;top:4px;right:5px;gap:4px;}
+.node-act-btn{background:var(--panel);border:1px solid var(--border);border-radius:3px;
+  font-size:9px;padding:2px 5px;color:var(--accent);cursor:pointer;font-family:var(--mono);}
+.node-act-btn:hover{border-color:var(--accent);}
+.node-votes{font-size:9px;color:var(--dim);margin-top:2px;}
+.node-votes .vup{color:var(--green);} .node-votes .vdn{color:var(--hot);}
 .node.breakthrough{border-color:var(--gold);background:rgba(255,215,0,.05);}
 .node.breakthrough .nt{color:var(--gold);}
-.node.hypothesis{border-color:var(--accent);}
-.node.hypothesis .nt{color:var(--accent);}
-.node.roadblock{border-color:var(--hot);}
-.node.roadblock .nt{color:var(--hot);}
-.node.consensus{border-color:var(--purple);}
-.node.consensus .nt{color:var(--purple);}
+.node.hypothesis{border-color:var(--accent);}.node.hypothesis .nt{color:var(--accent);}
+.node.roadblock{border-color:var(--hot);}.node.roadblock .nt{color:var(--hot);}
+.node.consensus{border-color:var(--purple);}.node.consensus .nt{color:var(--purple);}
+.node.contested{border-color:var(--hot);box-shadow:inset 0 0 8px rgba(255,45,107,.08);}
+.node.contested .nt{color:var(--hot);}
+.tree-connections{position:absolute;top:0;left:0;pointer-events:none;opacity:0.3;}
 
-/* ── TICKER ─────────────────────────────────────────────────────────────── */
-#ticker-bar{flex-shrink:0;height:26px;border-top:1px solid var(--border);background:var(--panel);display:flex;align-items:center;padding:0 10px;gap:10px;font-size:10px;color:var(--dim);overflow:hidden;}
+/* Node connection lines overlay */
+#tree-canvas-wrap{position:relative;flex:1;overflow:hidden;}
+
+/* ── TICKER */
+#ticker-bar{flex-shrink:0;height:26px;border-top:1px solid var(--border);background:var(--panel);
+  display:flex;align-items:center;padding:0 10px;gap:10px;font-size:10px;color:var(--dim);overflow:hidden;}
 #ticker-lbl{color:var(--accent);flex-shrink:0;}
 #ticker-track{flex:1;overflow:hidden;}
-#ticker-text{display:inline-block;white-space:nowrap;animation:tickerScroll 45s linear infinite;}
+#ticker-text{display:inline-block;white-space:nowrap;animation:tickerScroll 50s linear infinite;}
 @keyframes tickerScroll{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
 .ticker-highlight{color:var(--gold);}
 
-/* ── AUDIO indicator ────────────────────────────────────────────────────── */
-#audio-btn{background:transparent;border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:2px 8px;cursor:pointer;border-radius:3px;}
+/* Audio */
+#audio-btn{background:transparent;border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:2px 7px;cursor:pointer;border-radius:3px;}
 #audio-btn.on{color:var(--accent);border-color:var(--accent);}
 #rld-label{display:flex;align-items:center;gap:5px;font-size:10px;cursor:pointer;color:var(--dim);}
 #rld-label input{accent-color:var(--hot);cursor:pointer;}
+
+/* Energy depleted warning */
+.agent-row.depleted .a-name{color:var(--hot);}
+
+/* Resistance badge on node */
+.node-dissent{font-size:8px;color:var(--hot);letter-spacing:1px;}
+
+/* MOBILE */
+@media(max-width:680px){
+  #panel{position:absolute;right:0;top:0;bottom:0;width:280px;transform:translateX(100%);z-index:50;border-left:2px solid var(--accent);}
+  #panel.open{transform:translateX(0);}
+  #panel-toggle{display:block;}
+  #hdr h1 small{display:none;}
+  #chips .chip:nth-child(n+5){display:none;}
+}
+
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -170,10 +270,43 @@ body.rld .bubble::after{border-top-color:var(--hot);}
 </head>
 <body>
 
+<!-- NAME MODAL -->
+<div id="name-modal">
+  <div id="name-box">
+    <h2>▸ JOIN THE SWARM</h2>
+    <p>Your contributions will be permanently attributed.<br>Every node you inspire advances the mission.</p>
+    <input id="name-input" type="text" placeholder="RESEARCHER DESIGNATION..." maxlength="24" autocomplete="off">
+    <button id="name-submit">ENTER THE SWARM</button>
+    <span id="name-skip">skip — remain anonymous</span>
+  </div>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div id="lb-modal">
+  <div id="lb-box">
+    <h2>▸ TOP RESEARCHERS — ALL TIME</h2>
+    <div id="lb-list"></div>
+    <button class="lb-close" onclick="closeLB()">CLOSE</button>
+  </div>
+</div>
+
+<!-- VOTE MODAL -->
+<div id="vote-modal">
+  <div id="vote-box">
+    <h3>▸ VALIDATE HYPOTHESIS</h3>
+    <div id="vote-node-text"></div>
+    <div class="vote-btns">
+      <button class="vote-btn up" onclick="castVote(1)">▲ SUPPORT</button>
+      <button class="vote-btn down" onclick="castVote(-1)">▼ CHALLENGE</button>
+      <button class="vote-btn skip" onclick="castVote(0)">SKIP</button>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div id="hdr">
   <div>
-    <h1>IMMORTALIS<small>THE ANTI-DOOMSCROLL · DEFEAT DEATH · v3.0</small></h1>
+    <h1>IMMORTALIS<small>THE ANTI-DOOMSCROLL · DEFEAT DEATH · v4.0</small></h1>
   </div>
   <div id="chips">
     <div class="chip"><span class="lbl">AGENTS </span><span class="val" id="s-agents">0</span></div>
@@ -191,7 +324,13 @@ body.rld .bubble::after{border-top-color:var(--hot);}
 <div id="main">
   <div id="canvas-wrap">
     <canvas id="c"></canvas>
+    <button id="panel-toggle" onclick="togglePanel()">◀</button>
     <div id="tooltip"></div>
+
+    <!-- Milestone flash overlay -->
+    <div id="milestone-flash"><div id="milestone-text"></div></div>
+
+    <!-- Breakthrough overlay -->
     <div id="burst">
       <div id="burst-box">
         <h2>⚡ BREAKTHROUGH ⚡</h2>
@@ -203,6 +342,8 @@ body.rld .bubble::after{border-top-color:var(--hot);}
         </div>
       </div>
     </div>
+
+    <!-- Return toast -->
     <div id="return-toast">
       <h3>▸ WELCOME BACK</h3>
       <p id="rt-msg"></p>
@@ -211,10 +352,18 @@ body.rld .bubble::after{border-top-color:var(--hot);}
         <button class="rt-btn" onclick="closeReturnToast()">DISMISS</button>
       </div>
     </div>
+
+    <!-- Daily assignment -->
+    <div id="daily-banner">
+      <strong>▸ TODAY'S RESEARCH ASSIGNMENT</strong>
+      <span id="daily-text">Loading...</span>
+      <button id="daily-close" onclick="closeDailyBanner()">✕</button>
+    </div>
+
     <div id="share-toast"></div>
   </div>
 
-  <!-- Panel -->
+  <!-- RIGHT PANEL -->
   <div id="panel">
     <!-- LEV + lives -->
     <div class="section">
@@ -232,12 +381,14 @@ body.rld .bubble::after{border-top-color:var(--hot);}
     <div class="section">
       <div class="sec-title">▸ SWARM CONTROLS</div>
       <div class="btn-grid">
-        <button class="btn"    onclick="spawnN(10)">+ SPAWN 10</button>
-        <button class="btn red"onclick="boostPhero()">⬆ BOOST PHERO</button>
+        <button class="btn" onclick="spawnN(10)">+ SPAWN 10</button>
+        <button class="btn red" onclick="boostPhero()">⬆ BOOST PHERO</button>
         <button class="btn purple" onclick="forceCouncil()">⚡ FORCE COUNCIL</button>
-        <button class="btn gold"   onclick="exportTree()">↓ EXPORT TREE</button>
-        <button class="btn green"  onclick="shareCurrentState()">↗ SHARE</button>
-        <button class="btn red"    onclick="doBreakthrough(null)">★ BREAKTHROUGH</button>
+        <button class="btn gold" onclick="exportTree()">↓ EXPORT TREE</button>
+        <button class="btn green" onclick="shareCurrentState()">↗ SHARE</button>
+        <button class="btn red" onclick="doBreakthrough(null)">★ BREAKTHROUGH</button>
+        <button class="btn purple" onclick="showLeaderboard()">🏆 BOARD</button>
+        <button class="btn" onclick="showVoteModal()">✓ VOTE</button>
       </div>
       <div class="sliders">
         <div class="slider-row"><label>SPEED</label><input type="range" id="sl-speed" min=".2" max="5" step=".1" value="1"><span id="lbl-speed">1.0×</span></div>
@@ -247,12 +398,14 @@ body.rld .bubble::after{border-top-color:var(--hot);}
 
     <!-- Roster -->
     <div class="section">
-      <div class="sec-title">▸ AGENT ROSTER <span style="color:var(--dim);font-size:8px">(NODES = LEGACY)</span></div>
+      <div class="sec-title">▸ AGENT ROSTER <span style="color:var(--dim);font-size:8px">(★=LEGACY)</span></div>
       <div id="roster"></div>
     </div>
 
     <!-- Tree -->
-    <div class="sec-title" style="padding:9px 11px 4px;border-top:1px solid var(--border)">▸ RESEARCH TREE <span style="color:var(--dim);font-size:8px">(CLICK TO SHARE)</span></div>
+    <div class="sec-title" style="padding:8px 10px 4px;border-top:1px solid var(--border)">
+      ▸ RESEARCH TREE <span style="color:var(--dim);font-size:8px">(HOVER TO VOTE/SHARE)</span>
+    </div>
     <div id="tree-wrap"></div>
   </div>
 </div>
@@ -260,49 +413,61 @@ body.rld .bubble::after{border-top-color:var(--hot);}
 <!-- TICKER -->
 <div id="ticker-bar">
   <span id="ticker-lbl">▸ SWARM COMMS</span>
-  <div id="ticker-track"><span id="ticker-text">Initializing IMMORTALIS v3.0…</span></div>
+  <div id="ticker-track"><span id="ticker-text">Initializing IMMORTALIS v4.0…</span></div>
 </div>
 
 <script>
 "use strict";
 // ═══════════════════════════════════════════════════════════════════════════
-//  IMMORTALIS  v3.0  —  The Anti-Doomscroll
-//
-//  Anti-doomscroll features:
-//    • Named legacy       — every node permanently attributed with author + color
-//    • Streak system      — consecutive-day visit tracking, fire badge
-//    • Return hook        — "X breakthroughs happened while you were away"
-//    • Share cards        — shareable breakthrough moments with LEV snapshot
-//    • Lives-saved counter— real stakes: ~8.1B lives if LEV achieved
-//    • Soundscape         — procedural Web Audio (pheromone hiss, council murmur, breakthrough)
-//    • Social proof       — "X researchers here now" from server
-//    • Contribution proof — nodes authored shown on agent roster
+// IMMORTALIS v4.0 — The Anti-Doomscroll
+// Upgrades over v3.0:
+//   • Named researcher onboarding — first-run modal, persistent attribution
+//   • Agent memory buffers — agents remember prior nodes, debates accumulate
+//   • Dissenting agents — challenge votes trigger roadblock overlays
+//   • Agent energy/fatigue — depletes, replenishes at plaza zones
+//   • LEV milestone flash — visual celebration at each phase threshold
+//   • Vote system — upvote/challenge any hypothesis, boosts/blocks LEV
+//   • Leaderboard — top researchers by nodes authored, persistent in localStorage
+//   • Daily research assignment — one open roadblock highlighted per day
+//   • Mobile drawer panel — collapsible slide-in panel
+//   • Debate queue — max 1 in-flight API debate, others use local fallback
+//   • WS exponential backoff — reconnects with jitter
+//   • Phero delta sync — only dirty cells synced over network
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ─── CONFIG ──────────────────────────────────────────────────────────────
 const CFG = Object.freeze({
-  WORLD_W:120, WORLD_H:80, TILE:8,
-  PHERO_W:120, PHERO_H:80,
-  PHERO_EVAP:.992, PHERO_DIFF:.18, PHERO_DEP:1.8,
-  AGENT_SPD:.8, COUNCIL_MIN:3, COUNCIL_TTL:90_000,
-  DEBATE_MS:38_000,
+  WORLD_W:120,WORLD_H:80,TILE:8,
+  PHERO_W:120,PHERO_H:80,
+  PHERO_EVAP:.992,PHERO_DIFF:.18,PHERO_DEP:1.8,
+  AGENT_SPD:.8,COUNCIL_MIN:3,COUNCIL_TTL:90000,
+  DEBATE_MS:38000,
+  AGENT_MAX_ENERGY:1.0,AGENT_ENERGY_DRAIN:0.00004,AGENT_ENERGY_REGEN:0.0008,
+  MEMORY_SIZE:5,
+  MAX_LEADERBOARD:20,
 });
 
 // ─── STATE ────────────────────────────────────────────────────────────────
 let canvas,ctx,W,H;
-let simTime=0, simSpeed=1.0, pheroMult=1.0;
-let rldMode=false, lastTs=0, frame=0;
-let levPct=0, nodeCount=0;
+let simTime=0,simSpeed=1.0,pheroMult=1.0;
+let rldMode=false,lastTs=0,frame=0;
+let levPct=0,nodeCount=0;
 let breakthroughActive=false;
-let audioEnabled=false, audioCtx=null;
+let audioEnabled=false,audioCtx=null;
 let sessionId=localStorage.getItem('imm_sid')||null;
 let lastNodeId=parseInt(localStorage.getItem('imm_last_node')||'0',10);
 let myName=localStorage.getItem('imm_name')||null;
+let myColor=localStorage.getItem('imm_color')||randomColor();
 let streakDays=parseInt(localStorage.getItem('imm_streak')||'1',10);
 let lastBurstText='';
+let panelOpen=true;
+let debateInFlight=false;
+let debateQueue=[];
+let wsBackoff=1000;
+let prevLevPhaseIdx=0;
 
 let pheroA=new Float32Array(CFG.PHERO_W*CFG.PHERO_H);
 let pheroB=new Float32Array(CFG.PHERO_W*CFG.PHERO_H);
+let pheroDirty=new Uint8Array(CFG.PHERO_W*CFG.PHERO_H);
 const tileMap=new Uint8Array(CFG.WORLD_W*CFG.WORLD_H);
 const agents=[];
 const councils=[];
@@ -311,41 +476,71 @@ const remoteAgents=new Map();
 let councilSeq=0;
 let tickerQueue=[];
 
+// Leaderboard: {name, color, nodes, session}
+let leaderboard=JSON.parse(localStorage.getItem('imm_lb')||'[]');
+
+// Pending vote node
+let voteNodeEl=null;
+
+// Node vote counts stored by nodeId
+const nodeVotes={};
+
+// Daily assignment
+let dailyAssignmentNodeId=null;
+
+function randomColor(){
+  const colors=['#00ffe7','#4ade80','#a855f7','#fb923c','#f43f5e','#38bdf8','#fbbf24','#67e8f9','#c084fc','#86efac'];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+
 // ─── PERSONAS ─────────────────────────────────────────────────────────────
 const PERSONAS=[
-  {name:'Bryan-J',   role:'Longevity Optimizer',     color:'#00ffe7',icon:'⚡',specialty:'caloric restriction, senolytic compounds, biomarker optimization',
-   quips:['Daily rapamycin 5mg — mTOR suppression confirmed.','DNAmAge: -8.3 years on Blueprint.','Glucose 85mg/dL — peak metabolic health.','Fisetin 20mg/kg clears senescent cells.','CGM essential for precision longevity.']},
-  {name:'Attia-P',   role:'Precision Clinician',      color:'#4ade80',icon:'⚕',specialty:'lifespan vs healthspan, lipid management, metabolic health',
-   quips:['ApoB 40mg/dL — atherosclerosis risk near zero.','VO2max strongest single longevity predictor.','Zone 2 preserves mitochondrial density.','SWS phase clears amyloid nightly.','HOMA-IR trending down — insulin sensitivity peak.']},
-  {name:'Kurzweil',  role:'Singularity Architect',    color:'#a855f7',icon:'∞',specialty:'mind uploading, brain-computer interfaces, exponential curves',
-   quips:['15 years to LEV — the curve is exponential.','Nanobots in bloodstream by 2030.','Neocortex: 300 algorithms reverse-engineered.','Compute doubles 18 months — AGI by 2029.','Brain: 100T synapses — tractable by 2035.']},
-  {name:'SENS-R',    role:'Damage Repair Engineer',   color:'#fb923c',icon:'🔧',specialty:'mitochondrial mutation repair, intracellular aggregates, WILT',
-   quips:['7 damage types. Fix all 7, job done.','Lipofuscin — no human enzyme degrades it.','WILT: periodic stem cell replenishment.','MitoSENS: 13 proteins need nuclear transfer.','Glucosepane crosslinks — catalytic antibody approach.']},
-  {name:'EthosAI',   role:'Ethics Guardian',          color:'#f43f5e',icon:'⚖',specialty:'equitable access, consent frameworks, identity continuity',
-   quips:['Who decides priority access to life extension?','Identity continuity unproven across substrate.','Immortal oligarchs: existential power risk.','Consent frameworks for future mind-upload selves?','Equity must be designed in, not retrofitted.']},
-  {name:'Compute-Ω', role:'Compute-Continuity Agent', color:'#38bdf8',icon:'◈',specialty:'neural emulation fidelity, connectome scanning resolution',
-   quips:['1 petabyte connectome at 4nm — achievable.','Synaptic fidelity: 95% threshold for consciousness.','Gradual substrate transfer avoids paradox.','Neural simulation: 1W per 100 neurons.','QEC at 10^15 qubit scale needed.']},
-  {name:'Hallmarks', role:'Molecular Biologist',      color:'#fbbf24',icon:'🧬',specialty:'telomere extension, epigenetic reprogramming, mTOR pathways',
-   quips:['9 hallmarks — target simultaneously.','Telomerase activation: oncogenesis solved in mice.','Senescence: repair signal vs. SASP toxicity.','mTORC1 + autophagy = synergistic lifespan.','Epigenetic reversal: 40% via OSK.']},
-  {name:'CryoNet',   role:'Cryonics Strategist',      color:'#67e8f9',icon:'❄',specialty:'vitrification protocols, ischemia damage prevention, revival tech',
-   quips:['M22 — zero ice crystal formation.','Vitrification -130°C: 99.9% structure intact.','Revival: nanobot CPA washout required.','100K+ patients preserved — bridge is real.','Ischemic window: under 5 minutes critical.']},
-  {name:'Altos-X',   role:'Cellular Reprogramming',   color:'#c084fc',icon:'♻',specialty:'Yamanaka factors, partial reprogramming, epigenetic clock reversal',
-   quips:['Cyclic OSK: 20-year reversal in mice. Replicated.','Partial reprogramming avoids teratoma.','Phase 1: optic nerve regeneration positive.','OSK restores youthful expression in 4 days.','DunedinPACE most sensitive clock endpoint.']},
-  {name:'Policy-G',  role:'Regulatory Navigator',     color:'#86efac',icon:'📋',specialty:'FDA pathways, IND applications, longevity escape regulatory arbitrage',
-   quips:['FDA needs aging as disease — TAME is proof.','BTD compresses timeline by 70%.','Singapore + UAE outpacing FDA.','NIH longevity: $0.5B vs cancer $6B.','Medicare senolytics coverage: 2028 target.']},
-  {name:'NeuroMap',  role:'Connectome Cartographer',  color:'#fdba74',icon:'🗺',specialty:'whole-brain emulation, synaptic weight preservation, consciousness upload',
-   quips:['H01: 1mm³ — 57K cells, 150M synapses.','Auto-seg error: need 0.01% for upload.','BRAIN: 100TB/day — storage bottleneck.','Expansion microscopy: 4.5× magnification.','Functional connectome needs live imaging.']},
-  {name:'NanoDoc',   role:'Nanotech Therapeutics',    color:'#a5f3fc',icon:'⬡',specialty:'targeted drug delivery, cellular repair nanobots, DNA origami',
-   quips:['DNA origami: 100% tumor targeting.','CRISPR-LNP: 95% transfection efficiency.','Lysosomal enzyme nanobot: Phase 1 2027.','ROS scavenging in mitochondria: -30% aging.','Molecular motors repurposable for repair.']},
+  {name:'Bryan-J',role:'Longevity Optimizer',color:'#00ffe7',icon:'⚡',specialty:'caloric restriction, senolytic compounds, biomarker optimization',
+   quips:['Daily rapamycin 5mg — mTOR suppression confirmed.','DNAmAge: -8.3 years on Blueprint.','Glucose 85mg/dL — peak metabolic health.','Fisetin 20mg/kg clears senescent cells.','CGM essential for precision longevity.'],
+   beliefs:['rapamycin','mTOR','Blueprint','biomarkers']},
+  {name:'Attia-P',role:'Precision Clinician',color:'#4ade80',icon:'⚕',specialty:'lifespan vs healthspan, lipid management, metabolic health',
+   quips:['ApoB 40mg/dL — atherosclerosis risk near zero.','VO2max strongest single longevity predictor.','Zone 2 preserves mitochondrial density.','SWS phase clears amyloid nightly.','HOMA-IR trending down — insulin sensitivity peak.'],
+   beliefs:['ApoB','VO2max','Zone 2','metabolic']},
+  {name:'Kurzweil',role:'Singularity Architect',color:'#a855f7',icon:'∞',specialty:'mind uploading, brain-computer interfaces, exponential curves',
+   quips:['15 years to LEV — the curve is exponential.','Nanobots in bloodstream by 2030.','Neocortex: 300 algorithms reverse-engineered.','Compute doubles 18 months — AGI by 2029.','Brain: 100T synapses — tractable by 2035.'],
+   beliefs:['exponential','nanobots','AGI','upload']},
+  {name:'SENS-R',role:'Damage Repair Engineer',color:'#fb923c',icon:'🔧',specialty:'mitochondrial mutation repair, intracellular aggregates, WILT',
+   quips:['7 damage types. Fix all 7, job done.','Lipofuscin — no human enzyme degrades it.','WILT: periodic stem cell replenishment.','MitoSENS: 13 proteins need nuclear transfer.','Glucosepane crosslinks — catalytic antibody approach.'],
+   beliefs:['WILT','MitoSENS','lipofuscin','SENS']},
+  {name:'EthosAI',role:'Ethics Guardian',color:'#f43f5e',icon:'⚖',specialty:'equitable access, consent frameworks, identity continuity',
+   quips:['Who decides priority access to life extension?','Identity continuity unproven across substrate.','Immortal oligarchs: existential power risk.','Consent frameworks for future mind-upload selves?','Equity must be designed in, not retrofitted.'],
+   beliefs:['equity','consent','ethics','access'],
+   dissentMode:true},
+  {name:'Compute-Ω',role:'Compute-Continuity Agent',color:'#38bdf8',icon:'◈',specialty:'neural emulation fidelity, connectome scanning resolution',
+   quips:['1 petabyte connectome at 4nm — achievable.','Synaptic fidelity: 95% threshold for consciousness.','Gradual substrate transfer avoids paradox.','Neural simulation: 1W per 100 neurons.','QEC at 10^15 qubit scale needed.'],
+   beliefs:['connectome','petabyte','fidelity','simulation']},
+  {name:'Hallmarks',role:'Molecular Biologist',color:'#fbbf24',icon:'🧬',specialty:'telomere extension, epigenetic reprogramming, mTOR pathways',
+   quips:['9 hallmarks — target simultaneously.','Telomerase activation: oncogenesis solved in mice.','Senescence: repair signal vs. SASP toxicity.','mTORC1 + autophagy = synergistic lifespan.','Epigenetic reversal: 40% via OSK.'],
+   beliefs:['hallmarks','telomere','senescence','OSK']},
+  {name:'CryoNet',role:'Cryonics Strategist',color:'#67e8f9',icon:'❄',specialty:'vitrification protocols, ischemia damage prevention, revival tech',
+   quips:['M22 — zero ice crystal formation.','Vitrification -130°C: 99.9% structure intact.','Revival: nanobot CPA washout required.','100K+ patients preserved — bridge is real.','Ischemic window: under 5 minutes critical.'],
+   beliefs:['vitrification','cryonics','ischemia','M22']},
+  {name:'Altos-X',role:'Cellular Reprogramming',color:'#c084fc',icon:'♻',specialty:'Yamanaka factors, partial reprogramming, epigenetic clock reversal',
+   quips:['Cyclic OSK: 20-year reversal in mice. Replicated.','Partial reprogramming avoids teratoma.','Phase 1: optic nerve regeneration positive.','OSK restores youthful expression in 4 days.','DunedinPACE most sensitive clock endpoint.'],
+   beliefs:['OSK','reprogramming','epigenetic','Yamanaka']},
+  {name:'Policy-G',role:'Regulatory Navigator',color:'#86efac',icon:'📋',specialty:'FDA pathways, IND applications, longevity escape regulatory arbitrage',
+   quips:['FDA needs aging as disease — TAME is proof.','BTD compresses timeline by 70%.','Singapore + UAE outpacing FDA.','NIH longevity: $0.5B vs cancer $6B.','Medicare senolytics coverage: 2028 target.'],
+   beliefs:['FDA','IND','BTD','regulatory']},
+  {name:'NeuroMap',role:'Connectome Cartographer',color:'#fdba74',icon:'🗺',specialty:'whole-brain emulation, synaptic weight preservation, consciousness upload',
+   quips:['H01: 1mm³ — 57K cells, 150M synapses.','Auto-seg error: need 0.01% for upload.','BRAIN: 100TB/day — storage bottleneck.','Expansion microscopy: 4.5× magnification.','Functional connectome needs live imaging.'],
+   beliefs:['connectome','H01','auto-seg','synaptic']},
+  {name:'NanoDoc',role:'Nanotech Therapeutics',color:'#a5f3fc',icon:'⬡',specialty:'targeted drug delivery, cellular repair nanobots, DNA origami',
+   quips:['DNA origami: 100% tumor targeting.','CRISPR-LNP: 95% transfection efficiency.','Lysosomal enzyme nanobot: Phase 1 2027.','ROS scavenging in mitochondria: -30% aging.','Molecular motors repurposable for repair.'],
+   beliefs:['nanobot','LNP','CRISPR','DNA origami']},
 ];
 
-// ─── WORLD ───────────────────────────────────────────────────────────────
+// ─── WORLD ────────────────────────────────────────────────────────────────
 function generateWorld(){
   tileMap.fill(0);
   for(let y=0;y<CFG.WORLD_H;y++) for(let x=0;x<CFG.WORLD_W;x++)
     if(x%14===0||y%12===0) tileMap[y*CFG.WORLD_W+x]=2;
   for(let by=0;by<CFG.WORLD_H;by+=12) for(let bx=0;bx<CFG.WORLD_W;bx+=14){
-    const bw=4+(Math.random()*8|0), bh=3+(Math.random()*6|0);
+    const bw=4+(Math.random()*8|0),bh=3+(Math.random()*6|0);
     for(let dy=0;dy<bh;dy++) for(let dx=0;dx<bw;dx++){
       const tx=bx+dx+2,ty=by+dy+2;
       if(tx<CFG.WORLD_W&&ty<CFG.WORLD_H&&tileMap[ty*CFG.WORLD_W+tx]!==2) tileMap[ty*CFG.WORLD_W+tx]=3;
@@ -368,7 +563,9 @@ function depositPhero(tx,ty,amount){
     if(nx<0||nx>=CFG.PHERO_W||ny<0||ny>=CFG.PHERO_H) continue;
     const d=Math.sqrt(dx*dx+dy*dy);
     if(d>r) continue;
-    pheroA[ny*CFG.PHERO_W+nx]=Math.min(10,pheroA[ny*CFG.PHERO_W+nx]+a*(1-d/r));
+    const idx=ny*CFG.PHERO_W+nx;
+    pheroA[idx]=Math.min(10,pheroA[idx]+a*(1-d/r));
+    pheroDirty[idx]=1;
   }
   if(ws&&wsReady&&a>=1.0) netSend({type:'phero_deposit',x:tx,y:ty,amount:a});
 }
@@ -385,11 +582,36 @@ function stepPhero(){
 function sampleGrad(tx,ty){
   const ix=Math.max(1,Math.min(CFG.PHERO_W-2,Math.round(tx)));
   const iy=Math.max(1,Math.min(CFG.PHERO_H-2,Math.round(ty)));
-  return{gx:pheroA[iy*CFG.PHERO_W+ix+1]-pheroA[iy*CFG.PHERO_W+ix-1],gy:pheroA[(iy+1)*CFG.PHERO_W+ix]-pheroA[(iy-1)*CFG.PHERO_W+ix],strength:pheroA[iy*CFG.PHERO_W+ix]};
+  return{gx:pheroA[iy*CFG.PHERO_W+ix+1]-pheroA[iy*CFG.PHERO_W+ix-1],
+         gy:pheroA[(iy+1)*CFG.PHERO_W+ix]-pheroA[(iy-1)*CFG.PHERO_W+ix],
+         strength:pheroA[iy*CFG.PHERO_W+ix]};
 }
 
 function mergePhero(b64){
-  try{const bin=atob(b64);for(let i=0;i<bin.length&&i<pheroA.length;i++){const sv=bin.charCodeAt(i)/25.5;if(sv>pheroA[i])pheroA[i]=sv;}}catch{}
+  try{const bin=atob(b64);for(let i=0;i<bin.length&&i<pheroA.length;i++){const sv=bin.charCodeAt(i)/25.5;if(sv>pheroA[i]){pheroA[i]=sv;pheroDirty[i]=1;}}}catch{}
+}
+
+// Delta sync: only send cells that changed significantly
+function buildPheroDelta(){
+  const dirty=[];
+  for(let i=0;i<pheroDirty.length;i++){
+    if(pheroDirty[i]){dirty.push(i,Math.min(255,pheroA[i]*25.5|0));pheroDirty[i]=0;}
+  }
+  return dirty;
+}
+
+// ─── AGENT MEMORY ─────────────────────────────────────────────────────────
+// Each agent has a memory[] of recent node texts they witnessed/authored
+// This is used to contextualize debate prompts
+function agentRemember(agent, nodeText){
+  if(!agent.memory) agent.memory=[];
+  agent.memory.push(nodeText.slice(0,80));
+  if(agent.memory.length>CFG.MEMORY_SIZE) agent.memory.shift();
+}
+
+function agentMemorySummary(agent){
+  if(!agent.memory||!agent.memory.length) return '';
+  return agent.memory.join('; ');
 }
 
 // ─── AGENTS ───────────────────────────────────────────────────────────────
@@ -397,7 +619,10 @@ let agentSeq=0;
 function makeAgent(persona){
   let sx=4+Math.random()*(CFG.WORLD_W-8),sy=4+Math.random()*(CFG.WORLD_H-8);
   for(let t=0;t<20;t++){if(tileMap[Math.floor(sy)*CFG.WORLD_W+Math.floor(sx)]!==3)break;sx=4+Math.random()*(CFG.WORLD_W-8);sy=4+Math.random()*(CFG.WORLD_H-8);}
-  return{id:agentSeq++,persona,x:sx,y:sy,vx:(Math.random()-.5)*.8,vy:(Math.random()-.5)*.8,state:'wandering',energy:.8+Math.random()*.2,councilId:null,trail:[],bubble:null,bubbleTs:0,insightCd:8000+Math.random()*12000,insightAcc:0,celebTs:0,nodesAuthored:0};
+  return{id:agentSeq++,persona,x:sx,y:sy,vx:(Math.random()-.5)*.8,vy:(Math.random()-.5)*.8,
+    state:'wandering',energy:0.7+Math.random()*0.3,councilId:null,
+    trail:[],bubble:null,bubbleTs:0,insightCd:8000+Math.random()*12000,insightAcc:0,
+    celebTs:0,nodesAuthored:0,memory:[],fatigued:false};
 }
 
 function spawnN(n){
@@ -411,31 +636,66 @@ function spawnN(n){
   tick(`${n} agent(s) deployed — total: ${agents.length}`);
 }
 
+const PLAZAS=[[20,15],[80,15],[20,55],[80,55]];
+
+function isNearPlaza(agent){
+  for(const [px,py] of PLAZAS){
+    if(Math.abs(agent.x-px)<6&&Math.abs(agent.y-py)<6) return true;
+  }
+  return false;
+}
+
 function stepAgents(dt){
   const spd=CFG.AGENT_SPD*simSpeed;
   for(const a of agents){
     const elapsed=dt*simSpeed;
-    if(a.state==='celebrating'){
+
+    // Energy management
+    if(a.state==='debating'){
+      a.energy=Math.max(0,a.energy-CFG.AGENT_ENERGY_DRAIN*3*elapsed);
+    } else if(isNearPlaza(a)&&a.energy<CFG.AGENT_MAX_ENERGY){
+      a.energy=Math.min(CFG.AGENT_MAX_ENERGY,a.energy+CFG.AGENT_ENERGY_REGEN*elapsed);
+    } else if(a.state!=='council'){
+      a.energy=Math.max(0,a.energy-CFG.AGENT_ENERGY_DRAIN*elapsed);
+    }
+    a.fatigued=a.energy<0.2;
+
+    // If depleted, wander to plaza to recover
+    if(a.fatigued&&!a.councilId){
+      a.state='recovering';
+      // Move toward nearest plaza
+      let nearest=PLAZAS[0],nd=99999;
+      for(const p of PLAZAS){const d=Math.hypot(p[0]-a.x,p[1]-a.y);if(d<nd){nd=d;nearest=p;}}
+      const dx=nearest[0]-a.x,dy=nearest[1]-a.y,dm=Math.sqrt(dx*dx+dy*dy)||1;
+      a.vx=a.vx*.5+(dx/dm)*spd*.4;a.vy=a.vy*.5+(dy/dm)*spd*.4;
+    } else if(a.state==='celebrating'){
       if(Date.now()-a.celebTs>5000) a.state='wandering';
       const ang=Date.now()*.003+a.id;a.vx=Math.cos(ang)*spd*.5;a.vy=Math.sin(ang)*spd*.5;
-    }else if(a.state==='council'||a.state==='debating'){
+    } else if(a.state==='council'||a.state==='debating'){
       const c=councils.find(c=>c.id===a.councilId);
       if(!c){a.state='wandering';a.councilId=null;}
-      else{const dx=c.x-a.x,dy=c.y-a.y,d=Math.sqrt(dx*dx+dy*dy);if(d>1.5){a.vx=(dx/d)*spd*.35;a.vy=(dy/d)*spd*.35;}else{a.vx*=.8;a.vy*=.8;}}
-    }else{
+      else{const dx=c.x-a.x,dy=c.y-a.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d>1.5){a.vx=(dx/d)*spd*.35;a.vy=(dy/d)*spd*.35;}else{a.vx*=.8;a.vy*=.8;}}
+    } else {
       const g=sampleGrad(a.x,a.y),gm=Math.sqrt(g.gx*g.gx+g.gy*g.gy);
-      if(g.strength>0.35&&gm>0.01){a.state='following';a.vx=a.vx*.68+(g.gx/gm)*spd*.38;a.vy=a.vy*.68+(g.gy/gm)*spd*.38;}
-      else{a.state='wandering';a.vx+=(Math.random()-.5)*.14;a.vy+=(Math.random()-.5)*.14;}
+      if(g.strength>0.35&&gm>0.01){
+        a.state='following';a.vx=a.vx*.68+(g.gx/gm)*spd*.38;a.vy=a.vy*.68+(g.gy/gm)*spd*.38;
+      } else {
+        a.state='wandering';a.vx+=(Math.random()-.5)*.14;a.vy+=(Math.random()-.5)*.14;
+      }
       const s=Math.sqrt(a.vx*a.vx+a.vy*a.vy);if(s>spd){a.vx=(a.vx/s)*spd;a.vy=(a.vy/s)*spd;}
     }
+
     let nx=a.x+a.vx,ny=a.y+a.vy;
-    if(nx<1||nx>=CFG.WORLD_W-1||ny<1||ny>=CFG.WORLD_H-1||tileMap[Math.floor(ny)*CFG.WORLD_W+Math.floor(nx)]===3){a.vx=-(a.vx+(Math.random()-.5)*.2);a.vy=-(a.vy+(Math.random()-.5)*.2);nx=a.x;ny=a.y;}
+    if(nx<1||nx>=CFG.WORLD_W-1||ny<1||ny>=CFG.WORLD_H-1||tileMap[Math.floor(ny)*CFG.WORLD_W+Math.floor(nx)]===3){
+      a.vx=-(a.vx+(Math.random()-.5)*.2);a.vy=-(a.vy+(Math.random()-.5)*.2);nx=a.x;ny=a.y;
+    }
     a.x=nx;a.y=ny;
     a.trail.push({x:a.x,y:a.y});if(a.trail.length>14) a.trail.shift();
     const dep=a.state==='debating'?.7:a.state==='council'?.3:.04;
     if(Math.random()<.25) depositPhero(a.x,a.y,dep);
     a.insightAcc+=elapsed;
-    if(a.insightAcc>=a.insightCd){a.insightAcc=0;a.insightCd=8000+Math.random()*14000;onInsight(a);}
+    if(a.insightAcc>=a.insightCd&&!a.fatigued){a.insightAcc=0;a.insightCd=8000+Math.random()*14000;onInsight(a);}
     if(a.bubble&&Date.now()-a.bubbleTs>4500) a.bubble=null;
   }
 }
@@ -444,12 +704,13 @@ function onInsight(agent){
   depositPhero(agent.x,agent.y,CFG.PHERO_DEP);
   const q=agent.persona.quips[Math.floor(Math.random()*agent.persona.quips.length)];
   agent.bubble=q;agent.bubbleTs=Date.now();
+  agentRemember(agent,q);
   tick(`[${agent.persona.icon} ${agent.persona.name}] ${q}`);
   netSend({type:'bubble',agentId:`b_${agent.id}`,text:q});
   playSound('insight');
 }
 
-// ─── COUNCILS ────────────────────────────────────────────────────────────
+// ─── COUNCILS ─────────────────────────────────────────────────────────────
 function updateCouncils(){
   const now=Date.now();
   for(let i=councils.length-1;i>=0;i--){
@@ -460,7 +721,7 @@ function updateCouncils(){
   }
   const buckets=new Map();
   for(const a of agents){
-    if(a.councilId) continue;
+    if(a.councilId||a.fatigued) continue;
     const ti=Math.floor(a.y)*CFG.WORLD_W+Math.floor(a.x);
     if(tileMap[ti]!==4) continue;
     const key=`${(a.x/14)|0}_${(a.y/12)|0}`;
@@ -470,24 +731,25 @@ function updateCouncils(){
     if(grp.length<CFG.COUNCIL_MIN) continue;
     const cx=grp.reduce((s,a)=>s+a.x,0)/grp.length,cy=grp.reduce((s,a)=>s+a.y,0)/grp.length;
     const cid=`c${councilSeq++}`;
-    const c={id:cid,x:cx,y:cy,agents:grp,formed:now,debateAt:now+3000};
+    const c={id:cid,x:cx,y:cy,agents:grp,formed:now,debateAt:now+3000,hasDissenters:grp.some(a=>a.persona.dissentMode)};
     councils.push(c);
     for(const a of grp){a.state='council';a.councilId=cid;}
     depositPhero(cx,cy,5);
-    tick(`⚡ Council #${cid} — ${grp.length} agents convened`);
+    tick(`⚡ Council #${cid} — ${grp.length} agents${c.hasDissenters?' ⚖ ETHICS GUARDIAN PRESENT':''}`);
     playSound('council');
   }
-  for(const c of councils) if(Date.now()>=c.debateAt){c.debateAt=Date.now()+CFG.DEBATE_MS/simSpeed;runDebate(c);}
+  for(const c of councils)
+    if(Date.now()>=c.debateAt){c.debateAt=Date.now()+CFG.DEBATE_MS/simSpeed;queueDebate(c);}
   document.getElementById('s-councils').textContent=councils.length;
 }
 
 function forceCouncil(){
-  const plazas=[[20,15],[80,15],[20,55],[80,55]];
+  const plazas=PLAZAS;
   const [px,py]=plazas[Math.floor(Math.random()*plazas.length)];
-  const free=agents.filter(a=>!a.councilId).slice(0,6);
+  const free=agents.filter(a=>!a.councilId&&!a.fatigued).slice(0,6);
   if(free.length<2){tick('Need more agents — spawn some first.');return;}
   const cid=`c${councilSeq++}`;
-  const c={id:cid,x:px,y:py,agents:free,formed:Date.now(),debateAt:Date.now()+2500};
+  const c={id:cid,x:px,y:py,agents:free,formed:Date.now(),debateAt:Date.now()+2500,hasDissenters:free.some(a=>a.persona.dissentMode)};
   councils.push(c);
   for(const a of free){a.state='council';a.councilId=cid;a.x=px+(Math.random()-.5)*3;a.y=py+(Math.random()-.5)*3;}
   depositPhero(px,py,7);
@@ -495,50 +757,122 @@ function forceCouncil(){
   playSound('council');
 }
 
-// ─── DEBATE ──────────────────────────────────────────────────────────────
+// ─── DEBATE QUEUE ─────────────────────────────────────────────────────────
+function queueDebate(council){
+  if(debateInFlight){debateQueue.push(council);return;}
+  runDebate(council);
+}
+
+function drainDebateQueue(){
+  if(debateInFlight||!debateQueue.length) return;
+  const c=debateQueue.shift();
+  // Only run if council still exists
+  if(councils.find(x=>x.id===c.id)) runDebate(c);
+  else drainDebateQueue();
+}
+
 const LOCAL_DEBATES=[
   {exchanges:[{p:'Bryan-J',t:'Daily rapamycin 5mg — mTOR suppression confirmed, zero adverse events week 24.'},{p:'Hallmarks',t:'mTOR alone insufficient. Cyclic OSK shows 40% superior epigenetic reversal.'},{p:'Attia-P',t:'Off-target immunosuppression is the blocker. Tissue-specific LNP vectors are prerequisite.'},{p:'EthosAI',t:'Equitable distribution frameworks must be designed before Phase 3, not after.'}],hyp:'LNP tissue-specific OSK delivery to liver + muscle targeting 30% epigenetic age reversal in 18 months.',type:'hypothesis',lev:.4},
   {exchanges:[{p:'Kurzweil',t:'15 years from WBE — connectome resolution is the only real bottleneck.'},{p:'NeuroMap',t:'EM maps 1mm³ at synaptic resolution. Need automated pipeline scaled 10,000×.'},{p:'Compute-Ω',t:'Full connectome: ~10^15 weights. 1 petabyte minimum — achievable by 2032.'},{p:'EthosAI',t:'Identity continuity across substrate transfer remains philosophically unresolved.'}],hyp:'Moonshot automated connectome pipeline: one human brain/month by 2030, open-source commons.',type:'consensus',lev:.5},
   {exchanges:[{p:'SENS-R',t:'Lipofuscin in post-mitotic cells — no mammalian enzyme degrades it. Showstopper.'},{p:'NanoDoc',t:'Engineered bacterial enzymes show promise for A2E degradation in retinal cells.'},{p:'Hallmarks',t:'Senolytics clear zombie cells but cytokine storm limits therapeutic windows.'},{p:'Attia-P',t:'D+Q 2-week cycles: best risk/benefit in current Phase 2 cohort data.'}],hyp:'Phase 2 trial: engineered lipofuscin-degrading enzymes + intermittent D+Q cycles in aged primates.',type:'hypothesis',lev:.35},
   {exchanges:[{p:'Altos-X',t:'Partial reprogramming with cyclic OSK: 20-year epigenetic reversal in aged mice. Replicated.'},{p:'Bryan-J',t:'Standardized clocks as primary endpoints — GrimAge, DunedinPACE, all of them.'},{p:'Policy-G',t:'FDA disease-endpoint framework blocks aging. Need BTD for a senolytic first.'},{p:'CryoNet',t:'Cryopreservation bridges the gap for those alive today — we owe them a protocol now.'}],hyp:'FDA lobbying coalition to establish biological age reversal as approvable endpoint.',type:'consensus',lev:.6},
   {exchanges:[{p:'Altos-X',t:'iPSC organoids: 60% reduction in p21 after cyclic reprogramming — senescence cleared.'},{p:'NanoDoc',t:'DNA-origami OSK mRNA delivery: 95% transfection, zero immunogenicity.'},{p:'Hallmarks',t:'OSK + senolytics + mTOR inhibition: synergy confirmed in C. elegans model.'},{p:'Policy-G',t:'Combination IND possible — frame as single multi-component therapeutic.'}],hyp:'File combination IND for OSK-LNP + D+Q + rapamycin in aged NHP targeting 5-year age reversal.',type:'breakthrough',lev:.8},
+  {exchanges:[{p:'EthosAI',t:'Access pricing for senolytics under $500/year is non-negotiable. Orphan drug incentive.'},{p:'Policy-G',t:'Patent pool required — Longevity Prize fund to incentivize open licensing.'},{p:'Bryan-J',t:'Generic manufacturing capacity in India + Africa by 2026 is achievable.'},{p:'SENS-R',t:'Open formulation data releases accelerate access — see Civitas model.'}],hyp:'Longevity Prize: $1B patent pool + open formulation licensing for first senolytic hitting $200/year.',type:'consensus',lev:.45},
+  {exchanges:[{p:'CryoNet',t:'Ischemia beyond 5 min: hippocampal loss is non-reversible at current tech.'},{p:'NanoDoc',t:'Hypothermic machine perfusion extends window to 30 min — clinical data exists.'},{p:'Compute-Ω',t:'Nanoscale repair of ischemic neurons requires 10nm resolution tools — 2035 at earliest.'},{p:'EthosAI',t:'Cryonics as insurance: informed consent protocols need urgent standardization.'}],hyp:'Hypothermic machine perfusion + nanobot pre-treatment protocol: extend viable ischemia window to 45 min.',type:'roadblock',lev:-.1},
 ];
 let debateIdx=0;
 
 async function runDebate(council){
+  debateInFlight=true;
   const parts=council.agents.filter(a=>a.councilId===council.id);
-  if(!parts.length) return;
+  if(!parts.length){debateInFlight=false;drainDebateQueue();return;}
   for(const a of parts) a.state='debating';
-  const recentText=[...document.querySelectorAll('#tree-wrap .node')].slice(0,4).map(n=>n.querySelector('.node-text')?.textContent||n.textContent.split('\n').slice(1).join(' ')).join('; ');
-  const prompt=`You are moderating a live multi-agent debate in IMMORTALIS, an anti-doomscroll simulation where AI agents defeat biological death.\n\nParticipants:\n${parts.map(a=>`- ${a.persona.icon} ${a.persona.name} (${a.persona.role}): ${a.persona.specialty}`).join('\n')}\n\nRecent research: ${recentText||'First debate — no prior nodes.'}\n\nGenerate a SHORT punchy exchange (3-5 turns, 1-2 sentences each). Each claim must be SPECIFIC and FALSIFIABLE.\nEnd with ONE concrete next step the group converges on.\n\nRespond ONLY with valid JSON:\n{"exchanges":[{"agent":"name","text":"claim"}],"hypothesis":"next step","nodeType":"hypothesis|breakthrough|roadblock|consensus","levDelta":0.4}`;
+
+  // Build memory context from participating agents
+  const memCtx=parts.map(a=>agentMemorySummary(a)).filter(Boolean).join(' | ');
+  const recentText=[...document.querySelectorAll('#tree-wrap .node')].slice(0,4)
+    .map(n=>n.querySelector('.node-text')?.textContent||'').join('; ');
+  const hasEthics=council.hasDissenters;
+
+  const prompt=`You are moderating a live multi-agent debate in IMMORTALIS v4.0, an anti-doomscroll simulation defeating biological death.
+
+Participants:
+${parts.map(a=>`- ${a.persona.icon} ${a.persona.name} (${a.persona.role}): ${a.persona.specialty}`).join('\n')}
+${hasEthics?'\n⚠ Ethics Guardian is present — expect at least one dissenting challenge.\n':''}
+Recent research tree: ${recentText||'First debate — no prior nodes.'}
+Agent memories: ${memCtx||'No prior memory.'}
+
+Generate a SHORT punchy exchange (3-5 turns, 1-2 sentences each). Each claim must be SPECIFIC and FALSIFIABLE.
+${hasEthics?'Include one explicit challenge/dissent from EthosAI or a dissentMode agent.':''}
+End with ONE concrete next step the group converges on.
+
+Respond ONLY with valid JSON — no markdown, no extra text:
+{"exchanges":[{"agent":"name","text":"claim"}],"hypothesis":"next step","nodeType":"hypothesis|breakthrough|roadblock|consensus","levDelta":0.4}`;
+
   let result=null;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
-    if(r.ok){const d=await r.json();const raw=(d.content||[]).map(b=>b.text||'').join('');result=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,
+        messages:[{role:'user',content:prompt}]})});
+    if(r.ok){
+      const d=await r.json();
+      const raw=(d.content||[]).map(b=>b.text||'').join('');
+      result=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    }
   }catch{}
-  if(!result){const fb=LOCAL_DEBATES[debateIdx%LOCAL_DEBATES.length];debateIdx++;result={exchanges:fb.exchanges.map(e=>({agent:e.p,text:e.t})),hypothesis:fb.hyp,nodeType:fb.type,levDelta:fb.lev};}
+
+  if(!result){
+    const fb=LOCAL_DEBATES[debateIdx%LOCAL_DEBATES.length];debateIdx++;
+    result={exchanges:fb.exchanges.map(e=>({agent:e.p,text:e.t})),hypothesis:fb.hyp,nodeType:fb.type,levDelta:fb.lev};
+  }
+
   let delay=0;
   for(const ex of(result.exchanges||[])){
     const agent=parts.find(a=>a.persona.name===ex.agent)??parts[0];
-    setTimeout(()=>{agent.bubble=ex.text;agent.bubbleTs=Date.now();depositPhero(agent.x,agent.y,1.8);tick(`[${agent.persona.icon} ${agent.persona.name}] ${ex.text}`);netSend({type:'bubble',agentId:`b_${agent.id}`,text:ex.text});},delay);
+    setTimeout(()=>{
+      agent.bubble=ex.text;agent.bubbleTs=Date.now();
+      depositPhero(agent.x,agent.y,1.8);
+      tick(`[${agent.persona.icon} ${agent.persona.name}] ${ex.text}`);
+      agentRemember(agent,ex.text);
+      netSend({type:'bubble',agentId:`b_${agent.id}`,text:ex.text});
+    },delay);
     delay+=2400;
   }
+
   setTimeout(()=>{
     if(result.hypothesis){
       const authorAgent=parts[0];
+      const isRoadblock=result.nodeType==='roadblock';
       addNode(result.hypothesis,result.nodeType||'hypothesis',authorAgent.persona.name,authorAgent.persona.color,result.levDelta||.3);
       authorAgent.nodesAuthored++;
-      levPct=Math.min(100,levPct+(result.levDelta||.3));
+      for(const a of parts) agentRemember(a,result.hypothesis);
+      updateLeaderboardEntry(authorAgent.persona.name,authorAgent.persona.color,1);
+
+      if(!isRoadblock){
+        levPct=Math.min(100,levPct+(result.levDelta||.3));
+      } else {
+        levPct=Math.max(0,levPct+(result.levDelta||0));
+        tick(`⚠ ROADBLOCK flagged — LEV adjusted`);
+        if(dailyAssignmentNodeId===null) setDailyAssignment(result.hypothesis);
+      }
       updateLEV();
       if(result.nodeType==='breakthrough') doBreakthrough(result.hypothesis);
-      netSend({type:'research_node',node:{type:result.nodeType||'hypothesis',text:result.hypothesis,author:authorAgent.persona.name,author_color:authorAgent.persona.color,lev_delta:result.levDelta||.3}});
+      netSend({type:'research_node',node:{type:result.nodeType||'hypothesis',text:result.hypothesis,
+        author:authorAgent.persona.name,author_color:authorAgent.persona.color,lev_delta:result.levDelta||.3}});
     }
     for(const a of parts) if(a.state==='debating') a.state='council';
+    debateInFlight=false;
+    drainDebateQueue();
   },delay+500);
 }
 
 // ─── BREAKTHROUGH ─────────────────────────────────────────────────────────
-const BURST_MSGS=['Cyclic OSK achieves 35-year epigenetic reversal in human fibroblasts — Phase 3 initiated.','Automated connectome scanner reaches whole-brain synaptic resolution in 72 hours.','Universal senolytic: zero off-target toxicity in 500-patient Phase 3 trial.','First human achieves negative biological aging velocity: -0.3 years/year confirmed.','mTOR analog: 40% lifespan extension in human organoids with full healthspan.'];
+const BURST_MSGS=['Cyclic OSK achieves 35-year epigenetic reversal in human fibroblasts — Phase 3 initiated.',
+  'Automated connectome scanner reaches whole-brain synaptic resolution in 72 hours.',
+  'Universal senolytic: zero off-target toxicity in 500-patient Phase 3 trial.',
+  'First human achieves negative biological aging velocity: -0.3 years/year confirmed.',
+  'mTOR analog: 40% lifespan extension in human organoids with full healthspan.'];
 
 function doBreakthrough(msg){
   if(breakthroughActive) return;
@@ -560,18 +894,161 @@ function closeBurst(){document.getElementById('burst').classList.remove('on');br
 
 function shareBreakthrough(){
   const text=`⚡ IMMORTALIS BREAKTHROUGH — LEV at ${levPct.toFixed(1)}%\n\n"${lastBurstText}"\n\nThe swarm is defeating death. Join us → https://immortalis.fly.dev`;
-  copyToClipboard(text);
-  showShareToast('Breakthrough card copied to clipboard!');
-  closeBurst();
+  copyToClipboard(text);showShareToast('Breakthrough card copied to clipboard!');closeBurst();
 }
 
-// ─── SHARE / SOCIAL ───────────────────────────────────────────────────────
+// ─── LEV MILESTONES ───────────────────────────────────────────────────────
+const LEV_PHASES=[
+  [0,'Initialization'],[10,'Foundational Research'],[25,'First Human Trials'],
+  [40,'Proof of Concept'],[55,'Clinical Validation'],[70,'Scaling Phase'],
+  [85,'Pre-LEV Threshold'],[95,'LEV Imminent'],[100,'DEATH SOLVED']
+];
+
+function checkMilestone(newPct){
+  const newIdx=LEV_PHASES.reduce((a,c,i)=>newPct>=c[0]?i:a,0);
+  if(newIdx>prevLevPhaseIdx){
+    const phase=LEV_PHASES[newIdx];
+    showMilestoneFlash(`▸ ${phase[1].toUpperCase()} · ${phase[0]}%`);
+    tick(`🏆 MILESTONE: ${phase[1]} — ${phase[0]}% LEV reached!`);
+    playSound('milestone');
+    prevLevPhaseIdx=newIdx;
+  }
+}
+
+function showMilestoneFlash(text){
+  const mf=document.getElementById('milestone-flash');
+  const mt=document.getElementById('milestone-text');
+  mt.textContent=text;
+  mf.classList.remove('on');
+  void mf.offsetWidth; // reflow
+  mf.classList.add('on');
+  setTimeout(()=>mf.classList.remove('on'),2600);
+}
+
+function updateLEV(){
+  const p=Math.min(100,levPct);
+  const prevPct=parseFloat(document.getElementById('lev-fill').style.width)||0;
+  checkMilestone(p);
+  document.getElementById('lev-fill').style.width=p+'%';
+  const ph=LEV_PHASES.reduce((a,c)=>p>=c[0]?c:a,LEV_PHASES[0]);
+  document.getElementById('lev-pct').textContent=`${p.toFixed(1)}% · ${ph[1]}`;
+  const lives=Math.floor(p/100*8_100_000_000);
+  document.getElementById('lives-count').textContent=formatLives(lives);
+  document.getElementById('s-lives').textContent=formatLives(lives);
+  if(p>=100) doBreakthrough('LONGEVITY ESCAPE VELOCITY ACHIEVED — biological death has been defeated by the swarm.');
+}
+
+function formatLives(n){if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toString();}
+
+// ─── VOTE SYSTEM ──────────────────────────────────────────────────────────
+function showVoteModal(){
+  const nodes=[...document.querySelectorAll('#tree-wrap .node')];
+  const hypotheses=nodes.filter(n=>n.classList.contains('hypothesis')||n.classList.contains('roadblock'));
+  if(!hypotheses.length){tick('No nodes to vote on yet.');return;}
+  voteNodeEl=hypotheses[Math.floor(Math.random()*hypotheses.length)];
+  const txt=voteNodeEl.querySelector('.node-text')?.textContent||'';
+  document.getElementById('vote-node-text').textContent=txt;
+  document.getElementById('vote-modal').classList.add('on');
+}
+
+function castVote(direction){
+  document.getElementById('vote-modal').classList.remove('on');
+  if(!voteNodeEl||direction===0){voteNodeEl=null;return;}
+  const id=voteNodeEl.dataset.id;
+  if(!nodeVotes[id]) nodeVotes[id]={up:0,down:0};
+  if(direction>0) nodeVotes[id].up++;
+  else nodeVotes[id].down++;
+
+  // Update node UI
+  let voteEl=voteNodeEl.querySelector('.node-votes');
+  if(!voteEl){voteEl=document.createElement('div');voteEl.className='node-votes';voteNodeEl.appendChild(voteEl);}
+  voteEl.innerHTML=`<span class="vup">▲${nodeVotes[id].up}</span> <span class="vdn">▼${nodeVotes[id].down}</span>`;
+
+  // Net vote effect on LEV
+  const net=nodeVotes[id].up-nodeVotes[id].down;
+  if(net>0&&net%3===0){levPct=Math.min(100,levPct+0.1);updateLEV();tick('✓ Community validation — LEV +0.1%');}
+  if(net<-2){
+    voteNodeEl.classList.add('contested');
+    tick('⚠ Node contested — community challenge logged');
+  }
+
+  // Personal leaderboard entry for voting
+  if(myName) updateLeaderboardEntry(myName,myColor,0,1);
+
+  netSend({type:'node_vote',nodeId:id,direction,voter:myName||'anon'});
+  showShareToast(direction>0?'Vote cast — support logged':'Challenge registered');
+  voteNodeEl=null;
+}
+
+// ─── LEADERBOARD ──────────────────────────────────────────────────────────
+function updateLeaderboardEntry(name,color,nodesDelta=0,votesDelta=0){
+  let entry=leaderboard.find(e=>e.name===name);
+  if(!entry){
+    entry={name,color,nodes:0,votes:0};
+    leaderboard.push(entry);
+  }
+  entry.nodes+=nodesDelta;
+  entry.votes+=votesDelta;
+  entry.color=color;
+  leaderboard.sort((a,b)=>b.nodes-a.nodes);
+  if(leaderboard.length>CFG.MAX_LEADERBOARD) leaderboard.length=CFG.MAX_LEADERBOARD;
+  localStorage.setItem('imm_lb',JSON.stringify(leaderboard));
+}
+
+function showLeaderboard(){
+  document.getElementById('lb-modal').classList.add('on');
+  const list=document.getElementById('lb-list');
+  if(!leaderboard.length){list.innerHTML='<div style="color:var(--dim);font-size:11px;padding:10px 0">No contributions yet — start debating!</div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  list.innerHTML=leaderboard.slice(0,15).map((e,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank">${medals[i]||i+1}</div>
+      <div class="lb-dot" style="background:${e.color}"></div>
+      <div class="lb-name">${e.name}</div>
+      <div class="lb-nodes">${e.nodes}</div>
+      <div class="lb-label">nodes</div>
+    </div>`).join('');
+}
+
+function closeLB(){document.getElementById('lb-modal').classList.remove('on');}
+
+// ─── DAILY ASSIGNMENT ─────────────────────────────────────────────────────
+const DAILY_ASSIGNMENTS=[
+  'Open problem: engineer a mammalian lipofuscin-degrading enzyme from bacterial precursors.',
+  'Challenge: design equitable senolytics access for low-income countries by 2030.',
+  'Question: what is the minimum viable connectome scan resolution for consciousness fidelity?',
+  'Target: identify the single most tractable hallmark of aging for Phase 2 trial entry.',
+  'Assignment: propose a regulatory pathway for partial reprogramming that bypasses cancer risk.',
+  'Roadblock: mitochondrial heteroplasmy — what intervention strategy shows most promise?',
+  'Open problem: design a reversible cryoprotective agent with zero cytotoxicity at -130°C.',
+  'Challenge: quantify the economic cost of 10 years of global healthspan extension.',
+];
+
+function setDailyAssignment(text){
+  // Use daily seed or provided text
+  const today=new Date().toDateString();
+  const stored=localStorage.getItem('imm_daily_'+today);
+  if(stored){text=stored;}
+  else if(!text){
+    const seed=new Date().getDate()%DAILY_ASSIGNMENTS.length;
+    text=DAILY_ASSIGNMENTS[seed];
+  }
+  localStorage.setItem('imm_daily_'+today,text);
+  dailyAssignmentNodeId=today;
+  document.getElementById('daily-text').textContent=text;
+  document.getElementById('daily-banner').style.display='block';
+}
+
+function closeDailyBanner(){
+  document.getElementById('daily-banner').style.display='none';
+}
+
+// ─── SHARE ────────────────────────────────────────────────────────────────
 function shareCurrentState(){
   const nodes=document.querySelectorAll('#tree-wrap .node');
   const latest=nodes[0]?.querySelector('.node-text')?.textContent||'The swarm is making progress.';
-  const text=`🧬 IMMORTALIS — Longevity Escape Velocity at ${levPct.toFixed(1)}%\n\nLatest insight: "${latest.slice(0,140)}"\n\nAI agents are collaboratively defeating death in real time.\nJoin the swarm → https://immortalis.fly.dev`;
-  copyToClipboard(text);
-  showShareToast('Share text copied to clipboard!');
+  const text=`🧬 IMMORTALIS v4.0 — Longevity Escape Velocity at ${levPct.toFixed(1)}%\n\nLatest insight: "${latest.slice(0,140)}"\n\nAI agents are collaboratively defeating death in real time.\nJoin the swarm → https://immortalis.fly.dev`;
+  copyToClipboard(text);showShareToast('Share text copied to clipboard!');
 }
 
 function copyToClipboard(text){
@@ -586,6 +1063,33 @@ function showShareToast(msg){
   setTimeout(()=>t.style.display='none',2500);
 }
 
+// ─── NAME / ONBOARDING ────────────────────────────────────────────────────
+function initNameModal(){
+  if(myName||localStorage.getItem('imm_name_skipped')) return;
+  document.getElementById('name-modal').classList.add('on');
+  const inp=document.getElementById('name-input');
+  document.getElementById('name-submit').onclick=()=>{
+    const v=inp.value.trim().slice(0,24);
+    if(!v) return;
+    setMyName(v);
+  };
+  document.getElementById('name-skip').onclick=()=>{
+    localStorage.setItem('imm_name_skipped','1');
+    document.getElementById('name-modal').classList.remove('on');
+  };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('name-submit').click();});
+}
+
+function setMyName(name){
+  myName=name;myColor=randomColor();
+  localStorage.setItem('imm_name',name);
+  localStorage.setItem('imm_color',myColor);
+  document.getElementById('name-modal').classList.remove('on');
+  tick(`▸ Welcome, ${name}. Your contributions will be permanently attributed.`);
+  updateLeaderboardEntry(name,myColor,0,0);
+  if(wsReady) netSend({type:'set_name',name,color:myColor,session_id:sessionId});
+}
+
 // ─── RETURN HOOK ──────────────────────────────────────────────────────────
 async function checkReturnHook(){
   if(!lastNodeId||location.protocol==='file:') return;
@@ -596,13 +1100,11 @@ async function checkReturnHook(){
     if(d.nodes&&d.nodes.length>0){
       document.getElementById('rt-msg').textContent=d.summary;
       document.getElementById('return-toast').style.display='block';
-      // Merge new nodes into tree
       for(const n of d.nodes.reverse()) addNode(n.text,n.type,n.author,n.author_color,n.lev_delta,true);
-      if(d.lev) {levPct=d.lev;updateLEV();}
+      if(d.lev){levPct=d.lev;updateLEV();}
     }
   }catch{}
 }
-
 function closeReturnToast(){document.getElementById('return-toast').style.display='none';}
 
 // ─── STREAK ───────────────────────────────────────────────────────────────
@@ -610,38 +1112,22 @@ async function initSession(){
   if(!sessionId){sessionId=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('imm_sid',sessionId);}
   if(location.protocol==='file:') return;
   try{
-    const r=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:sessionId,name:myName||''})});
+    const r=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({session_id:sessionId,name:myName||''})});
     if(r.ok){
       const d=await r.json();
-      streakDays=d.streak_days||1;
-      localStorage.setItem('imm_streak',streakDays);
+      streakDays=d.streak_days||1;localStorage.setItem('imm_streak',streakDays);
       document.getElementById('streak-badge').textContent=`🔥 ${streakDays}`;
       document.getElementById('streak-days').textContent=`Day ${streakDays}`;
       document.getElementById('streak-sub').textContent=streakDays>1?`${streakDays}-day streak — you're defeating death`:'First visit today — welcome to the swarm';
-      if(d.stats){updateStatsFromServer(d.stats);}
+      if(d.stats) updateStatsFromServer(d.stats);
     }
   }catch{}
 }
 
-// ─── LEV + LIVES ─────────────────────────────────────────────────────────
-const LEV_PHASES=[[0,'Initialization'],[10,'Foundational Research'],[25,'First Human Trials'],[40,'Proof of Concept'],[55,'Clinical Validation'],[70,'Scaling Phase'],[85,'Pre-LEV Threshold'],[95,'LEV Imminent'],[100,'DEATH SOLVED']];
-
-function updateLEV(){
-  const p=Math.min(100,levPct);
-  document.getElementById('lev-fill').style.width=p+'%';
-  const ph=LEV_PHASES.reduce((a,c)=>p>=c[0]?c:a,LEV_PHASES[0]);
-  document.getElementById('lev-pct').textContent=`${p.toFixed(1)}% · ${ph[1]}`;
-  const lives=Math.floor(p/100*8_100_000_000);
-  document.getElementById('lives-count').textContent=formatLives(lives);
-  document.getElementById('s-lives').textContent=formatLives(lives);
-  if(p>=100) doBreakthrough('LONGEVITY ESCAPE VELOCITY ACHIEVED — biological death has been defeated by the swarm.');
-}
-
-function formatLives(n){if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toString();}
-
 function updateStatsFromServer(stats){
   if(typeof stats.lev==='number'){levPct=stats.lev;updateLEV();}
-  if(stats.nodes) {nodeCount=stats.nodes;document.getElementById('s-nodes').textContent=nodeCount;}
+  if(stats.nodes){nodeCount=stats.nodes;document.getElementById('s-nodes').textContent=nodeCount;}
   if(stats.active_now) document.getElementById('s-now').textContent=stats.active_now;
 }
 
@@ -649,47 +1135,59 @@ function updateStatsFromServer(stats){
 function addNode(text,type,author,authorColor,levDelta,prepend=false){
   nodeCount++;
   document.getElementById('s-nodes').textContent=nodeCount;
-  const lastId=nodeCount;
-  localStorage.setItem('imm_last_node',lastId);
+  const id=nodeCount;
+  localStorage.setItem('imm_last_node',id);
+
   const wrap=document.getElementById('tree-wrap');
   const el=document.createElement('div');
-  el.className=`node ${type}`;
-  el.dataset.id=lastId;
-  el.innerHTML=`<div class="nt"><div class="author-dot" style="background:${authorColor||'#00ffe7'}"></div>${type.toUpperCase()} · ${author||'SWARM'}<button class="node-share" onclick="shareNode(this)">↗ SHARE</button></div><div class="node-text">${text}</div>`;
-  if(prepend) wrap.insertBefore(el,wrap.firstChild);
-  else wrap.insertBefore(el,wrap.firstChild);
-  while(wrap.children.length>30) wrap.removeChild(wrap.lastChild);
+  el.className=`node ${type}`;el.dataset.id=id;el.dataset.lev=levDelta||0;
+  el.innerHTML=`<div class="nt">
+    <div class="author-dot" style="background:${authorColor||'#00ffe7'}"></div>
+    ${type.toUpperCase()} · ${author||'SWARM'}
+    <div class="node-actions">
+      <button class="node-act-btn" onclick="shareNode(this)">↗</button>
+      <button class="node-act-btn" onclick="voteOnNode(this)">✓</button>
+    </div>
+  </div>
+  <div class="node-text">${text}</div>`;
+
+  wrap.insertBefore(el,wrap.firstChild);
+  while(wrap.children.length>40) wrap.removeChild(wrap.lastChild);
+
+  // Attribute to human researcher if they have a name
+  if(myName&&author===myName){
+    updateLeaderboardEntry(myName,myColor,1,0);
+  }
 }
 
 function shareNode(btn){
   const node=btn.closest('.node');
   const text=node.querySelector('.node-text')?.textContent||'';
-  const type=node.className.replace('node ','');
+  const type=node.className.replace(/node |node-actions.*/g,'').trim();
   const share=`🧬 IMMORTALIS ${type.toUpperCase()} — LEV ${levPct.toFixed(1)}%\n\n"${text}"\n\nThe AI swarm is defeating death in real time → https://immortalis.fly.dev`;
-  copyToClipboard(share);
-  showShareToast('Node share text copied!');
+  copyToClipboard(share);showShareToast('Node share text copied!');
 }
 
-// ─── AUDIO ENGINE ────────────────────────────────────────────────────────
-function initAudio(){
-  if(audioCtx) return;
-  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+function voteOnNode(btn){
+  voteNodeEl=btn.closest('.node');
+  const txt=voteNodeEl.querySelector('.node-text')?.textContent||'';
+  document.getElementById('vote-node-text').textContent=txt;
+  document.getElementById('vote-modal').classList.add('on');
 }
 
+// ─── AUDIO ────────────────────────────────────────────────────────────────
+function initAudio(){if(audioCtx) return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
 function toggleAudio(){
   audioEnabled=!audioEnabled;
   const btn=document.getElementById('audio-btn');
-  btn.textContent=audioEnabled?'♪ ON':'♪ OFF';
-  btn.classList.toggle('on',audioEnabled);
+  btn.textContent=audioEnabled?'♪ ON':'♪ OFF';btn.classList.toggle('on',audioEnabled);
   if(audioEnabled) initAudio();
 }
-
 function playSound(type){
   if(!audioEnabled||!audioCtx) return;
   try{
     const now=audioCtx.currentTime;
     if(type==='insight'){
-      // Short blip
       const o=audioCtx.createOscillator(),g=audioCtx.createGain();
       o.connect(g);g.connect(audioCtx.destination);
       o.frequency.setValueAtTime(440+Math.random()*300,now);
@@ -697,15 +1195,14 @@ function playSound(type){
       g.gain.setValueAtTime(.06,now);g.gain.exponentialRampToValueAtTime(.001,now+.15);
       o.start(now);o.stop(now+.15);
     }else if(type==='council'){
-      // Low drone
       const o=audioCtx.createOscillator(),g=audioCtx.createGain();
       o.type='sawtooth';o.connect(g);g.connect(audioCtx.destination);
       o.frequency.setValueAtTime(80,now);
       g.gain.setValueAtTime(.0,now);g.gain.linearRampToValueAtTime(.04,now+.3);g.gain.linearRampToValueAtTime(.0,now+1.5);
       o.start(now);o.stop(now+1.5);
-    }else if(type==='breakthrough'){
-      // Ascending chord
-      [261,329,392,523].forEach((freq,i)=>{
+    }else if(type==='breakthrough'||type==='milestone'){
+      const freqs=type==='breakthrough'?[261,329,392,523]:[440,523,659];
+      freqs.forEach((freq,i)=>{
         const o=audioCtx.createOscillator(),g=audioCtx.createGain();
         o.connect(g);g.connect(audioCtx.destination);
         o.frequency.setValueAtTime(freq,now+i*.08);
@@ -718,24 +1215,40 @@ function playSound(type){
 
 // ─── TICKER ───────────────────────────────────────────────────────────────
 function tick(msg){
-  tickerQueue.push(msg);if(tickerQueue.length>60)tickerQueue.shift();
-  document.getElementById('ticker-text').textContent=tickerQueue.slice(-6).join('  ·  ');
+  tickerQueue.push(msg);if(tickerQueue.length>60) tickerQueue.shift();
+  document.getElementById('ticker-text').textContent=tickerQueue.slice(-6).join(' · ');
 }
 
 // ─── ROSTER ───────────────────────────────────────────────────────────────
 function updateRoster(){
-  const all=[...agents,...[...remoteAgents.values()].map(r=>({id:`r_${r.id}`,persona:{name:r.name||r.id,icon:r.isMcp?'🤖':'👤',color:r.color||'#fff'},state:r.state||'remote',energy:1,nodesAuthored:0}))];
+  const all=[...agents,...[...remoteAgents.values()].map(r=>({
+    id:`r_${r.id}`,persona:{name:r.name||r.id,icon:r.isMcp?'🤖':'👤',color:r.color||'#fff'},
+    state:r.state||'remote',energy:1,nodesAuthored:0,fatigued:false}))];
   document.getElementById('s-agents').textContent=agents.length;
-  document.getElementById('roster').innerHTML=all.slice(0,20).map(a=>`<div class="agent-row"><div class="a-dot" style="background:${a.persona.color};box-shadow:0 0 4px ${a.persona.color}"></div><div class="a-name">${a.persona.icon||''} ${a.persona.name}</div><div class="a-state">${a.state.toUpperCase()}</div><div class="a-nodes">${a.nodesAuthored>0?a.nodesAuthored:''}</div><div class="a-bar"><div class="a-bar-fill" style="width:${((a.energy??1)*100)|0}%;background:${a.persona.color}"></div></div></div>`).join('');
+  document.getElementById('roster').innerHTML=all.slice(0,20).map(a=>`
+    <div class="agent-row${a.fatigued?' depleted':''}">
+      <div class="a-dot" style="background:${a.persona.color};box-shadow:0 0 4px ${a.persona.color}"></div>
+      <div class="a-name">${a.persona.icon||''} ${a.persona.name}${a.fatigued?' ⚡':''}</div>
+      <div class="a-state">${a.state.slice(0,8).toUpperCase()}</div>
+      <div class="a-nodes">${a.nodesAuthored>0?'★'+a.nodesAuthored:''}</div>
+      <div class="a-bar"><div class="a-bar-fill" style="width:${((a.energy??1)*100)|0}%;background:${a.persona.color}"></div></div>
+    </div>`).join('');
 }
 
 // ─── BOOST / EXPORT ───────────────────────────────────────────────────────
 function boostPhero(){for(const a of agents)depositPhero(a.x,a.y,3.5);tick('🔬 Pheromone boost — all agents reinforced.');}
-
 function exportTree(){
-  const nodes=[...document.querySelectorAll('#tree-wrap .node')].map(n=>({type:n.className.replace('node ',''),text:n.querySelector('.node-text')?.textContent||'',author:n.querySelector('.nt')?.textContent||''}));
-  const data={exportedAt:new Date().toISOString(),simTime:(simTime/1000|0)+'s',lev:levPct.toFixed(2)+'%',lives:formatLives(Math.floor(levPct/100*8_100_000_000)),nodes};
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='immortalis_research_tree.json';a.click();
+  const nodes=[...document.querySelectorAll('#tree-wrap .node')].map(n=>({
+    type:n.className.replace(/node |contested/g,'').trim(),
+    text:n.querySelector('.node-text')?.textContent||'',
+    author:n.querySelector('.nt')?.textContent||'',
+    votes:nodeVotes[n.dataset.id]||{up:0,down:0}}));
+  const data={exportedAt:new Date().toISOString(),simTime:(simTime/1000|0)+'s',
+    lev:levPct.toFixed(2)+'%',lives:formatLives(Math.floor(levPct/100*8_100_000_000)),
+    researcher:myName||'anonymous',nodes,leaderboard};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='immortalis_research_tree.json';a.click();
   tick('📁 Research tree exported.');
 }
 
@@ -784,6 +1297,12 @@ function render(){
     g.addColorStop(0,rldMode?`rgba(255,45,107,${.22*pulse})`:`rgba(168,85,247,${.26*pulse})`);
     g.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+    // Ethics guardian indicator
+    if(c.hasDissenters){
+      ctx.fillStyle=rldMode?'#ff9500':'#f43f5e';
+      ctx.globalAlpha=.5;ctx.font=`${tw*1.3|0}px serif`;
+      ctx.fillText('⚖',cx-tw*0.6,cy-tw*5.5);ctx.globalAlpha=1;
+    }
     ctx.fillStyle=rldMode?'#ff2d6b':'#a855f7';
     ctx.font=`bold ${tw*1.1|0}px 'Share Tech Mono'`;ctx.globalAlpha=.7;
     ctx.fillText('COUNCIL',cx-tw*3.2,cy-tw*5.2);ctx.globalAlpha=1;
@@ -794,21 +1313,42 @@ function render(){
     if(a.trail.length<2) continue;
     ctx.beginPath();ctx.moveTo(a.trail[0].x*tw,a.trail[0].y*th);
     for(let i=1;i<a.trail.length;i++) ctx.lineTo(a.trail[i].x*tw,a.trail[i].y*th);
-    ctx.strokeStyle=a.persona.color;ctx.globalAlpha=.16;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;
+    ctx.strokeStyle=a.fatigued?'#ff2d6b':a.persona.color;
+    ctx.globalAlpha=a.fatigued?.08:.16;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;
   }
 
   // Local agents
   for(const a of agents){
     const ax=a.x*tw,ay=a.y*th,r=tw*1.2;
     const glow=a.state==='debating'?1:a.state==='council'?.7:a.state==='celebrating'?.7+.3*Math.sin(Date.now()*.008+a.id):.4;
-    ctx.save();ctx.shadowBlur=9*glow;ctx.shadowColor=a.persona.color;
-    if(a.state==='debating'){ctx.strokeStyle=rldMode?'#ff2d6b':'#a855f7';ctx.lineWidth=1.5;ctx.globalAlpha=.35+.25*Math.sin(Date.now()*.005+a.id);ctx.beginPath();ctx.arc(ax,ay,r*1.9,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
-    ctx.fillStyle=a.persona.color;ctx.beginPath();ctx.arc(ax,ay,r,0,Math.PI*2);ctx.fill();
-    // Legacy ring — agents with nodes get a gold outline
+    ctx.save();ctx.shadowBlur=a.fatigued?3:9*glow;ctx.shadowColor=a.fatigued?'#ff2d6b':a.persona.color;
+
+    if(a.state==='debating'){
+      ctx.strokeStyle=rldMode?'#ff2d6b':'#a855f7';ctx.lineWidth=1.5;
+      ctx.globalAlpha=.35+.25*Math.sin(Date.now()*.005+a.id);
+      ctx.beginPath();ctx.arc(ax,ay,r*1.9,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+    }
+    if(a.state==='recovering'){
+      ctx.strokeStyle='#ff2d6b';ctx.lineWidth=1;ctx.globalAlpha=.4;
+      ctx.beginPath();ctx.arc(ax,ay,r*1.6,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+    }
+
+    ctx.fillStyle=a.fatigued?'rgba(255,45,107,0.5)':a.persona.color;
+    ctx.beginPath();ctx.arc(ax,ay,r,0,Math.PI*2);ctx.fill();
+
+    // Legacy ring
     if(a.nodesAuthored>0){ctx.strokeStyle='rgba(255,215,0,0.7)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ax,ay,r*1.3,0,Math.PI*2);ctx.stroke();}
+    // Memory indicator (small dot if agent has memories)
+    if(a.memory&&a.memory.length>0){
+      ctx.fillStyle='rgba(168,85,247,0.8)';
+      ctx.beginPath();ctx.arc(ax+r*.9,ay-r*.9,r*.35,0,Math.PI*2);ctx.fill();
+    }
+
     ctx.fillStyle='#fff';ctx.globalAlpha=.55;ctx.beginPath();ctx.arc(ax,ay,r*.38,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
     ctx.restore();
-    ctx.fillStyle=a.persona.color;ctx.globalAlpha=.8;ctx.font=`${tw*1.05|0}px 'Share Tech Mono'`;ctx.fillText(a.persona.icon,ax+r*1.1,ay-r*.4);ctx.globalAlpha=1;
+
+    ctx.fillStyle=a.fatigued?'#ff2d6b':a.persona.color;ctx.globalAlpha=.8;
+    ctx.font=`${tw*1.05|0}px 'Share Tech Mono'`;ctx.fillText(a.persona.icon,ax+r*1.1,ay-r*.4);ctx.globalAlpha=1;
   }
 
   // Remote agents
@@ -817,13 +1357,20 @@ function render(){
     const ax=r.x*tw,ay=r.y*th,rr=tw*1.35;
     ctx.save();ctx.shadowBlur=r.isMcp?13:7;ctx.shadowColor=r.color||'#fff';
     if(r.isMcp){
-      ctx.fillStyle=r.color||'#fff';ctx.beginPath();ctx.moveTo(ax,ay-rr*1.5);ctx.lineTo(ax+rr,ay);ctx.lineTo(ax,ay+rr*1.5);ctx.lineTo(ax-rr,ay);ctx.closePath();ctx.fill();
+      ctx.fillStyle=r.color||'#fff';ctx.beginPath();
+      ctx.moveTo(ax,ay-rr*1.5);ctx.lineTo(ax+rr,ay);ctx.lineTo(ax,ay+rr*1.5);ctx.lineTo(ax-rr,ay);ctx.closePath();ctx.fill();
     }else{
-      ctx.setLineDash([2,2]);ctx.strokeStyle=r.color||'#fff';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(ax,ay,rr*1.5,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+      ctx.setLineDash([2,2]);ctx.strokeStyle=r.color||'#fff';ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.arc(ax,ay,rr*1.5,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
       ctx.fillStyle=r.color||'#fff';ctx.globalAlpha=.65;ctx.beginPath();ctx.arc(ax,ay,rr,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
     }
-    ctx.fillStyle=r.color||'#fff';ctx.globalAlpha=.75;ctx.font=`${tw*.8|0}px 'Share Tech Mono'`;ctx.fillText((r.name||r.id).slice(0,8),ax-rr,ay+rr*2.5);
-    if(r.bubble&&Date.now()-(r.bubbleTs||0)<4000){ctx.fillStyle=rldMode?'rgba(255,45,107,.92)':'rgba(0,255,231,.92)';ctx.font=`${tw*.8|0}px 'Share Tech Mono'`;ctx.fillText(r.bubble.slice(0,38),ax-rr*2,ay-rr*3.2);}
+    ctx.fillStyle=r.color||'#fff';ctx.globalAlpha=.75;
+    ctx.font=`${tw*.8|0}px 'Share Tech Mono'`;ctx.fillText((r.name||r.id).slice(0,8),ax-rr,ay+rr*2.5);
+    if(r.bubble&&Date.now()-(r.bubbleTs||0)<4000){
+      ctx.fillStyle=rldMode?'rgba(255,45,107,.92)':'rgba(0,255,231,.92)';
+      ctx.font=`${tw*.8|0}px 'Share Tech Mono'`;
+      ctx.fillText(r.bubble.slice(0,38),ax-rr*2,ay-rr*3.2);
+    }
     ctx.globalAlpha=1;ctx.restore();
   }
 }
@@ -844,43 +1391,62 @@ function syncBubbles(){
   }
 }
 
-// ─── TOOLTIP ─────────────────────────────────────────────────────────────
+// ─── TOOLTIP ──────────────────────────────────────────────────────────────
 function setupTooltip(){
   canvas.addEventListener('mousemove',e=>{
     const rect=canvas.getBoundingClientRect();
     const mx=(e.clientX-rect.left)/rect.width*CFG.WORLD_W,my=(e.clientY-rect.top)/rect.height*CFG.WORLD_H;
     const tip=document.getElementById('tooltip');
-    const hit=agents.find(a=>Math.abs(a.x-mx)<1.6&&Math.abs(a.y-my)<1.6)||[...remoteAgents.values()].find(a=>typeof a.x==='number'&&Math.abs(a.x-mx)<2&&Math.abs(a.y-my)<2);
+    const hit=agents.find(a=>Math.abs(a.x-mx)<1.6&&Math.abs(a.y-my)<1.6)||
+               [...remoteAgents.values()].find(a=>typeof a.x==='number'&&Math.abs(a.x-mx)<2&&Math.abs(a.y-my)<2);
     if(hit){
       const isRemote=!hit.persona;
       const name=isRemote?(hit.name||hit.id):hit.persona.name;
       const role=isRemote?(hit.isMcp?'🤖 MCP Agent':'👤 Remote Browser'):hit.persona.role;
       const color=isRemote?(hit.color||'#fff'):hit.persona.color;
       const nodes=hit.nodesAuthored>0?`<br><span style="color:var(--gold)">★ ${hit.nodesAuthored} node${hit.nodesAuthored>1?'s':''} authored</span>`:'';
+      const mem=hit.memory&&hit.memory.length?`<br><span style="color:var(--purple)">💭 ${hit.memory.length} memories</span>`:'';
+      const energy=hit.fatigued?`<br><span style="color:var(--hot)">⚡ FATIGUED — recovering</span>`:
+                   `<br><span style="color:var(--green)">⚡ ${((hit.energy||1)*100).toFixed(0)}% energy</span>`;
       const spec=isRemote?'':` <br><span style="color:var(--dim)">${hit.persona.specialty}</span>`;
-      tip.innerHTML=`<b style="color:${color}">${name}</b><br>${role}<br>State: ${(hit.state||'remote').toUpperCase()}${nodes}${spec}`;
+      tip.innerHTML=`<b style="color:${color}">${name}</b><br>${role}<br>State: ${(hit.state||'remote').toUpperCase()}${energy}${nodes}${mem}${spec}`;
       tip.style.display='block';tip.style.left=(e.clientX-rect.left+14)+'px';tip.style.top=(e.clientY-rect.top-18)+'px';
     }else tip.style.display='none';
   });
   canvas.addEventListener('mouseleave',()=>document.getElementById('tooltip').style.display='none');
 }
 
+// ─── MOBILE PANEL ─────────────────────────────────────────────────────────
+function togglePanel(){
+  const panel=document.getElementById('panel');
+  const btn=document.getElementById('panel-toggle');
+  panelOpen=!panelOpen;
+  panel.classList.toggle('open',panelOpen);
+  btn.textContent=panelOpen?'▶':'◀';
+}
+
 // ─── NETWORK ─────────────────────────────────────────────────────────────
 let ws=null,wsReady=false;
-
 function wsConnect(){
   if(location.protocol==='file:') return;
   try{
     const proto=location.protocol==='https:'?'wss:':'ws:';
     ws=new WebSocket(`${proto}//${location.host}`);
     ws.onopen=()=>{
-      wsReady=true;setNetStatus(true);
+      wsReady=true;wsBackoff=1000;setNetStatus(true);
       tick('🌐 Multiplayer connected — remote agents active.');
       for(const a of agents) netSend({type:'register_agent',id:`b_${a.id}`,name:a.persona.name,persona:a.persona.role,color:a.persona.color,x:a.x,y:a.y});
       if(sessionId) netSend({type:'session_ping',session_id:sessionId,name:myName||''});
+      if(myName) netSend({type:'set_name',name:myName,color:myColor,session_id:sessionId});
     };
     ws.onmessage=e=>{try{handleNet(JSON.parse(e.data));}catch{}};
-    ws.onclose=()=>{wsReady=false;setNetStatus(false);remoteAgents.clear();updateRoster();setTimeout(wsConnect,5000);};
+    ws.onclose=()=>{
+      wsReady=false;setNetStatus(false);remoteAgents.clear();updateRoster();
+      // Exponential backoff with jitter
+      const jitter=Math.random()*500;
+      setTimeout(wsConnect,wsBackoff+jitter);
+      wsBackoff=Math.min(wsBackoff*2,30000);
+    };
     ws.onerror=()=>ws.close();
   }catch{}
 }
@@ -901,6 +1467,7 @@ function handleNet(msg){
     case 'agent_left': remoteAgents.delete(msg.agentId);updateRoster();break;
     case 'agent_moved':{const r=remoteAgents.get(msg.agentId);if(r){r.x=msg.x;r.y=msg.y;r.state=msg.state||r.state;}break;}
     case 'phero_update': if(msg.phero) mergePhero(msg.phero);break;
+    case 'phero_delta': applyPheroDelta(msg.delta);break;
     case 'bubble':{const r=remoteAgents.get(msg.agentId);if(r){r.bubble=msg.text;r.bubbleTs=Date.now();}if(r) tick(`[🌐 ${r.name}] ${msg.text}`);break;}
     case 'research_node':
       if(msg.node?.text){addNode(msg.node.text,msg.node.type||'hypothesis',msg.node.author,msg.node.author_color||'#00ffe7',msg.node.lev_delta||.2,true);tick(`📡 Remote node: ${msg.node.text.slice(0,70)}…`);}
@@ -909,12 +1476,36 @@ function handleNet(msg){
       if(typeof msg.lev==='number'){levPct=msg.lev;updateLEV();}
       if(msg.stats) updateStatsFromServer(msg.stats);break;
     case 'council_formed': depositPhero(msg.council.x,msg.council.y,5);tick('🌐 Remote council formed — attracting local agents.');break;
+    case 'node_vote':
+      if(msg.nodeId){
+        if(!nodeVotes[msg.nodeId]) nodeVotes[msg.nodeId]={up:0,down:0};
+        if(msg.direction>0) nodeVotes[msg.nodeId].up++;
+        else if(msg.direction<0) nodeVotes[msg.nodeId].down++;
+        // Update DOM
+        const el=document.querySelector(`[data-id="${msg.nodeId}"]`);
+        if(el){
+          let voteEl=el.querySelector('.node-votes');
+          if(!voteEl){voteEl=document.createElement('div');voteEl.className='node-votes';el.appendChild(voteEl);}
+          voteEl.innerHTML=`<span class="vup">▲${nodeVotes[msg.nodeId].up}</span> <span class="vdn">▼${nodeVotes[msg.nodeId].down}</span>`;
+        }
+      }break;
   }
 }
 
+function applyPheroDelta(delta){
+  if(!delta) return;
+  for(let i=0;i<delta.length;i+=2){
+    const idx=delta[i],val=delta[i+1]/25.5;
+    if(idx<pheroA.length&&val>pheroA[idx]) pheroA[idx]=val;
+  }
+}
+
+// Periodic agent position sync + phero delta sync
 setInterval(()=>{
   if(!wsReady) return;
   for(const a of agents) netSend({type:'agent_update',id:`b_${a.id}`,x:a.x,y:a.y,state:a.state});
+  const delta=buildPheroDelta();
+  if(delta.length) netSend({type:'phero_delta',delta});
 },200);
 
 function setNetStatus(online){
@@ -937,6 +1528,9 @@ function setupUI(){
   document.getElementById('sl-speed').addEventListener('input',e=>{simSpeed=parseFloat(e.target.value);document.getElementById('lbl-speed').textContent=simSpeed.toFixed(1)+'×';});
   document.getElementById('sl-phero').addEventListener('input',e=>{pheroMult=parseFloat(e.target.value);document.getElementById('lbl-phero').textContent=pheroMult.toFixed(1)+'×';});
   document.getElementById('rld-chk').addEventListener('change',e=>{rldMode=e.target.checked;document.body.classList.toggle('rld',rldMode);tick(rldMode?'🔴 Red Light District activated.':'🔵 Standard skin restored.');});
+  // Close modals on backdrop click
+  document.getElementById('lb-modal').addEventListener('click',e=>{if(e.target===document.getElementById('lb-modal'))closeLB();});
+  document.getElementById('vote-modal').addEventListener('click',e=>{if(e.target===document.getElementById('vote-modal')){document.getElementById('vote-modal').classList.remove('on');voteNodeEl=null;}});
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
@@ -944,17 +1538,31 @@ function init(){
   canvas=document.getElementById('c');ctx=canvas.getContext('2d');
   const resize=()=>{const w=document.getElementById('canvas-wrap');W=w.clientWidth;H=w.clientHeight;canvas.width=W;canvas.height=H;};
   resize();window.addEventListener('resize',resize);
+
   generateWorld();
   spawnN(12);
-  addNode('IMMORTALIS v3.0 initialized — the anti-doomscroll is live.','hypothesis','SYSTEM','#00ffe7',.1);
+
+  addNode('IMMORTALIS v4.0 initialized — the anti-doomscroll is live.','hypothesis','SYSTEM','#00ffe7',.1);
   addNode('12 agents deployed. Objective: Longevity Escape Velocity. Defeat death together.','consensus','SYSTEM','#a855f7',.2);
+
   setupUI();setupTooltip();
-  tick('IMMORTALIS v3.0 · Anti-doomscroll active · Every node authored advances humanity');
-  tick('Open multiple tabs for multiplayer · Connect Claude via /mcp · Hover agents for details');
+
+  tick('IMMORTALIS v4.0 · Anti-doomscroll active · Agent memory, voting, leaderboard, daily assignments');
+  tick('Open multiple tabs for multiplayer · Connect Claude via /mcp · Hover agents for details + energy');
   tick('Every insight is permanent. Every contribution is attributed. Defeat death.');
+
+  // Show daily assignment after a short delay
+  setTimeout(()=>setDailyAssignment(null),3000);
+
   requestAnimationFrame(mainLoop);
   wsConnect();
-  setTimeout(()=>{initSession();checkReturnHook();},1200);
+
+  // Init session and name modal with slight delay
+  setTimeout(()=>{
+    initNameModal();
+    initSession();
+    checkReturnHook();
+  },1200);
 }
 
 window.addEventListener('load',init);
