@@ -1,0 +1,25 @@
+{
+  "name": "immortalis",
+  "version": "3.0.0",
+  "description": "The anti-doomscroll — pheromone-lured death-solving agent districts. Multiplayer browser sim + MCP server.",
+  "author": "IMMORTALIS Contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/your-username/immortalis#readme",
+  "repository": { "type": "git", "url": "https://github.com/your-username/immortalis.git" },
+  "keywords": ["longevity","multi-agent","pheromone","simulation","mcp","websocket","canvas","anti-doomscroll"],
+  "main": "server/index.js",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev":   "node --watch server/index.js",
+    "check": "node --check server/index.js && echo 'Server syntax OK'"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "cors":           "^2.8.5",
+    "express":        "^4.18.2",
+    "nanoid":         "^5.0.6",
+    "ws":             "^8.16.0"
+  }
+}

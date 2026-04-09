@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm install
+      - name: Server syntax
+        run: node --check server/index.js
+      - name: Client brace balance
+        run: |
+          python3 -c "
+          html=open('public/index.html').read()
+          js=html[html.find('<script>'):]
+          d=js.count('{')-js.count('}')
+          assert d==0,f'Client brace delta {d}'
+          print(f'Client: {js.count(chr(123))}/{js.count(chr(125))} OK')
+          "
+      - name: Server brace balance
+        run: |
+          python3 -c "
+          js=open('server/index.js').read()
+          d=js.count('{')-js.count('}')
+          assert d==0,f'Server brace delta {d}'
+          print(f'Server: {js.count(chr(123))}/{js.count(chr(125))} OK')
+          "
+      - name: No duplicate functions
+        run: |
+          python3 -c "
+          import re
+          for f in ['server/index.js','public/index.html']:
+            src=open(f).read()
+            names=re.findall(r'\bfunction\s+(\w+)\s*\(',src)
+            dupes=[n for n in names if names.count(n)>1]
+            assert not dupes,f'{f} duplicate functions: {set(dupes)}'
+            print(f'{f}: {len(names)} functions, no dupes OK')
+          "
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t immortalis:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --name imm -p 3001:3000 immortalis:ci
+          sleep 4
+          curl -sf http://localhost:3001/health | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['ok'], d"
+          echo "Health check passed"
+          docker stop imm && docker rm imm

@@ -1,0 +1,30 @@
+app            = "immortalis"
+primary_region = "yyz"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port       = 3000
+  force_https         = true
+  auto_stop_machines  = true
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type       = "connections"
+    hard_limit = 500
+    soft_limit = 400
+
+[[vm]]
+  memory   = "256mb"
+  cpu_kind = "shared"
+  cpus     = 1
+
+[mounts]
+  source      = "immortalis_data"
+  destination = "/data"
+
+[env]
+  DB_PATH  = "/data/immortalis.db"
+  NODE_ENV = "production"
