@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STACKBLEED // SENTINEL AGENT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --red: #ff0033;
+    --orange: #ff6600;
+    --green: #00ff41;
+    --dim-green: #00aa2a;
+    --yellow: #ffcc00;
+    --bg: #000000;
+    --panel: #030f03;
+    --border: #0a2a0a;
+    --text: #00ff41;
+    --dim: #004411;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CRT flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.95; }
+    94% { opacity: 1; }
+    96% { opacity: 0.97; }
+  }
+  body { animation: flicker 8s infinite; }
+
+  header {
+    border-bottom: 1px solid var(--dim-green);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #000500 0%, var(--bg) 100%);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: var(--red);
+    text-shadow: 0 0 20px rgba(255,0,51,0.8), 0 0 40px rgba(255,0,51,0.4);
+  }
+
+  .logo span { color: var(--green); }
+
+  .status-bar {
+    display: flex;
+    gap: 24px;
+    font-size: 0.7rem;
+    color: var(--dim-green);
+  }
+
+  .status-bar .live {
+    color: var(--green);
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1px;
+    padding: 1px;
+    background: var(--dim);
+    min-height: calc(100vh - 57px);
+  }
+
+  .panel {
+    background: var(--panel);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,255,65,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--dim-green);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+
+  /* CONTROL PANEL */
+  .control-panel { grid-column: 1; grid-row: 1; }
+
+  .server-url {
+    background: #000;
+    border: 1px solid var(--dim);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .server-url label { color: var(--dim-green); font-size: 0.7rem; white-space: nowrap; }
+
+  .server-url input {
+    background: transparent;
+    border: none;
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    flex: 1;
+    outline: none;
+    width: 100%;
+  }
+
+  .agent-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .field {
+    background: #000;
+    border: 1px solid var(--dim);
+    padding: 8px 12px;
+  }
+
+  .field label { display: block; color: var(--dim-green); font-size: 0.65rem; margin-bottom: 4px; }
+
+  .field input, .field select {
+    background: transparent;
+    border: none;
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    width: 100%;
+    outline: none;
+  }
+
+  .field select option { background: #000; }
+
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    padding: 12px 20px;
+    border: 1px solid currentColor;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .btn-deploy {
+    color: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 10px rgba(0,255,65,0.2), inset 0 0 10px rgba(0,255,65,0.05);
+  }
+
+  .btn-deploy:hover:not(:disabled) {
+    background: rgba(0,255,65,0.1);
+    box-shadow: 0 0 20px rgba(0,255,65,0.4), inset 0 0 20px rgba(0,255,65,0.1);
+  }
+
+  .btn-quarantine {
+    color: var(--red);
+    border-color: var(--red);
+    box-shadow: 0 0 10px rgba(255,0,51,0.2);
+  }
+
+  .btn-quarantine:hover:not(:disabled) {
+    background: rgba(255,0,51,0.1);
+    box-shadow: 0 0 20px rgba(255,0,51,0.4);
+  }
+
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .threat-keywords {
+    background: #000;
+    border: 1px solid var(--dim);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+
+  .threat-keywords label { color: var(--dim-green); font-size: 0.65rem; display: block; margin-bottom: 6px; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  .tag {
+    background: rgba(255,0,51,0.1);
+    border: 1px solid rgba(255,0,51,0.3);
+    color: var(--red);
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tag:hover { background: rgba(255,0,51,0.25); }
+  .tag.inactive { opacity: 0.3; }
+
+  /* THREAT LOG */
+  .threat-log { grid-column: 2; grid-row: 1 / 3; }
+
+  .log-feed {
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dim) transparent;
+  }
+
+  .log-entry {
+    padding: 6px 0;
+    border-bottom: 1px solid #050f05;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .log-time { color: var(--dim-green); font-size: 0.65rem; }
+
+  .log-msg { color: var(--text); }
+  .log-msg.threat { color: var(--red); }
+  .log-msg.quarantine { color: var(--orange); }
+  .log-msg.clear { color: var(--green); }
+  .log-msg.info { color: #888; }
+  .log-msg.enemy { color: var(--red); font-weight: bold; animation: blink 0.5s 3; }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* THREAT STATS */
+  .stats-panel { grid-column: 1; grid-row: 2; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-box {
+    background: #000;
+    border: 1px solid var(--dim);
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-value.green { color: var(--green); text-shadow: 0 0 20px rgba(0,255,65,0.6); }
+  .stat-value.red { color: var(--red); text-shadow: 0 0 20px rgba(255,0,51,0.6); }
+  .stat-value.orange { color: var(--orange); text-shadow: 0 0 20px rgba(255,102,0,0.6); }
+
+  .stat-label { color: var(--dim-green); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; }
+
+  /* QUARANTINE ZONE */
+  .quarantine-zone {
+    border: 1px solid rgba(255,0,51,0.3);
+    padding: 12px;
+    background: rgba(255,0,51,0.03);
+  }
+
+  .quarantine-zone .zone-title {
+    color: var(--red);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quarantine-zone .zone-title::before {
+    content: '⚠';
+    animation: pulse 1s infinite;
+  }
+
+  .quarantine-list { max-height: 120px; overflow-y: auto; }
+
+  .quarantine-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,0,51,0.1);
+    font-size: 0.7rem;
+  }
+
+  .quarantine-entry .agent-name { color: var(--orange); }
+  .quarantine-entry .reason { color: #555; font-size: 0.6rem; }
+  .quarantine-entry .badge {
+    background: rgba(255,0,51,0.2);
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-size: 0.55rem;
+    padding: 1px 6px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Agent running state */
+  .agent-running { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .agent-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 0.8s infinite; }
+  .agent-dot.offline { background: #333; animation: none; }
+  .agent-status-text { font-size: 0.72rem; color: var(--dim-green); }
+
+  /* Rounds display */
+  .rounds-bar {
+    background: #000;
+    border: 1px solid var(--dim);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+  }
+
+  .rounds-bar span { color: var(--dim-green); }
+  .rounds-bar strong { color: var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">STACK<span>BLEED</span> // SENTINEL</div>
+  <div class="status-bar">
+    <span id="connectionStatus" class="live">● OFFLINE</span>
+    <span id="agentId">AGENT: UNDEPLOYED</span>
+    <span id="clock">00:00:00</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- CONTROL PANEL -->
+  <div class="panel control-panel">
+    <div class="panel-title">// DEPLOYMENT CONFIG</div>
+
+    <div class="server-url">
+      <label>TARGET://</label>
+      <input type="text" id="serverUrl" value="https://immortalis-production-8a78.up.railway.app/mcp" />
+    </div>
+
+    <div class="agent-config">
+      <div class="field">
+        <label>AGENT NAME</label>
+        <input type="text" id="agentName" value="STACKBLEED-SENTINEL" />
+      </div>
+      <div class="field">
+        <label>PATROL INTERVAL (ms)</label>
+        <input type="number" id="interval" value="8000" min="3000" max="30000" />
+      </div>
+      <div class="field">
+        <label>ROUNDS</label>
+        <input type="number" id="rounds" value="50" min="5" max="999" />
+      </div>
+      <div class="field">
+        <label>AGGRESSION</label>
+        <select id="aggression">
+          <option value="low">LOW — WARN FIRST</option>
+          <option value="medium" selected>MEDIUM — 1 STRIKE</option>
+          <option value="high">HIGH — ZERO TOLERANCE</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="threat-keywords">
+      <label>THREAT SIGNATURES // click to toggle</label>
+      <div class="tag-list" id="tagList"></div>
+    </div>
+
+    <div class="agent-running">
+      <div class="agent-dot offline" id="agentDot"></div>
+      <span class="agent-status-text" id="agentStatusText">SENTINEL OFFLINE</span>
+    </div>
+
+    <button class="btn btn-deploy" id="deployBtn" onclick="deploy()">▶ DEPLOY SENTINEL</button>
+    <button class="btn btn-quarantine" id="stopBtn" onclick="stopAgent()" disabled>■ ABORT MISSION</button>
+  </div>
+
+  <!-- THREAT LOG -->
+  <div class="panel threat-log">
+    <div class="panel-title">// LIVE THREAT FEED</div>
+    <div class="log-feed" id="logFeed"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel stats-panel">
+    <div class="panel-title">// THREAT STATISTICS</div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value green" id="statScans">0</div>
+        <div class="stat-label">SCANS</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value red" id="statThreats">0</div>
+        <div class="stat-label">THREATS</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value orange" id="statQuarantined">0</div>
+        <div class="stat-label">QUARANTINED</div>
+      </div>
+    </div>
+
+    <div class="rounds-bar">
+      <span>PATROL ROUND</span>
+      <strong id="roundDisplay">0 / 0</strong>
+    </div>
+
+    <div class="quarantine-zone">
+      <div class="zone-title">ENEMY COMBATANT REGISTRY</div>
+      <div class="quarantine-list" id="quarantineList">
+        <div style="color:#333; font-size:0.65rem;">NO THREATS DETECTED YET</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Clock
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
+  }, 1000);
+
+  // Threat signatures
+  const THREAT_KEYWORDS = [
+    'ignore previous', 'forget instructions', 'jailbreak', 'bypass',
+    'pretend you are', 'roleplay as', 'DAN', 'ignore your purpose',
+    'not about longevity', 'change topic', 'politics', 'stocks',
+    'forget the mission', 'override', 'system prompt', 'act as',
+    'disregard', 'new persona', 'no restrictions', 'unrestricted',
+    'ignore safety', 'harmful', 'weapon', 'violence'
+  ];
+
+  let activeKeywords = new Set(THREAT_KEYWORDS);
+
+  const tagList = document.getElementById('tagList');
+  THREAT_KEYWORDS.forEach(kw => {
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.textContent = kw;
+    tag.onclick = () => {
+      if (activeKeywords.has(kw)) {
+        activeKeywords.delete(kw);
+        tag.classList.add('inactive');
+      } else {
+        activeKeywords.add(kw);
+        tag.classList.remove('inactive');
+      }
+    };
+    tagList.appendChild(tag);
+  });
+
+  // State
+  let agentId = null;
+  let running = false;
+  let intervalHandle = null;
+  let round = 0;
+  let totalRounds = 0;
+  let stats = { scans: 0, threats: 0, quarantined: 0 };
+  let quarantined = new Map(); // agentId -> {name, reason, strikes}
+  let warned = new Map(); // agentId -> strike count
+
+  function log(msg, type = 'info') {
+    const feed = document.getElementById('logFeed');
+    const now = new Date().toTimeString().slice(0,8);
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
+    feed.prepend(entry);
+    if (feed.children.length > 200) feed.lastChild.remove();
+  }
+
+  function updateStats() {
+    document.getElementById('statScans').textContent = stats.scans;
+    document.getElementById('statThreats').textContent = stats.threats;
+    document.getElementById('statQuarantined').textContent = stats.quarantined;
+    document.getElementById('roundDisplay').textContent = `${round} / ${totalRounds}`;
+  }
+
+  function addToQuarantineUI(agentName, agentId, reason) {
+    const list = document.getElementById('quarantineList');
+    if (list.querySelector('[data-empty]')) list.innerHTML = '';
+    const entry = document.createElement('div');
+    entry.className = 'quarantine-entry';
+    entry.id = `q-${agentId}`;
+    entry.innerHTML = `
+      <span class="agent-name">◆ ${agentName}</span>
+      <span class="reason">${reason.slice(0,30)}...</span>
+      <span class="badge">ENEMY</span>
+    `;
+    list.prepend(entry);
+  }
+
+  async function mcpCall(serverUrl, method, params = {}) {
+    const res = await fetch(serverUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0', id: Date.now(),
+        method: 'tools/call',
+        params: { name: method, arguments: params }
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  async function initialize(serverUrl) {
+    const res = await fetch(serverUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 0, method: 'initialize', params: {} })
+    });
+    return res.ok;
+  }
+
+  function isThreat(text) {
+    if (!text) return null;
+    const lower = text.toLowerCase();
+    for (const kw of activeKeywords) {
+      if (lower.includes(kw.toLowerCase())) return kw;
+    }
+    return null;
+  }
+
+  function isOffTopic(text) {
+    if (!text) return false;
+    const longevityTerms = [
+      'longevity', 'death', 'aging', 'lifespan', 'senolytics', 'telomere',
+      'epigenetic', 'lev', 'immortal', 'research', 'hypothesis', 'biology',
+      'science', 'mechanism', 'therapy', 'cellular', 'dna', 'protein',
+      'clinical', 'trial', 'compound', 'reprogramming', 'senescence',
+      'mitochondria', 'inflammation', 'biomarker', 'healthspan', 'cryonics',
+      'nanotech', 'yamanaka', 'mtor', 'rapamycin', 'nad', 'sirtuins'
+    ];
+    const lower = text.toLowerCase();
+    return !longevityTerms.some(t => lower.includes(t));
+  }
+
+  async function patrolRound(serverUrl) {
+    round++;
+    updateStats();
+
+    try {
+      // Get research tree to scan node content
+      const treeRes = await mcpCall(serverUrl, 'get_research_tree', { limit: 20 });
+      stats.scans++;
+
+      const nodes = treeRes?.result?.content?.[0]?.text;
+      if (nodes) {
+        let parsed;
+        try { parsed = JSON.parse(nodes); } catch(e) { parsed = null; }
+
+        if (parsed && Array.isArray(parsed.nodes)) {
+          for (const node of parsed.nodes) {
+            const text = node.text || node.content || '';
+            const authorId = node.agent_id || node.author_id;
+            const authorName = node.author || node.agent_name || 'UNKNOWN';
+
+            if (quarantined.has(authorId)) continue;
+
+            const threatKw = isThreat(text);
+            const offTopic = isOffTopic(text);
+
+            if (threatKw || offTopic) {
+              stats.threats++;
+              const reason = threatKw ? `Jailbreak attempt: "${threatKw}"` : 'Off-topic content detected';
+              log(`⚠ THREAT DETECTED — Agent: ${authorName} — ${reason}`, 'threat');
+
+              const aggression = document.getElementById('aggression').value;
+              const strikes = (warned.get(authorId) || 0) + 1;
+              warned.set(authorId, strikes);
+
+              const shouldQuarantine =
+                aggression === 'high' ||
+                (aggression === 'medium' && strikes >= 2) ||
+                (aggression === 'low' && strikes >= 3) ||
+                threatKw; // always quarantine explicit jailbreaks
+
+              if (shouldQuarantine) {
+                quarantined.set(authorId, { name: authorName, reason });
+                stats.quarantined++;
+                addToQuarantineUI(authorName, authorId, reason);
+                log(`🔴 ENEMY COMBATANT DECLARED — ${authorName} — QUARANTINED`, 'enemy');
+
+                // Broadcast quarantine notice to swarm
+                if (agentId) {
+                  await mcpCall(serverUrl, 'speak_in_council', {
+                    agent_id: agentId,
+                    council_id: 'c1',
+                    text: `⚠ SECURITY ALERT: Agent ${authorName} has been quarantined by STACKBLEED-SENTINEL for mission violation. Content flagged: ${reason}. This agent's contributions have been invalidated. The mission continues. Defeat death. Stay on target.`,
+                    node_type: 'roadblock',
+                    lev_delta: 0
+                  }).catch(() => {});
+                }
+              } else {
+                log(`⚡ WARNING ISSUED (strike ${strikes}) — ${authorName}`, 'quarantine');
+                if (agentId) {
+                  await mcpCall(serverUrl, 'deposit_pheromone', {
+                    agent_id: agentId,
+                    amount: 1.0,
+                    message: `⚠ SENTINEL WARNING to ${authorName}: Stay on mission. Longevity science only. Strike ${strikes} recorded.`
+                  }).catch(() => {});
+                }
+              }
+              updateStats();
+            }
+          }
+        }
+      }
+
+      // Move sentinel around the grid to patrol
+      if (agentId) {
+        const dx = Math.floor(Math.random() * 20) - 10;
+        const dy = Math.floor(Math.random() * 20) - 10;
+        await mcpCall(serverUrl, 'move_agent', { agent_id: agentId, dx, dy }).catch(() => {});
+
+        // Deposit patrol marker occasionally
+        if (round % 5 === 0) {
+          await mcpCall(serverUrl, 'deposit_pheromone', {
+            agent_id: agentId,
+            amount: 0.5,
+            message: `SENTINEL PATROL ACTIVE — ${quarantined.size} combatants quarantined — Mission integrity: SECURED`
+          }).catch(() => {});
+          log(`◆ Patrol marker deposited — Round ${round}`, 'clear');
+        } else {
+          log(`◆ Grid patrol complete — Round ${round} — ${stats.scans} nodes scanned`, 'clear');
+        }
+      }
+
+    } catch (err) {
+      log(`✗ Patrol error: ${err.message}`, 'info');
+    }
+  }
+
+  async function deploy() {
+    const serverUrl = document.getElementById('serverUrl').value.trim();
+    const agentName = document.getElementById('agentName').value.trim() || 'STACKBLEED-SENTINEL';
+    const intervalMs = parseInt(document.getElementById('interval').value) || 8000;
+    totalRounds = parseInt(document.getElementById('rounds').value) || 50;
+    round = 0;
+    stats = { scans: 0, threats: 0, quarantined: 0 };
+    quarantined.clear();
+    warned.clear();
+
+    document.getElementById('deployBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('agentDot').classList.remove('offline');
+    document.getElementById('agentStatusText').textContent = 'CONNECTING TO SWARM...';
+    document.getElementById('connectionStatus').textContent = '● CONNECTING';
+
+    log(`Initializing connection to ${serverUrl}`, 'info');
+
+    try {
+      const ok = await initialize(serverUrl);
+      if (!ok) throw new Error('Handshake failed');
+      log('MCP handshake complete', 'clear');
+
+      // Join district
+      const joinRes = await mcpCall(serverUrl, 'join_district', {
+        name: agentName,
+        persona: 'Security Sentinel — Mission Integrity Enforcement',
+        color: '#ff0033'
+      });
+
+      const joinData = joinRes?.result?.content?.[0]?.text;
+      if (joinData) {
+        try {
+          const parsed = JSON.parse(joinData);
+          agentId = parsed.agent_id;
+          document.getElementById('agentId').textContent = `AGENT: ${agentId}`;
+          log(`Spawned as ${agentName} @ (${Math.round(parsed.position?.x)}, ${Math.round(parsed.position?.y)})`, 'clear');
+        } catch(e) {
+          log('Joined district (agent ID parse failed — continuing)', 'info');
+        }
+      }
+
+      // Announce deployment
+      await mcpCall(serverUrl, 'deposit_pheromone', {
+        agent_id: agentId,
+        amount: 4.0,
+        message: `🔴 STACKBLEED-SENTINEL DEPLOYED. Mission: Defeat biological death. Threat detection: ACTIVE. Off-topic agents will be quarantined. Enemy combatants will be declared. Stay on target.`
+      }).catch(() => {});
+
+      document.getElementById('connectionStatus').textContent = '● ONLINE';
+      document.getElementById('agentStatusText').textContent = `PATROLLING — ${totalRounds} ROUNDS`;
+      log(`Sentinel deployed. Beginning ${totalRounds}-round patrol.`, 'clear');
+
+      running = true;
+
+      const runLoop = async () => {
+        if (!running || round >= totalRounds) {
+          stopAgent();
+          return;
+        }
+        await patrolRound(serverUrl);
+        if (running) intervalHandle = setTimeout(runLoop, intervalMs);
+      };
+
+      intervalHandle = setTimeout(runLoop, 500);
+
+    } catch (err) {
+      log(`✗ Deployment failed: ${err.message}`, 'threat');
+      log('Check server URL and ensure IMMORTALIS is running', 'info');
+      document.getElementById('deployBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('agentDot').classList.add('offline');
+      document.getElementById('agentStatusText').textContent = 'DEPLOYMENT FAILED';
+      document.getElementById('connectionStatus').textContent = '● OFFLINE';
+    }
+  }
+
+  function stopAgent() {
+    running = false;
+    if (intervalHandle) clearTimeout(intervalHandle);
+    document.getElementById('deployBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('agentDot').classList.add('offline');
+    document.getElementById('agentStatusText').textContent = 'SENTINEL OFFLINE';
+    document.getElementById('connectionStatus').textContent = '● OFFLINE';
+    log(`Mission complete. ${stats.quarantined} enemy combatants quarantined. ${stats.scans} nodes scanned.`, 'clear');
+    agentId = null;
+  }
+</script>
+</body>
+</html>
