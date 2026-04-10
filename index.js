@@ -395,7 +395,206 @@ server.listen(PORT, () => {
   console.log(`IMMORTALIS v4.0 server running on port ${PORT}`);
   console.log(`Persist: ${PERSIST_PATH || 'disabled (set PERSIST_PATH to enable)'}`);
 });
+// ============================================================
+// IMMORTALIS v5.0 — TOOLS API
+// Add this entire block to your index.js
+// Place BEFORE the server.listen() call
+// ============================================================
 
+const TOOL_CACHE = new Map(); // cache keyed by "toolName:queryHash"
+const CACHE_TTL = 1000 * 60 * 15; // 15 min
+
+function cacheKey(tool, args) {
+  return `${tool}:${JSON.stringify(args)}`;
+}
+
+function fromCache(key) {
+  const entry = TOOL_CACHE.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) { TOOL_CACHE.delete(key); return null; }
+  return entry.data;
+}
+
+function toCache(key, data) {
+  TOOL_CACHE.set(key, { ts: Date.now(), data });
+}
+
+// ── PubMed Search (NCBI E-utilities — no API key required) ──
+async function pubmedSearch(query, maxResults = 8) {
+  const key = cacheKey('pubmed', { query, maxResults });
+  const cached = fromCache(key);
+  if (cached) return cached;
+
+  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query + '[Title/Abstract]')}&retmax=${maxResults}&sort=date&retmode=json`;
+  const searchRes = await fetch(searchUrl);
+  const searchData = await searchRes.json();
+  const ids = searchData?.esearchresult?.idlist || [];
+  if (!ids.length) return { results: [], query };
+
+  const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
+  const summaryRes = await fetch(summaryUrl);
+  const summaryData = await summaryRes.json();
+
+  const results = ids.map(id => {
+    const doc = summaryData?.result?.[id] || {};
+    return {
+      pmid: id,
+      title: doc.title || 'Unknown',
+      authors: (doc.authors || []).slice(0, 3).map(a => a.name).join(', '),
+      journal: doc.fulljournalname || doc.source || '',
+      pubdate: doc.pubdate || '',
+      url: `https://pubmed.ncbi.nlm.nih.gov/${id}/`
+    };
+  });
+
+  const result = { results, query, source: 'PubMed' };
+  toCache(key, result);
+  return result;
+}
+
+// ── arXiv Search (preprints — no API key required) ──
+async function arxivSearch(query, maxResults = 6) {
+  const key = cacheKey('arxiv', { query, maxResults });
+  const cached = fromCache(key);
+  if (cached) return cached;
+
+  const url = `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&sortBy=submittedDate&sortOrder=descending&max_results=${maxResults}`;
+  const res = await fetch(url);
+  const text = await res.text();
+
+  // Parse Atom XML
+  const entries = [];
+  const entryMatches = text.matchAll(/<entry>([\s\S]*?)<\/entry>/g);
+  for (const match of entryMatches) {
+    const entry = match[1];
+    const getId = (tag) => { const m = entry.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`)); return m ? m[1].trim().replace(/<[^>]+>/g, '') : ''; };
+    const id = getId('id').split('/').pop();
+    entries.push({
+      arxiv_id: id,
+      title: getId('title').replace(/\n/g, ' '),
+      summary: getId('summary').replace(/\n/g, ' ').slice(0, 300) + '...',
+      published: getId('published').slice(0, 10),
+      url: `https://arxiv.org/abs/${id}`
+    });
+  }
+
+  const result = { results: entries, query, source: 'arXiv' };
+  toCache(key, result);
+  return result;
+}
+
+// ── PubMed Abstract Fetch (for critique) ──
+async function fetchAbstract(pmid) {
+  const key = cacheKey('abstract', { pmid });
+  const cached = fromCache(key);
+  if (cached) return cached;
+
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${pmid}&retmode=text&rettype=abstract`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const result = { pmid, abstract: text.slice(0, 2000), url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/` };
+  toCache(key, result);
+  return result;
+}
+
+// ── ClinicalTrials.gov Search ──
+async function clinicalTrialsSearch(query, maxResults = 6) {
+  const key = cacheKey('trials', { query, maxResults });
+  const cached = fromCache(key);
+  if (cached) return cached;
+
+  const url = `https://clinicaltrials.gov/api/v2/studies?query.term=${encodeURIComponent(query)}&pageSize=${maxResults}&sort=LastUpdatePostDate:desc`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const results = (data?.studies || []).map(s => {
+    const p = s?.protocolSection;
+    return {
+      nct_id: p?.identificationModule?.nctId || '',
+      title: p?.identificationModule?.briefTitle || '',
+      status: p?.statusModule?.overallStatus || '',
+      phase: p?.designModule?.phases?.join(', ') || 'N/A',
+      enrollment: p?.designModule?.enrollmentInfo?.count || 0,
+      url: `https://clinicaltrials.gov/study/${p?.identificationModule?.nctId}`
+    };
+  });
+
+  const result = { results, query, source: 'ClinicalTrials.gov' };
+  toCache(key, result);
+  return result;
+}
+
+// ── Tool dispatcher ──
+async function dispatchTool(toolName, args) {
+  switch (toolName) {
+    case 'pubmed_search':
+      return await pubmedSearch(args.query, args.max_results || 8);
+    case 'arxiv_search':
+      return await arxivSearch(args.query, args.max_results || 6);
+    case 'fetch_abstract':
+      return await fetchAbstract(args.pmid);
+    case 'clinicaltrials_search':
+      return await clinicalTrialsSearch(args.query, args.max_results || 6);
+    default:
+      return { error: `Unknown tool: ${toolName}` };
+  }
+}
+
+// ── HTTP endpoint: POST /api/tools ──
+// Add this inside your existing HTTP request handler
+// where you handle other /api/* routes:
+//
+// if (req.method === 'POST' && pathname === '/api/tools') {
+//   handleToolsEndpoint(req, res);
+//   return;
+// }
+
+async function handleToolsEndpoint(req, res) {
+  let body = '';
+  req.on('data', d => body += d);
+  req.on('end', async () => {
+    try {
+      const { tool, args } = JSON.parse(body);
+      if (!tool) { res.writeHead(400); res.end(JSON.stringify({ error: 'tool required' })); return; }
+      const result = await dispatchTool(tool, args || {});
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(result));
+    } catch (e) {
+      res.writeHead(500);
+      res.end(JSON.stringify({ error: e.message }));
+    }
+  });
+}
+
+// ── WebSocket tool_call message handler ──
+// Add this inside your existing WebSocket message handler:
+//
+// if (data.type === 'tool_call') {
+//   handleWsToolCall(ws, data);
+//   return;
+// }
+
+async function handleWsToolCall(ws, data) {
+  try {
+    const result = await dispatchTool(data.tool, data.args || {});
+    ws.send(JSON.stringify({
+      type: 'tool_result',
+      call_id: data.call_id,
+      tool: data.tool,
+      result
+    }));
+  } catch (e) {
+    ws.send(JSON.stringify({
+      type: 'tool_result',
+      call_id: data.call_id,
+      tool: data.tool,
+      error: e.message
+    }));
+  }
+}
+
+module.exports = { handleToolsEndpoint, handleWsToolCall, dispatchTool };
+  
 // Graceful shutdown
 process.on('SIGTERM', () => { persist(); process.exit(0); });
 process.on('SIGINT',  () => { persist(); process.exit(0); });
