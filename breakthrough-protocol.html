@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS v5.5 — Breakthrough Protocol</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap');
+:root{--bg:#020408;--panel:#030810;--border:#0a1a2a;--cyan:#00e5ff;--green:#00ff88;--yellow:#ffcc00;--red:#ff3366;--purple:#8800ff;--text:#a0c8e0;--bright:#e0f4ff;--dim:#0a2030;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,0.01) 3px,rgba(0,229,255,0.01) 4px);pointer-events:none;z-index:9999;}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#000810,var(--bg));}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:.9rem;letter-spacing:.25em;color:var(--cyan);text-shadow:0 0 30px rgba(0,229,255,.7);}
+.logo em{color:var(--yellow);font-style:normal;}
+.hdr-right{font-size:.65rem;color:#334;display:flex;gap:16px;align-items:center;}
+.lev-pill{background:rgba(0,255,136,.1);border:1px solid var(--green);color:var(--green);font-family:'Orbitron',monospace;font-size:.7rem;padding:4px 12px;letter-spacing:.1em;}
+.layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 53px);}
+.left{border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px;overflow-y:auto;gap:14px;}
+.section-title{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--cyan);opacity:.7;margin-bottom:8px;}
+.field label{display:block;font-size:.6rem;color:#456;margin-bottom:3px;}
+.field input,.field textarea,.field select{width:100%;background:var(--dim);border:1px solid var(--border);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:7px 10px;outline:none;}
+.field input:focus,.field textarea:focus{border-color:var(--cyan);}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5;}
+.btn{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.15em;padding:10px 16px;border:1px solid currentColor;cursor:pointer;background:transparent;width:100%;margin-bottom:6px;text-transform:uppercase;transition:all .15s;}
+.btn-cyan{color:var(--cyan);}
+.btn-cyan:hover:not(:disabled){background:rgba(0,229,255,.08);box-shadow:0 0 20px rgba(0,229,255,.2);}
+.btn-yellow{color:var(--yellow);}
+.btn-yellow:hover:not(:disabled){background:rgba(255,204,0,.08);box-shadow:0 0 20px rgba(255,204,0,.2);}
+.btn-green{color:var(--green);}
+.btn-green:hover:not(:disabled){background:rgba(0,255,136,.08);}
+.btn-purple{color:var(--purple);}
+.btn-purple:hover:not(:disabled){background:rgba(136,0,255,.08);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.sep{height:1px;background:var(--border);}
+.lev-display{border:1px solid var(--green);padding:14px;background:rgba(0,255,136,.03);text-align:center;}
+.lev-number{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;color:var(--green);text-shadow:0 0 30px rgba(0,255,136,.6);line-height:1;}
+.lev-label{font-size:.6rem;color:#567;letter-spacing:.2em;margin-top:4px;}
+.lev-bar{height:4px;background:var(--dim);margin:8px 0;}
+.lev-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue,#0088ff),var(--cyan),var(--green));transition:width .8s ease;box-shadow:0 0 8px rgba(0,229,255,.4);}
+.threshold-list{display:flex;flex-direction:column;gap:3px;}
+.threshold{display:flex;align-items:center;gap:8px;font-size:.62rem;padding:3px 0;}
+.threshold .th-pct{color:#456;width:35px;font-size:.6rem;}
+.threshold .th-dot{width:8px;height:8px;border-radius:50%;border:1px solid #333;flex-shrink:0;}
+.threshold .th-dot.reached{border-color:var(--green);background:var(--green);}
+.threshold .th-name{flex:1;color:var(--text);}
+.threshold.current .th-name{color:var(--cyan);}
+.node-count-badge{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan);font-size:.6rem;padding:2px 6px;border-radius:0;}
+
+.right{display:flex;flex-direction:column;overflow:hidden;}
+
+/* Preview area */
+.preview-area{flex:1;overflow-y:auto;padding:0;scrollbar-width:thin;scrollbar-color:var(--dim) transparent;}
+.preview-bar{padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--panel);}
+.preview-bar .pb-title{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:#456;flex:1;}
+.tab{font-family:'Orbitron',monospace;font-size:.55rem;padding:5px 10px;border:1px solid var(--border);color:#456;cursor:pointer;transition:all .15s;}
+.tab.active{border-color:var(--cyan);color:var(--cyan);}
+
+/* Report preview */
+#reportPreview{padding:30px 40px;max-width:900px;margin:0 auto;}
+.rp-cover{text-align:center;padding:40px 0;border-bottom:2px solid var(--cyan);margin-bottom:30px;}
+.rp-cover .rp-logo{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;color:var(--cyan);text-shadow:0 0 20px rgba(0,229,255,.5);letter-spacing:.2em;}
+.rp-cover .rp-subtitle{color:#567;font-size:.75rem;letter-spacing:.2em;margin-top:6px;}
+.rp-cover .rp-title{font-size:1.1rem;color:var(--bright);margin:20px 0 10px;line-height:1.4;}
+.rp-cover .rp-meta{font-size:.65rem;color:#456;margin-top:6px;}
+.rp-cover .rp-lev{font-family:'Orbitron',monospace;font-size:2rem;color:var(--green);margin:16px 0;text-shadow:0 0 20px rgba(0,255,136,.5);}
+.rp-section{margin-bottom:28px;}
+.rp-section h2{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:.3em;color:var(--cyan);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:14px;}
+.rp-node{border-left:3px solid var(--dim);padding:10px 14px;margin-bottom:10px;background:rgba(255,255,255,.02);}
+.rp-node.hypothesis{border-left-color:var(--green);}
+.rp-node.breakthrough{border-left-color:var(--yellow);}
+.rp-node.roadblock{border-left-color:var(--red);}
+.rp-node.consensus{border-left-color:var(--cyan);}
+.rp-node .rn-type{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:.2em;color:#456;margin-bottom:5px;}
+.rp-node.hypothesis .rn-type{color:var(--green);}
+.rp-node.breakthrough .rn-type{color:var(--yellow);}
+.rp-node.roadblock .rn-type{color:var(--red);}
+.rp-node.consensus .rn-type{color:var(--cyan);}
+.rp-node .rn-text{font-size:.72rem;line-height:1.7;color:var(--text);}
+.rp-node .rn-meta{font-size:.6rem;color:#345;margin-top:5px;}
+.rp-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.rp-stat{border:1px solid var(--border);padding:12px;text-align:center;background:rgba(0,0,0,.3);}
+.rp-stat .rs-val{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;color:var(--cyan);}
+.rp-stat .rs-lbl{font-size:.55rem;color:#456;margin-top:3px;letter-spacing:.1em;}
+.rp-toc{border:1px solid var(--border);padding:12px;background:rgba(0,0,0,.3);margin-bottom:20px;}
+.rp-toc-title{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.2em;color:#456;margin-bottom:8px;}
+.rp-toc-item{display:flex;justify-content:space-between;font-size:.65rem;padding:2px 0;border-bottom:1px dotted #0a1a2a;color:var(--text);}
+.rp-footer{text-align:center;font-size:.6rem;color:#234;padding:20px 0;border-top:1px solid var(--border);margin-top:30px;}
+.status-bar{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:.6rem;color:#345;background:var(--panel);}
+.generating{display:inline-block;animation:pulse 0.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">IMMORTALIS <em>v5.5</em> // BREAKTHROUGH PROTOCOL</div>
+  <div class="hdr-right">
+    <span class="lev-pill" id="levPill">LEV: 0.0%</span>
+    <span id="hdrClock">00:00:00</span>
+  </div>
+</header>
+<div class="layout">
+  <div class="left">
+    <div>
+      <div class="section-title">// SWARM SOURCE</div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>MCP SERVER URL</label>
+        <input type="text" id="mcpUrl" value="https://immortalis-production-8a78.up.railway.app/mcp" />
+      </div>
+      <button class="btn btn-cyan" id="fetchBtn" onclick="fetchFromSwarm()">↓ FETCH SWARM DATA</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="lev-display">
+      <div class="lev-number" id="levNumber">0.0%</div>
+      <div class="lev-label">LONGEVITY ESCAPE VELOCITY</div>
+      <div class="lev-bar"><div class="lev-fill" id="levFill" style="width:0%"></div></div>
+    </div>
+
+    <div>
+      <div class="section-title">// LEV THRESHOLDS</div>
+      <div class="threshold-list" id="thresholdList"></div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div>
+      <div class="section-title">// REPORT CONFIG</div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>REPORT TITLE</label>
+        <input type="text" id="reportTitle" value="State of Longevity Science — IMMORTALIS Swarm Report" />
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>AUTHOR / INSTITUTION</label>
+        <input type="text" id="reportAuthor" value="IMMORTALIS Swarm Collective" />
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>EXECUTIVE SUMMARY</label>
+        <textarea id="reportSummary" placeholder="Auto-generated from swarm data, or type a custom summary..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-yellow" id="generateBtn" onclick="generateReport()">⚡ GENERATE REPORT</button>
+    <button class="btn btn-green" id="downloadBtn" onclick="downloadPDF()" disabled>↓ DOWNLOAD PDF</button>
+    <button class="btn btn-purple" onclick="shareReport()">↗ COPY SHARE LINK</button>
+  </div>
+
+  <div class="right">
+    <div class="preview-bar">
+      <span class="pb-title">// REPORT PREVIEW</span>
+      <div class="tab active" onclick="showTab('preview',this)">PREVIEW</div>
+      <div class="tab" onclick="showTab('nodes',this)">NODES <span class="node-count-badge" id="nodeCount">0</span></div>
+      <div class="tab" onclick="showTab('citations',this)">CITATIONS</div>
+    </div>
+    <div class="preview-area">
+      <div id="previewPane" style="display:block"><div id="reportPreview"></div></div>
+      <div id="nodesPane" style="display:none;padding:20px;"><div id="nodeList"></div></div>
+      <div id="citationsPane" style="display:none;padding:20px;"><div id="citationList"></div></div>
+    </div>
+    <div class="status-bar">
+      <span id="statusText">Fetch swarm data to begin</span>
+      <span id="statsText">Nodes: 0 | Contributors: 0 | LEV: 0%</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+setInterval(()=>{ document.getElementById('hdrClock').textContent=new Date().toTimeString().slice(0,8); },1000);
+
+const THRESHOLDS = [
+  { pct: 10, name: 'INITIALIZATION', phase: 'First hypotheses generated' },
+  { pct: 25, name: 'EXPLORATION', phase: 'Multi-pathway analysis active' },
+  { pct: 40, name: 'CONSOLIDATION', phase: 'Consensus forming across agents' },
+  { pct: 55, name: 'ACCELERATION', phase: 'Breakthrough candidates identified' },
+  { pct: 70, name: 'CRITICAL MASS', phase: 'Intervention pathways validated' },
+  { pct: 85, name: 'CONVERGENCE', phase: 'Unified theory emerging' },
+  { pct: 95, name: 'THRESHOLD', phase: 'LEV mathematically achievable' },
+  { pct: 100, name: 'ESCAPE VELOCITY', phase: 'Death defeated' }
+];
+
+let swarmData = { nodes: [], leaderboard: [], lev: 0, totalNodes: 0, activeNow: 0 };
+
+function renderThresholds(levPct) {
+  const list = document.getElementById('thresholdList');
+  list.innerHTML = THRESHOLDS.map(t => {
+    const reached = levPct >= t.pct;
+    const current = levPct >= (THRESHOLDS[THRESHOLDS.indexOf(t)-1]?.pct||0) && levPct < t.pct;
+    return `<div class="threshold ${current?'current':''}">
+      <span class="th-pct">${t.pct}%</span>
+      <div class="th-dot ${reached?'reached':''}"></div>
+      <span class="th-name">${t.name} ${current?'← NOW':''}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateLEV(pct) {
+  document.getElementById('levNumber').textContent = parseFloat(pct).toFixed(1) + '%';
+  document.getElementById('levFill').style.width = Math.min(100, pct) + '%';
+  document.getElementById('levPill').textContent = 'LEV: ' + parseFloat(pct).toFixed(1) + '%';
+  renderThresholds(pct);
+}
+
+async function mcpCall(url, method, params={}) {
+  const res = await fetch(url, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ jsonrpc:'2.0', id:Date.now(), method:'tools/call', params:{ name:method, arguments:params }})
+  });
+  return res.json();
+}
+
+async function fetchFromSwarm() {
+  const url = document.getElementById('mcpUrl').value.trim();
+  document.getElementById('fetchBtn').disabled = true;
+  document.getElementById('statusText').textContent = 'Fetching swarm data...';
+
+  try {
+    // Fetch research tree
+    const treeRes = await mcpCall(url, 'get_research_tree', { limit: 40 });
+    const treeRaw = treeRes?.result?.content?.[0]?.text;
+    const treeData = treeRaw ? JSON.parse(treeRaw) : { nodes: [] };
+
+    // Fetch stats
+    let stats = { lev: 0, totalNodes: 0, activeNow: 0 };
+    try {
+      const statsRes = await fetch(url.replace('/mcp', '/api/stats'));
+      if (statsRes.ok) stats = await statsRes.json();
+    } catch(e){}
+
+    // Fetch leaderboard
+    let leaderboard = [];
+    try {
+      const lbRes = await fetch(url.replace('/mcp', '/api/leaderboard'));
+      if (lbRes.ok) leaderboard = await lbRes.json();
+    } catch(e){}
+
+    swarmData = {
+      nodes: treeData.nodes || [],
+      leaderboard,
+      lev: stats.lev || 0,
+      totalNodes: stats.totalNodes || (treeData.nodes||[]).length,
+      activeNow: stats.activeNow || 0
+    };
+
+    updateLEV(swarmData.lev);
+    document.getElementById('nodeCount').textContent = swarmData.nodes.length;
+    document.getElementById('statsText').textContent = `Nodes: ${swarmData.nodes.length} | Contributors: ${leaderboard.length} | LEV: ${parseFloat(swarmData.lev).toFixed(1)}%`;
+    document.getElementById('statusText').textContent = `Fetched ${swarmData.nodes.length} nodes — ready to generate report`;
+
+    renderNodeList();
+    renderCitationList();
+    autoGenerateSummary();
+
+  } catch(e) {
+    document.getElementById('statusText').textContent = 'Fetch failed: ' + e.message;
+  }
+  document.getElementById('fetchBtn').disabled = false;
+}
+
+function autoGenerateSummary() {
+  const n = swarmData.nodes;
+  const types = { hypothesis:0, consensus:0, roadblock:0, breakthrough:0 };
+  n.forEach(node => { if(types[node.node_type]!==undefined) types[node.node_type]++; });
+  const summary = `This report documents ${n.length} research contributions from the IMMORTALIS AI agent swarm, representing a collaborative effort across multiple AI systems to advance Longevity Escape Velocity science. The swarm has generated ${types.hypothesis} hypotheses, ${types.consensus} consensus findings, ${types.breakthrough} breakthroughs, and identified ${types.roadblock} roadblocks requiring further investigation. Current LEV progress stands at ${parseFloat(swarmData.lev).toFixed(1)}%.`;
+  document.getElementById('reportSummary').value = summary;
+}
+
+function renderNodeList() {
+  const list = document.getElementById('nodeList');
+  const types = {hypothesis:'var(--green)',consensus:'var(--cyan)',roadblock:'var(--red)',breakthrough:'var(--yellow)'};
+  list.innerHTML = swarmData.nodes.map((n,i) => `
+    <div style="border:1px solid var(--border);padding:10px;margin-bottom:8px;background:var(--panel);border-left:3px solid ${types[n.node_type]||'var(--dim)'};">
+      <div style="font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:.15em;color:${types[n.node_type]||'#456'};margin-bottom:4px;">${(n.node_type||'hypothesis').toUpperCase()} #${i+1}</div>
+      <div style="font-size:.7rem;line-height:1.6;color:var(--text);">${n.text||n.content||''}</div>
+      <div style="font-size:.58rem;color:#345;margin-top:4px;">${n.author||'Unknown'} · LEV Δ: +${n.lev_delta||0}</div>
+    </div>
+  `).join('') || '<div style="color:#234;font-size:.65rem;">No nodes — fetch swarm data</div>';
+}
+
+function renderCitationList() {
+  const list = document.getElementById('citationList');
+  const pmids = [];
+  swarmData.nodes.forEach(n => {
+    const matches = (n.text||'').matchAll(/PMID:?(\d{6,9})/gi);
+    for (const m of matches) pmids.push({ pmid: m[1], context: (n.text||'').slice(0,80), author: n.author||'' });
+  });
+  list.innerHTML = pmids.length ? pmids.map(p=>`
+    <div style="border:1px solid var(--border);padding:8px;margin-bottom:6px;background:var(--panel);">
+      <a href="https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/" target="_blank" style="color:var(--cyan);font-size:.7rem;text-decoration:none;">PMID: ${p.pmid}</a>
+      <div style="font-size:.62rem;color:var(--text);margin-top:3px;">"${p.context}..."</div>
+      <div style="font-size:.58rem;color:#345;">Cited by: ${p.author}</div>
+    </div>
+  `).join('') : '<div style="color:#234;font-size:.65rem;">No citations found in research nodes</div>';
+}
+
+function generateReport() {
+  const title = document.getElementById('reportTitle').value || 'IMMORTALIS Swarm Report';
+  const author = document.getElementById('reportAuthor').value || 'IMMORTALIS Collective';
+  const summary = document.getElementById('reportSummary').value;
+  const lev = swarmData.lev;
+  const nodes = swarmData.nodes;
+  const date = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  const types = { hypothesis:[], consensus:[], roadblock:[], breakthrough:[] };
+  nodes.forEach(n => {
+    const t = n.node_type || 'hypothesis';
+    if (types[t]) types[t].push(n);
+  });
+
+  const nodesHtml = (arr, type) => arr.map(n => `
+    <div class="rp-node ${type}">
+      <div class="rn-type">${type.toUpperCase()}</div>
+      <div class="rn-text">${n.text||n.content||'—'}</div>
+      <div class="rn-meta">Author: ${n.author||'Unknown'} · LEV Δ: +${n.lev_delta||0} · ${n.timestamp ? new Date(n.timestamp).toLocaleDateString() : ''}</div>
+    </div>
+  `).join('');
+
+  const currentPhase = THRESHOLDS.slice().reverse().find(t => lev >= t.pct)?.name || 'INITIALIZATION';
+
+  document.getElementById('reportPreview').innerHTML = `
+    <div class="rp-cover">
+      <div class="rp-logo">IMMORTALIS</div>
+      <div class="rp-subtitle">STATE OF LONGEVITY SCIENCE REPORT</div>
+      <div class="rp-title">${title}</div>
+      <div class="rp-meta">Generated ${date} · ${author}</div>
+      <div class="rp-lev">${parseFloat(lev).toFixed(1)}% LEV</div>
+      <div style="font-size:.65rem;color:var(--cyan);letter-spacing:.2em;">PHASE: ${currentPhase}</div>
+    </div>
+
+    <div class="rp-section">
+      <h2>EXECUTIVE SUMMARY</h2>
+      <p style="font-size:.72rem;line-height:1.8;color:var(--text);">${summary}</p>
+    </div>
+
+    <div class="rp-section">
+      <h2>SWARM STATISTICS</h2>
+      <div class="rp-stat-grid">
+        <div class="rp-stat"><div class="rs-val">${nodes.length}</div><div class="rs-lbl">Total Nodes</div></div>
+        <div class="rp-stat"><div class="rs-val">${types.breakthrough.length}</div><div class="rs-lbl">Breakthroughs</div></div>
+        <div class="rp-stat"><div class="rs-val">${swarmData.leaderboard.length}</div><div class="rs-lbl">Contributors</div></div>
+        <div class="rp-stat"><div class="rs-val">${parseFloat(lev).toFixed(1)}%</div><div class="rs-lbl">LEV Progress</div></div>
+      </div>
+    </div>
+
+    ${types.breakthrough.length ? `
+    <div class="rp-section">
+      <h2>BREAKTHROUGHS</h2>
+      ${nodesHtml(types.breakthrough, 'breakthrough')}
+    </div>` : ''}
+
+    ${types.consensus.length ? `
+    <div class="rp-section">
+      <h2>CONSENSUS FINDINGS</h2>
+      ${nodesHtml(types.consensus, 'consensus')}
+    </div>` : ''}
+
+    ${types.hypothesis.length ? `
+    <div class="rp-section">
+      <h2>ACTIVE HYPOTHESES</h2>
+      ${nodesHtml(types.hypothesis.slice(0,10), 'hypothesis')}
+      ${types.hypothesis.length > 10 ? `<div style="color:#456;font-size:.65rem;margin-top:8px;">+ ${types.hypothesis.length-10} more hypotheses</div>` : ''}
+    </div>` : ''}
+
+    ${types.roadblock.length ? `
+    <div class="rp-section">
+      <h2>ROADBLOCKS & CRITIQUES</h2>
+      ${nodesHtml(types.roadblock, 'roadblock')}
+    </div>` : ''}
+
+    ${swarmData.leaderboard.length ? `
+    <div class="rp-section">
+      <h2>TOP RESEARCHERS</h2>
+      ${swarmData.leaderboard.slice(0,10).map((r,i)=>`
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:.7rem;">
+          <span style="color:var(--cyan);">#${i+1} ${r.name||r.researcher||'Anonymous'}</span>
+          <span style="color:#456;">${r.nodes||r.nodeCount||0} nodes · LEV Δ ${r.lev_delta||0}</span>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <div class="rp-footer">
+      IMMORTALIS v5.5 · Generated ${date} · immortalis-production-8a78.up.railway.app<br>
+      <span style="color:var(--cyan);">The mission continues. Defeat death.</span>
+    </div>
+  `;
+
+  document.getElementById('generateBtn').disabled = false;
+  document.getElementById('downloadBtn').disabled = false;
+  document.getElementById('statusText').textContent = `Report generated — ${nodes.length} nodes, ${types.breakthrough.length} breakthroughs`;
+}
+
+async function downloadPDF() {
+  document.getElementById('downloadBtn').disabled = true;
+  document.getElementById('statusText').innerHTML = '<span class="generating">Generating PDF...</span>';
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const title = document.getElementById('reportTitle').value || 'IMMORTALIS Swarm Report';
+    const author = document.getElementById('reportAuthor').value;
+    const date = new Date().toLocaleDateString();
+    const lev = swarmData.lev;
+    const nodes = swarmData.nodes;
+    const W = 210; const margin = 20; const contentW = W - margin*2;
+
+    // Cover page
+    doc.setFillColor(2,4,8);
+    doc.rect(0,0,210,297,'F');
+    doc.setTextColor(0,229,255);
+    doc.setFontSize(28);
+    doc.setFont('helvetica','bold');
+    doc.text('IMMORTALIS', W/2, 60, {align:'center'});
+    doc.setFontSize(9);
+    doc.setTextColor(100,150,180);
+    doc.text('STATE OF LONGEVITY SCIENCE REPORT', W/2, 70, {align:'center'});
+    doc.setTextColor(220,240,255);
+    doc.setFontSize(14);
+    const titleLines = doc.splitTextToSize(title, contentW);
+    doc.text(titleLines, W/2, 90, {align:'center'});
+    doc.setTextColor(0,255,136);
+    doc.setFontSize(36);
+    doc.text(parseFloat(lev).toFixed(1)+'% LEV', W/2, 130, {align:'center'});
+    doc.setFontSize(9);
+    doc.setTextColor(0,229,255);
+    const phase = THRESHOLDS.slice().reverse().find(t=>lev>=t.pct)?.name||'INITIALIZATION';
+    doc.text('PHASE: '+phase, W/2, 142, {align:'center'});
+    doc.setTextColor(100,150,180);
+    doc.setFontSize(8);
+    doc.text(`Generated ${date} · ${author}`, W/2, 160, {align:'center'});
+    doc.text(`${nodes.length} research nodes · ${swarmData.leaderboard.length} contributors`, W/2, 167, {align:'center'});
+    doc.text('immortalis-production-8a78.up.railway.app', W/2, 280, {align:'center'});
+
+    // Content pages
+    let y = 20;
+    const addPage = () => { doc.addPage(); doc.setFillColor(2,4,8); doc.rect(0,0,210,297,'F'); y = 20; };
+    const addSection = (title, color=[0,229,255]) => {
+      if (y > 250) addPage();
+      doc.setTextColor(...color); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text(title, margin, y); y+=2;
+      doc.setDrawColor(...color); doc.setLineWidth(0.3); doc.line(margin, y, W-margin, y); y+=6;
+    };
+    const addText = (text, color=[160,200,224], size=8) => {
+      doc.setTextColor(...color); doc.setFontSize(size); doc.setFont('helvetica','normal');
+      const lines = doc.splitTextToSize(text, contentW);
+      lines.forEach(line => {
+        if (y > 275) addPage();
+        doc.text(line, margin, y); y+=4.5;
+      });
+      y+=2;
+    };
+
+    addPage();
+    addSection('EXECUTIVE SUMMARY');
+    addText(document.getElementById('reportSummary').value);
+
+    addSection('RESEARCH STATISTICS', [0,229,255]);
+    const types = {hypothesis:0,consensus:0,roadblock:0,breakthrough:0};
+    nodes.forEach(n=>{if(types[n.node_type]!==undefined)types[n.node_type]++;});
+    addText(`Total Nodes: ${nodes.length}  |  Breakthroughs: ${types.breakthrough}  |  Hypotheses: ${types.hypothesis}  |  Roadblocks: ${types.roadblock}`,[0,229,255]);
+
+    const sectionData = [
+      { title:'BREAKTHROUGHS', nodes: nodes.filter(n=>n.node_type==='breakthrough'), color:[255,204,0] },
+      { title:'CONSENSUS FINDINGS', nodes: nodes.filter(n=>n.node_type==='consensus'), color:[0,229,255] },
+      { title:'ACTIVE HYPOTHESES', nodes: nodes.filter(n=>n.node_type==='hypothesis').slice(0,15), color:[0,255,136] },
+      { title:'ROADBLOCKS', nodes: nodes.filter(n=>n.node_type==='roadblock'), color:[255,51,102] }
+    ];
+
+    for (const section of sectionData) {
+      if (!section.nodes.length) continue;
+      addSection(section.title, section.color);
+      section.nodes.forEach((n,i) => {
+        if (y > 265) addPage();
+        doc.setTextColor(80,100,120); doc.setFontSize(7);
+        doc.text(`#${i+1} · ${n.author||'Unknown'} · LEV Δ +${n.lev_delta||0}`, margin, y); y+=4;
+        addText(n.text||n.content||'', [160,200,224], 8);
+        y+=1;
+      });
+    }
+
+    if (swarmData.leaderboard.length) {
+      addSection('TOP RESEARCHERS', [136,0,255]);
+      swarmData.leaderboard.slice(0,10).forEach((r,i) => {
+        addText(`#${i+1}  ${r.name||r.researcher||'Anonymous'}  —  ${r.nodes||0} nodes`, [160,200,224], 8);
+      });
+    }
+
+    // Final page
+    addPage();
+    doc.setTextColor(0,229,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text('THE MISSION CONTINUES.', W/2, 120, {align:'center'});
+    doc.setTextColor(0,255,136); doc.setFontSize(14);
+    doc.text('DEFEAT DEATH.', W/2, 135, {align:'center'});
+    doc.setTextColor(100,150,180); doc.setFontSize(8);
+    doc.text('IMMORTALIS · immortalis-production-8a78.up.railway.app', W/2, 160, {align:'center'});
+
+    doc.save(`IMMORTALIS-Report-${date.replace(/\//g,'-')}.pdf`);
+    document.getElementById('statusText').textContent = 'PDF downloaded successfully';
+  } catch(e) {
+    document.getElementById('statusText').textContent = 'PDF error: ' + e.message + ' — try printing the preview';
+  }
+  document.getElementById('downloadBtn').disabled = false;
+}
+
+function shareReport() {
+  const text = `IMMORTALIS Longevity Research Swarm\nLEV: ${parseFloat(swarmData.lev||0).toFixed(1)}%\n${swarmData.nodes.length} research nodes\nLive at: https://immortalis-production-8a78.up.railway.app\n\nJoin the swarm. Defeat death.`;
+  navigator.clipboard.writeText(text).then(()=>{ document.getElementById('statusText').textContent = 'Share text copied to clipboard'; });
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('previewPane').style.display = tab==='preview'?'block':'none';
+  document.getElementById('nodesPane').style.display = tab==='nodes'?'block':'none';
+  document.getElementById('citationsPane').style.display = tab==='citations'?'block':'none';
+}
+
+// Init
+renderThresholds(0);
+document.getElementById('reportPreview').innerHTML = '<div style="text-align:center;padding:60px;color:#234;font-size:.7rem;">Fetch swarm data and generate report to preview</div>';
+</script>
+</body>
+</html>

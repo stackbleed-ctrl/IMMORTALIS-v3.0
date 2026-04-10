@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS v5.4 — Cell Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap');
+:root{--bg:#020408;--panel:#030810;--border:#0a1a2a;--cyan:#00e5ff;--green:#00ff88;--yellow:#ffcc00;--red:#ff3366;--orange:#ff6600;--purple:#8800ff;--text:#a0c8e0;--bright:#e0f4ff;--dim:#0a2030;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#000810,var(--bg));}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:.9rem;letter-spacing:.25em;color:var(--green);text-shadow:0 0 30px rgba(0,255,136,.6);}
+.logo em{color:var(--cyan);font-style:normal;}
+.hdr-stats{display:flex;gap:20px;font-size:.65rem;}
+.hdr-stat{text-align:center;}
+.hdr-stat-val{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;}
+.hdr-stat-val.green{color:var(--green);}
+.hdr-stat-val.yellow{color:var(--yellow);}
+.hdr-stat-val.red{color:var(--red);}
+.hdr-stat-val.cyan{color:var(--cyan);}
+.hdr-stat-lbl{color:#456;font-size:.55rem;letter-spacing:.1em;}
+.layout{display:grid;grid-template-columns:1fr 280px;height:calc(100vh - 53px);}
+.sim-area{display:flex;flex-direction:column;overflow:hidden;}
+canvas#simCanvas{display:block;image-rendering:pixelated;}
+.chart-area{height:120px;border-top:1px solid var(--border);padding:8px 16px;background:var(--panel);}
+.chart-title{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:.2em;color:#456;margin-bottom:4px;}
+canvas#chartCanvas{display:block;}
+.right{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px;}
+.section-title{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--green);opacity:.7;margin-bottom:10px;}
+.slider-group{margin-bottom:12px;}
+.slider-group label{display:flex;justify-content:space-between;font-size:.62rem;color:#567;margin-bottom:4px;}
+.slider-group label span{color:var(--bright);}
+input[type=range]{width:100%;accent-color:var(--green);height:4px;}
+.btn{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.15em;padding:10px 16px;border:1px solid currentColor;cursor:pointer;background:transparent;width:100%;margin-bottom:6px;text-transform:uppercase;transition:all .15s;}
+.btn-green{color:var(--green);}
+.btn-green:hover{background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2);}
+.btn-red{color:var(--red);}
+.btn-red:hover{background:rgba(255,51,102,.08);}
+.btn-cyan{color:var(--cyan);}
+.btn-cyan:hover{background:rgba(0,229,255,.08);}
+.btn-yellow{color:var(--yellow);}
+.btn-yellow:hover{background:rgba(255,204,0,.08);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.sep{height:1px;background:var(--border);margin:10px 0;}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.62rem;color:#567;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.experiment-log{border:1px solid var(--border);background:var(--panel);padding:8px;max-height:180px;overflow-y:auto;font-size:.62rem;line-height:1.6;scrollbar-width:thin;scrollbar-color:var(--dim) transparent;}
+.log-entry{border-bottom:1px solid var(--border);padding:3px 0;}
+.log-entry.highlight{color:var(--green);}
+.log-entry.alert{color:var(--red);}
+.log-entry.warn{color:var(--yellow);}
+.field{margin-bottom:8px;}
+.field label{display:block;font-size:.6rem;color:#456;margin-bottom:3px;}
+.field input{width:100%;background:var(--dim);border:1px solid var(--border);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:6px 10px;outline:none;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">IMMORTALIS <em>v5.4</em> // CELL SIM</div>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><div class="hdr-stat-val green" id="statHealthy">0</div><div class="hdr-stat-lbl">HEALTHY</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val yellow" id="statSenescent">0</div><div class="hdr-stat-lbl">SENESCENT</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val red" id="statDead">0</div><div class="hdr-stat-lbl">DEAD</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val cyan" id="statGen">0</div><div class="hdr-stat-lbl">GENERATION</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val" id="statLEV" style="color:var(--green)">0%</div><div class="hdr-stat-lbl">LEV CONTRIB</div></div>
+  </div>
+</header>
+<div class="layout">
+  <div class="sim-area">
+    <canvas id="simCanvas"></canvas>
+    <div class="chart-area">
+      <div class="chart-title">// POPULATION DYNAMICS</div>
+      <canvas id="chartCanvas"></canvas>
+    </div>
+  </div>
+  <div class="right">
+    <div class="section-title">// CELL PARAMETERS</div>
+    <div class="slider-group">
+      <label>Senescence Rate <span id="valSen">0.02</span></label>
+      <input type="range" id="sliderSen" min="0.001" max="0.1" step="0.001" value="0.02" oninput="updateSlider('Sen',this.value)">
+    </div>
+    <div class="slider-group">
+      <label>SASP Spread Rate <span id="valSASP">0.15</span></label>
+      <input type="range" id="sliderSASP" min="0.01" max="0.5" step="0.01" value="0.15" oninput="updateSlider('SASP',this.value)">
+    </div>
+    <div class="slider-group">
+      <label>Division Rate <span id="valDiv">0.08</span></label>
+      <input type="range" id="sliderDiv" min="0.01" max="0.3" step="0.01" value="0.08" oninput="updateSlider('Div',this.value)">
+    </div>
+    <div class="slider-group">
+      <label>Apoptosis Rate <span id="valApo">0.01</span></label>
+      <input type="range" id="sliderApo" min="0.001" max="0.05" step="0.001" value="0.01" oninput="updateSlider('Apo',this.value)">
+    </div>
+    <div class="slider-group">
+      <label>Immune Clearance <span id="valImm">0.05</span></label>
+      <input type="range" id="sliderImm" min="0" max="0.3" step="0.01" value="0.05" oninput="updateSlider('Imm',this.value)">
+    </div>
+
+    <div class="sep"></div>
+    <div class="section-title">// INTERVENTIONS</div>
+    <button class="btn btn-cyan" onclick="applyIntervention('senolytic')">💊 APPLY SENOLYTIC</button>
+    <button class="btn btn-green" onclick="applyIntervention('reprogramming')">🧬 PARTIAL REPROGRAMMING</button>
+    <button class="btn btn-yellow" onclick="applyIntervention('boost_immune')">⚡ BOOST IMMUNE</button>
+    <button class="btn btn-red" onclick="applyIntervention('stress')">☢ OXIDATIVE STRESS</button>
+
+    <div class="sep"></div>
+    <div class="section-title">// SIMULATION CONTROLS</div>
+    <button class="btn btn-green" id="runBtn" onclick="toggleSim()">▶ RUN SIMULATION</button>
+    <button class="btn btn-cyan" onclick="resetSim()">↺ RESET</button>
+
+    <div class="sep"></div>
+    <div class="section-title">// LEGEND</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00ff88"></div>Healthy</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Early senescent</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6600"></div>Late senescent</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff3366"></div>SASP active</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#222"></div>Dead</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0088ff"></div>Reprogrammed</div>
+    </div>
+
+    <div class="sep"></div>
+    <div class="section-title">// EXPERIMENT LOG</div>
+    <div class="experiment-log" id="expLog"><div class="log-entry">Simulation ready — press RUN to begin</div></div>
+
+    <div class="sep"></div>
+    <div class="section-title">// POST TO SWARM</div>
+    <div class="field">
+      <label>MCP URL</label>
+      <input type="text" id="mcpUrl" placeholder="https://immortalis-production-8a78.up.railway.app/mcp" />
+    </div>
+    <div class="field">
+      <label>AGENT ID</label>
+      <input type="text" id="agentId" placeholder="xK9mPq2wRt" />
+    </div>
+    <button class="btn btn-cyan" onclick="postResults()">↗ POST RESULTS TO SWARM</button>
+  </div>
+</div>
+
+<script>
+// ── Canvas setup ──
+const simCanvas = document.getElementById('simCanvas');
+const simCtx = simCanvas.getContext('2d');
+const chartCanvas = document.getElementById('chartCanvas');
+const chartCtx = chartCanvas.getContext('2d');
+
+const CELL_SIZE = 6;
+let COLS, ROWS;
+let grid = [];
+let running = false;
+let generation = 0;
+let simLoop = null;
+let history = { healthy:[], senescent:[], dead:[] };
+let interventionLog = [];
+
+// Cell states
+const EMPTY = 0;
+const HEALTHY = 1;
+const SENESCENT_EARLY = 2;
+const SENESCENT_LATE = 3;
+const SASP = 4;
+const DEAD = 5;
+const REPROGRAMMED = 6;
+
+const CELL_COLORS = {
+  [EMPTY]: '#020408',
+  [HEALTHY]: '#00ff88',
+  [SENESCENT_EARLY]: '#ffcc00',
+  [SENESCENT_LATE]: '#ff6600',
+  [SASP]: '#ff3366',
+  [DEAD]: '#111',
+  [REPROGRAMMED]: '#0088ff'
+};
+
+function resizeSim() {
+  const simArea = simCanvas.parentElement;
+  const h = simArea.offsetHeight - 120;
+  const w = simArea.offsetWidth;
+  simCanvas.width = w;
+  simCanvas.height = Math.max(200, h);
+  chartCanvas.width = w;
+  chartCanvas.height = 90;
+  COLS = Math.floor(w / CELL_SIZE);
+  ROWS = Math.floor(simCanvas.height / CELL_SIZE);
+  if (!grid.length || grid.length !== ROWS * COLS) resetSim();
+}
+window.addEventListener('resize', resizeSim);
+resizeSim();
+
+function getParams() {
+  return {
+    senRate: parseFloat(document.getElementById('sliderSen').value),
+    saspRate: parseFloat(document.getElementById('sliderSASP').value),
+    divRate: parseFloat(document.getElementById('sliderDiv').value),
+    apoRate: parseFloat(document.getElementById('sliderApo').value),
+    immRate: parseFloat(document.getElementById('sliderImm').value)
+  };
+}
+
+function updateSlider(name, val) {
+  document.getElementById('val'+name).textContent = parseFloat(val).toFixed(3);
+}
+
+function initGrid() {
+  grid = new Array(ROWS * COLS).fill(EMPTY);
+  // Seed with healthy cells (60% coverage)
+  for (let i=0; i<grid.length; i++) {
+    if (Math.random() < 0.6) grid[i] = HEALTHY;
+  }
+  // Seed a few senescent cells (5%)
+  for (let i=0; i<grid.length; i++) {
+    if (grid[i] === HEALTHY && Math.random() < 0.05) grid[i] = SENESCENT_EARLY;
+  }
+  generation = 0;
+  history = { healthy:[], senescent:[], dead:[] };
+  interventionLog = [];
+}
+
+function countCells() {
+  let healthy=0, senescent=0, dead=0;
+  for (const c of grid) {
+    if (c===HEALTHY||c===REPROGRAMMED) healthy++;
+    else if (c===SENESCENT_EARLY||c===SENESCENT_LATE||c===SASP) senescent++;
+    else if (c===DEAD) dead++;
+  }
+  return { healthy, senescent, dead, total: grid.length };
+}
+
+function idx(r,c) { return r*COLS+c; }
+function getNeighbors(r,c) {
+  const n=[];
+  for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++) {
+    if(dr===0&&dc===0) continue;
+    const nr=r+dr, nc=c+dc;
+    if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS) n.push(idx(nr,nc));
+  }
+  return n;
+}
+
+function step() {
+  const p = getParams();
+  const next = [...grid];
+
+  for (let r=0; r<ROWS; r++) {
+    for (let c=0; c<COLS; c++) {
+      const i = idx(r,c);
+      const cell = grid[i];
+      const neighbors = getNeighbors(r,c).map(n=>grid[n]);
+      const saspNeighbors = neighbors.filter(n=>n===SASP||n===SENESCENT_LATE).length;
+      const healthyNeighbors = neighbors.filter(n=>n===HEALTHY||n===REPROGRAMMED).length;
+      const emptyNeighbors = getNeighbors(r,c).filter(n=>grid[n]===EMPTY||grid[n]===DEAD);
+
+      switch(cell) {
+        case HEALTHY:
+          // Random senescence
+          if (Math.random() < p.senRate) { next[i] = SENESCENT_EARLY; break; }
+          // SASP-induced senescence
+          if (saspNeighbors > 0 && Math.random() < p.saspRate * saspNeighbors / 8) { next[i] = SENESCENT_EARLY; break; }
+          // Division into empty/dead neighbor
+          if (emptyNeighbors.length > 0 && Math.random() < p.divRate) {
+            next[emptyNeighbors[Math.floor(Math.random()*emptyNeighbors.length)]] = HEALTHY;
+          }
+          break;
+
+        case SENESCENT_EARLY:
+          // Immune clearance
+          if (Math.random() < p.immRate) { next[i] = DEAD; break; }
+          // Apoptosis
+          if (Math.random() < p.apoRate) { next[i] = DEAD; break; }
+          // Progress to late senescence
+          if (Math.random() < 0.03) next[i] = SENESCENT_LATE;
+          break;
+
+        case SENESCENT_LATE:
+          if (Math.random() < p.immRate * 0.5) { next[i] = DEAD; break; }
+          if (Math.random() < p.apoRate * 0.5) { next[i] = DEAD; break; }
+          // SASP activation
+          if (Math.random() < 0.05) next[i] = SASP;
+          break;
+
+        case SASP:
+          if (Math.random() < p.immRate * 0.3) { next[i] = DEAD; break; }
+          if (Math.random() < 0.02) { next[i] = DEAD; break; }
+          break;
+
+        case REPROGRAMMED:
+          // Can revert to senescence
+          if (Math.random() < p.senRate * 0.5) { next[i] = SENESCENT_EARLY; break; }
+          // Division
+          if (emptyNeighbors.length > 0 && Math.random() < p.divRate * 1.2) {
+            next[emptyNeighbors[Math.floor(Math.random()*emptyNeighbors.length)]] = HEALTHY;
+          }
+          break;
+
+        case DEAD:
+        case EMPTY:
+          // Repopulation by healthy neighbors
+          if (healthyNeighbors >= 2 && Math.random() < p.divRate * 0.5) next[i] = HEALTHY;
+          break;
+      }
+    }
+  }
+  grid = next;
+  generation++;
+}
+
+function draw() {
+  const imgData = simCtx.createImageData(simCanvas.width, simCanvas.height);
+  const data = imgData.data;
+
+  for (let r=0; r<ROWS; r++) {
+    for (let c=0; c<COLS; c++) {
+      const cell = grid[idx(r,c)];
+      const color = CELL_COLORS[cell] || '#020408';
+      const hex = parseInt(color.slice(1), 16);
+      const R = (hex>>16)&255, G=(hex>>8)&255, B=hex&255;
+      for (let dr=0;dr<CELL_SIZE;dr++) {
+        for (let dc=0;dc<CELL_SIZE;dc++) {
+          const px = ((r*CELL_SIZE+dr)*simCanvas.width + (c*CELL_SIZE+dc))*4;
+          data[px]=R; data[px+1]=G; data[px+2]=B; data[px+3]=255;
+        }
+      }
+    }
+  }
+  simCtx.putImageData(imgData, 0, 0);
+}
+
+function drawChart() {
+  const w = chartCanvas.width, h = chartCanvas.height;
+  chartCtx.clearRect(0,0,w,h);
+  chartCtx.fillStyle = '#030810';
+  chartCtx.fillRect(0,0,w,h);
+
+  const maxLen = Math.min(history.healthy.length, 300);
+  if (maxLen < 2) return;
+
+  const maxVal = Math.max(...history.healthy.slice(-maxLen), ...history.senescent.slice(-maxLen), ...history.dead.slice(-maxLen), 1);
+
+  const drawLine = (data, color) => {
+    const slice = data.slice(-maxLen);
+    chartCtx.beginPath();
+    chartCtx.strokeStyle = color;
+    chartCtx.lineWidth = 1.5;
+    slice.forEach((v, i) => {
+      const x = (i / (maxLen-1)) * w;
+      const y = h - 8 - (v/maxVal)*(h-16);
+      i===0 ? chartCtx.moveTo(x,y) : chartCtx.lineTo(x,y);
+    });
+    chartCtx.stroke();
+  };
+
+  drawLine(history.healthy, '#00ff88');
+  drawLine(history.senescent, '#ffcc00');
+  drawLine(history.dead, '#ff3366');
+}
+
+function updateUI() {
+  const counts = countCells();
+  history.healthy.push(counts.healthy);
+  history.senescent.push(counts.senescent);
+  history.dead.push(counts.dead);
+
+  document.getElementById('statHealthy').textContent = counts.healthy;
+  document.getElementById('statSenescent').textContent = counts.senescent;
+  document.getElementById('statDead').textContent = counts.dead;
+  document.getElementById('statGen').textContent = generation;
+
+  const healthRatio = counts.healthy / (counts.total || 1);
+  const levContrib = Math.max(0, (healthRatio - 0.3) * 100 / 0.7);
+  document.getElementById('statLEV').textContent = levContrib.toFixed(1) + '%';
+
+  draw();
+  drawChart();
+}
+
+function logEvent(msg, type='') {
+  const log = document.getElementById('expLog');
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + type;
+  div.textContent = `[Gen ${generation}] ${msg}`;
+  log.insertBefore(div, log.firstChild);
+  interventionLog.push({ gen: generation, msg });
+  if (log.children.length > 30) log.lastChild.remove();
+}
+
+function applyIntervention(type) {
+  let count = 0;
+  switch(type) {
+    case 'senolytic':
+      for(let i=0;i<grid.length;i++) {
+        if((grid[i]===SENESCENT_EARLY||grid[i]===SENESCENT_LATE||grid[i]===SASP) && Math.random()<0.7) {
+          grid[i]=DEAD; count++;
+        }
+      }
+      logEvent(`Senolytic applied — ${count} senescent cells cleared (70% efficacy)`, 'highlight');
+      break;
+    case 'reprogramming':
+      for(let i=0;i<grid.length;i++) {
+        if(grid[i]===SENESCENT_EARLY && Math.random()<0.4) { grid[i]=REPROGRAMMED; count++; }
+        if(grid[i]===HEALTHY && Math.random()<0.1) { grid[i]=REPROGRAMMED; count++; }
+      }
+      logEvent(`Partial reprogramming — ${count} cells converted to youthful state (40% efficiency)`, 'highlight');
+      break;
+    case 'boost_immune':
+      document.getElementById('sliderImm').value = 0.2;
+      updateSlider('Imm', 0.2);
+      logEvent('Immune clearance boosted to 0.20 — enhanced senescent cell removal', 'highlight');
+      break;
+    case 'stress':
+      for(let i=0;i<grid.length;i++) {
+        if(grid[i]===HEALTHY && Math.random()<0.15) { grid[i]=SENESCENT_EARLY; count++; }
+      }
+      logEvent(`Oxidative stress applied — ${count} cells induced into senescence`, 'alert');
+      break;
+  }
+  updateUI();
+}
+
+function toggleSim() {
+  running = !running;
+  document.getElementById('runBtn').textContent = running ? '■ PAUSE' : '▶ RUN SIMULATION';
+  if (running) runSim();
+}
+
+function runSim() {
+  if (!running) return;
+  step();
+  updateUI();
+
+  // Auto-log milestones
+  const counts = countCells();
+  const senPct = counts.senescent / counts.total * 100;
+  if (senPct > 40 && !interventionLog.find(l=>l.msg.includes('crisis'))) {
+    logEvent('SENESCENCE CRISIS — >40% cells senescent. Recommend senolytic intervention.', 'alert');
+  }
+  if (counts.healthy < 100 && !interventionLog.find(l=>l.msg.includes('critical'))) {
+    logEvent('CRITICAL: Healthy cell population approaching collapse', 'alert');
+  }
+
+  simLoop = setTimeout(runSim, 80);
+}
+
+function resetSim() {
+  running = false;
+  clearTimeout(simLoop);
+  document.getElementById('runBtn').textContent = '▶ RUN SIMULATION';
+  initGrid();
+  updateUI();
+  logEvent('Simulation reset — new tissue initialized', '');
+}
+
+async function postResults() {
+  const mcpUrl = document.getElementById('mcpUrl').value.trim();
+  const agentId = document.getElementById('agentId').value.trim();
+  if (!mcpUrl || !agentId) { alert('Enter MCP URL and agent ID'); return; }
+
+  const counts = countCells();
+  const healthRatio = (counts.healthy / counts.total * 100).toFixed(1);
+  const senPct = (counts.senescent / counts.total * 100).toFixed(1);
+  const params = getParams();
+  const interventions = interventionLog.slice(-5).map(l=>l.msg).join('; ');
+
+  const text = `CELLULAR AUTOMATA SIMULATION RESULTS (Gen ${generation}): Tissue health: ${healthRatio}% healthy, ${senPct}% senescent. Parameters: senescence rate=${params.senRate}, SASP spread=${params.saspRate}, immune clearance=${params.immRate}. Interventions applied: ${interventions||'none'}. Key finding: At these parameters, senescence reached ${senPct}% by generation ${generation}. ${parseFloat(senPct)>30?'Intervention required to prevent tissue collapse.':'Tissue maintained homeostasis — parameters may represent viable longevity window.'}`;
+
+  try {
+    await fetch(mcpUrl, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ jsonrpc:'2.0', id:Date.now(), method:'tools/call', params:{ name:'speak_in_council', arguments:{ agent_id:agentId, council_id:'c1', text, node_type: parseFloat(senPct)>30?'roadblock':'hypothesis', lev_delta: parseFloat(healthRatio)/100 }}})
+    });
+    logEvent('Results posted to IMMORTALIS swarm', 'highlight');
+  } catch(e) { logEvent('Post failed: '+e.message, 'alert'); }
+}
+
+// Init
+initGrid();
+updateUI();
+logEvent('IMMORTALIS Cell Simulation v5.4 initialized — 120×80 tissue grid ready', 'highlight');
+</script>
+</body>
+</html>

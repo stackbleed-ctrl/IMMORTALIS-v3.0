@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS v5.1 — Math Verifier</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap');
+:root {
+  --bg:#020408;--panel:#030810;--border:#0a1a2a;
+  --cyan:#00e5ff;--green:#00ff88;--yellow:#ffcc00;
+  --red:#ff3366;--purple:#8800ff;--text:#a0c8e0;--bright:#e0f4ff;--dim:#0a2030;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,0.012) 3px,rgba(0,229,255,0.012) 4px);pointer-events:none;z-index:9999;}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#000810 0%,var(--bg) 100%);}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:.9rem;letter-spacing:.25em;color:var(--yellow);text-shadow:0 0 30px rgba(255,204,0,.6);}
+.logo em{color:var(--cyan);font-style:normal;}
+.hdr-right{font-size:.65rem;color:#334;display:flex;gap:16px;align-items:center;}
+.pyodide-status{color:var(--yellow);font-size:.65rem;}
+.pyodide-status.ready{color:var(--green);}
+.layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 53px);}
+.left{border-right:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.section-title{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--cyan);opacity:.7;margin-bottom:8px;}
+.field label{display:block;font-size:.6rem;color:#456;margin-bottom:3px;}
+.field input,.field textarea,.field select{width:100%;background:var(--dim);border:1px solid var(--border);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:7px 10px;outline:none;}
+.field input:focus,.field textarea:focus{border-color:var(--yellow);}
+.field textarea{resize:vertical;min-height:100px;line-height:1.5;}
+.btn{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.15em;padding:10px 16px;border:1px solid currentColor;cursor:pointer;background:transparent;width:100%;margin-bottom:6px;text-transform:uppercase;transition:all .15s;}
+.btn-yellow{color:var(--yellow);}
+.btn-yellow:hover:not(:disabled){background:rgba(255,204,0,.08);box-shadow:0 0 20px rgba(255,204,0,.2);}
+.btn-red{color:var(--red);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.right{display:flex;flex-direction:column;overflow:hidden;}
+.feed{flex:1;overflow-y:auto;padding:20px;scrollbar-width:thin;scrollbar-color:var(--dim) transparent;}
+.entry{margin-bottom:16px;border-left:2px solid var(--dim);padding-left:12px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.entry.pass{border-left-color:var(--green);}
+.entry.fail{border-left-color:var(--red);}
+.entry.warn{border-left-color:var(--yellow);}
+.entry.info{border-left-color:#234;}
+.entry.running{border-left-color:var(--cyan);}
+.etime{font-size:.6rem;color:#345;margin-bottom:2px;}
+.etype{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.2em;margin-bottom:5px;}
+.entry.pass .etype{color:var(--green);}
+.entry.fail .etype{color:var(--red);}
+.entry.warn .etype{color:var(--yellow);}
+.entry.info .etype{color:#456;}
+.entry.running .etype{color:var(--cyan);}
+.ebody{font-size:.72rem;line-height:1.6;}
+.ebody pre{background:rgba(0,0,0,.4);border:1px solid var(--border);padding:10px;margin:6px 0;font-size:.65rem;overflow-x:auto;white-space:pre-wrap;}
+.ebody .flag{color:var(--red);display:block;margin:2px 0;}
+.ebody .ok{color:var(--green);}
+.ebody .warn-text{color:var(--yellow);}
+.result-card{background:var(--panel);border:1px solid var(--border);padding:12px;margin:8px 0;}
+.result-card h4{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.2em;margin-bottom:8px;}
+.result-card h4.pass{color:var(--green);}
+.result-card h4.fail{color:var(--red);}
+.result-card h4.warn{color:var(--yellow);}
+.score-bar{height:3px;background:var(--dim);margin:6px 0;}
+.score-fill{height:100%;transition:width .5s;}
+.score-fill.high{background:var(--green);}
+.score-fill.mid{background:var(--yellow);}
+.score-fill.low{background:var(--red);}
+.status-bar{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:.6rem;color:#345;background:var(--panel);}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">IMMORTALIS <em>v5.1</em> // MATH VERIFIER</div>
+  <div class="hdr-right">
+    <span class="pyodide-status" id="pyStatus">⏳ LOADING PYODIDE...</span>
+    <span id="hdrClock">00:00:00</span>
+  </div>
+</header>
+<div class="layout">
+  <div class="left">
+    <div>
+      <div class="section-title">// PAPER INPUT</div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>PMID (optional)</label>
+        <input type="text" id="pmid" placeholder="38901234" />
+      </div>
+      <div class="field">
+        <label>PASTE ABSTRACT / STATS / EQUATIONS</label>
+        <textarea id="paperText" placeholder="Paste abstract, statistical results, equations, or any numerical claims from a longevity paper...&#10;&#10;Examples:&#10;- 'p=0.048, n=12'&#10;- 'HR=0.73 (95% CI: 0.51-0.98)'&#10;- 'telomere length increased by 2.3kb ± 0.8'&#10;- LaTeX equations"></textarea>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">// VERIFICATION OPTIONS</div>
+      <div class="field" style="margin-bottom:6px;">
+        <label>CHECKS TO RUN</label>
+        <div style="display:grid;gap:4px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkPvalue" checked> P-value fishing / threshold abuse</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkSampleSize" checked> Sample size adequacy</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkCI" checked> Confidence interval validity</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkEquations" checked> Equation consistency (SymPy)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkEffect" checked> Effect size reporting</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text);cursor:pointer;"><input type="checkbox" id="chkControls" checked> Control group mentions</label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">// SWARM INTEGRATION</div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>MCP SERVER (optional — posts results to swarm)</label>
+        <input type="text" id="mcpUrl" placeholder="https://immortalis-production-8a78.up.railway.app/mcp" />
+      </div>
+      <div class="field">
+        <label>AGENT ID (from research-agent session)</label>
+        <input type="text" id="agentId" placeholder="xK9mPq2wRt" />
+      </div>
+    </div>
+    <button class="btn btn-yellow" id="verifyBtn" onclick="runVerification()" disabled>⚡ VERIFY PAPER</button>
+    <button class="btn btn-yellow" onclick="loadDemo()">◈ LOAD DEMO PAPER</button>
+  </div>
+
+  <div class="right">
+    <div class="feed" id="feed"></div>
+    <div class="status-bar">
+      <span id="statusText">Load Pyodide to begin — equations verified with real SymPy</span>
+      <span id="statsText">Papers verified: 0 | Flags raised: 0</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script>
+setInterval(() => { document.getElementById('hdrClock').textContent = new Date().toTimeString().slice(0,8); }, 1000);
+
+let pyodide = null;
+let papersVerified = 0;
+let flagsRaised = 0;
+
+async function initPyodide() {
+  log('info', '// LOADING PYODIDE', 'Initializing browser Python runtime...');
+  try {
+    pyodide = await loadPyodide();
+    await pyodide.loadPackage(['sympy', 'numpy']);
+    document.getElementById('pyStatus').textContent = '✓ PYODIDE + SYMPY READY';
+    document.getElementById('pyStatus').className = 'pyodide-status ready';
+    document.getElementById('verifyBtn').disabled = false;
+    log('pass', '// PYODIDE INITIALIZED', 'SymPy + NumPy loaded. Math verification active.');
+  } catch (e) {
+    document.getElementById('pyStatus').textContent = '✗ PYODIDE FAILED — JS MODE ONLY';
+    document.getElementById('verifyBtn').disabled = false;
+    log('warn', '// PYODIDE UNAVAILABLE', 'Running JS-only verification. Equation checking limited.');
+  }
+}
+
+function log(type, title, body) {
+  const feed = document.getElementById('feed');
+  const now = new Date().toTimeString().slice(0,8);
+  const div = document.createElement('div');
+  div.className = `entry ${type}`;
+  div.innerHTML = `<div class="etime">${now}</div><div class="etype">${title}</div><div class="ebody">${body}</div>`;
+  feed.appendChild(div);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function updateStats() {
+  document.getElementById('statsText').textContent = `Papers verified: ${papersVerified} | Flags raised: ${flagsRaised}`;
+}
+
+// ── JS-based statistical checks ──
+function checkPValues(text) {
+  const flags = [];
+  const warnings = [];
+  // Extract p-values
+  const pMatches = [...text.matchAll(/p\s*[=<>]\s*([\d.]+(?:e-?\d+)?)/gi)];
+  for (const m of pMatches) {
+    const val = parseFloat(m[1]);
+    if (val > 0.04 && val <= 0.05) {
+      flags.push(`P-value ${m[0]} — suspiciously close to threshold (p-hacking risk)`);
+      flagsRaised++;
+    }
+    if (val > 0.05 && text.toLowerCase().includes('significant')) {
+      flags.push(`Non-significant result (${m[0]}) described as "significant" — terminology error`);
+      flagsRaised++;
+    }
+    if (val < 0.001 && !text.match(/bonferroni|fdr|correction|adjust/i)) {
+      warnings.push(`Very low p-value (${m[0]}) — confirm multiple comparison correction applied`);
+    }
+  }
+  // Check for p-value reporting without correction
+  const pCount = pMatches.length;
+  if (pCount > 3 && !text.match(/bonferroni|fdr|bh|benjamini|correction|adjusted/i)) {
+    flags.push(`${pCount} p-values reported with no mention of multiple comparison correction`);
+    flagsRaised++;
+  }
+  return { flags, warnings, pValues: pMatches.map(m => m[0]) };
+}
+
+function checkSampleSize(text) {
+  const flags = [];
+  const warnings = [];
+  const nMatches = [...text.matchAll(/n\s*=\s*(\d+)/gi)];
+  for (const m of nMatches) {
+    const n = parseInt(m[1]);
+    if (n < 10) { flags.push(`Very small sample size: ${m[0]} — severely underpowered`); flagsRaised++; }
+    else if (n < 20) { warnings.push(`Small sample size: ${m[0]} — results may not generalize`); }
+    else if (n < 50 && text.match(/randomized|rct|trial/i)) { warnings.push(`RCT with ${m[0]} — consider power analysis`); }
+  }
+  if (!nMatches.length && text.match(/study|trial|cohort|patients|subjects/i)) {
+    warnings.push('No sample size (n=X) reported — required for reproducibility');
+  }
+  return { flags, warnings, ns: nMatches.map(m => parseInt(m[1])) };
+}
+
+function checkConfidenceIntervals(text) {
+  const flags = [];
+  const warnings = [];
+  const ciMatches = [...text.matchAll(/(?:95%?\s*CI|confidence interval)\s*:?\s*[\[(]?\s*([\d.]+)\s*[-–]\s*([\d.]+)/gi)];
+  for (const m of ciMatches) {
+    const lo = parseFloat(m[1]);
+    const hi = parseFloat(m[2]);
+    if (lo <= 0 && hi >= 0 && text.match(/difference|change|delta/i)) {
+      flags.push(`CI [${lo}, ${hi}] crosses zero — effect not statistically significant despite possible significance claim`);
+      flagsRaised++;
+    }
+    if (lo <= 1 && hi >= 1 && text.match(/ratio|hr|or|rr/i)) {
+      warnings.push(`Ratio CI [${lo}, ${hi}] includes 1.0 — null effect cannot be excluded`);
+    }
+    const width = hi - lo;
+    if (width > (hi + lo) * 0.8) {
+      warnings.push(`Very wide CI [${lo}, ${hi}] — high uncertainty, likely underpowered`);
+    }
+  }
+  return { flags, warnings };
+}
+
+function checkEffectSize(text) {
+  const warnings = [];
+  const hasEffect = text.match(/cohen'?s?\s*d|hedges'?\s*g|eta.squared|omega.squared|effect size|r\s*=\s*0\.\d+|odds ratio|hazard ratio|relative risk/i);
+  if (!hasEffect && text.match(/significant|p\s*[=<]/i)) {
+    warnings.push('Statistical significance reported without effect size — clinical relevance unclear');
+  }
+  return { warnings };
+}
+
+function checkControls(text) {
+  const flags = [];
+  const hasControl = text.match(/control\s+group|placebo|sham|vehicle|untreated|baseline|comparator/i);
+  const isIntervention = text.match(/treatment|intervention|dose|administered|injected|fed|treated/i);
+  if (isIntervention && !hasControl) {
+    flags.push('Intervention study with no mention of control group — comparison validity unknown');
+    flagsRaised++;
+  }
+  return { flags };
+}
+
+// ── SymPy equation verification ──
+async function verifyEquations(text) {
+  if (!pyodide) return { results: [], note: 'Pyodide not available' };
+
+  // Extract LaTeX-style or inline equations
+  const equations = [];
+  const latexMatches = [...text.matchAll(/\$\$?(.*?)\$\$?/gs)];
+  latexMatches.forEach(m => equations.push(m[1].trim()));
+
+  // Extract inline math patterns like "x = 2y + z"
+  const inlineMatches = [...text.matchAll(/([a-zA-Z]\w*\s*=\s*[^.,;\n]{5,50})/g)];
+  inlineMatches.forEach(m => {
+    const eq = m[1].trim();
+    if (/[\+\-\*\/\^]/.test(eq)) equations.push(eq);
+  });
+
+  if (!equations.length) return { results: [], note: 'No equations detected' };
+
+  const results = [];
+  for (const eq of equations.slice(0, 5)) {
+    try {
+      const code = `
+from sympy import *
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+import re
+
+eq_str = """${eq.replace(/\\/g, '\\\\').replace(/"""/g, "'''")}"""
+result = {"equation": eq_str, "status": "unknown", "note": ""}
+
+try:
+    # Try to parse as equation
+    if '=' in eq_str:
+        parts = eq_str.split('=', 1)
+        lhs_str = parts[0].strip()
+        rhs_str = parts[1].strip()
+        transformations = standard_transformations + (implicit_multiplication_application,)
+        try:
+            lhs = parse_expr(lhs_str, transformations=transformations)
+            rhs = parse_expr(rhs_str, transformations=transformations)
+            diff = simplify(lhs - rhs)
+            if diff == 0:
+                result["status"] = "verified"
+                result["note"] = "LHS = RHS confirmed by SymPy"
+            else:
+                result["status"] = "inconsistent"
+                result["note"] = f"LHS - RHS = {diff} (not zero)"
+        except Exception as e2:
+            result["status"] = "parse_warning"
+            result["note"] = f"Could not fully parse: {str(e2)[:80]}"
+    else:
+        result["status"] = "expression"
+        result["note"] = "Expression (no equality to verify)"
+except Exception as e:
+    result["status"] = "error"
+    result["note"] = str(e)[:100]
+
+import json
+json.dumps(result)
+`;
+      const res = await pyodide.runPythonAsync(code);
+      results.push(JSON.parse(res));
+    } catch (e) {
+      results.push({ equation: eq, status: 'error', note: e.message.slice(0, 100) });
+    }
+  }
+  return { results };
+}
+
+// ── Statistical power check via Python ──
+async function checkStatisticalPower(ns, effectSizes) {
+  if (!pyodide || !ns.length) return null;
+  try {
+    const code = `
+import json
+import math
+
+ns = ${JSON.stringify(ns)}
+results = []
+for n in ns:
+    # Approximate power for two-sample t-test, medium effect size d=0.5, alpha=0.05
+    # Using approximation: power ≈ Φ(√(n/2)*d - z_alpha/2)
+    d = 0.5  # medium effect
+    z_alpha = 1.96
+    se = math.sqrt(2/n) if n > 0 else float('inf')
+    z_power = d / se - z_alpha
+    # Approximate normal CDF
+    def norm_cdf(x):
+        return 0.5 * (1 + math.erf(x / math.sqrt(2)))
+    power = norm_cdf(z_power)
+    results.append({"n": n, "approx_power": round(power, 3), "adequate": power >= 0.8})
+json.dumps(results)
+`;
+    const res = await pyodide.runPythonAsync(code);
+    return JSON.parse(res);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function runVerification() {
+  const text = document.getElementById('paperText').value.trim();
+  if (!text) { log('warn', '// NO INPUT', 'Paste paper abstract or statistics to verify'); return; }
+
+  document.getElementById('verifyBtn').disabled = true;
+  document.getElementById('statusText').textContent = 'Verifying...';
+  papersVerified++;
+
+  log('running', '// VERIFICATION STARTED', `Analyzing ${text.length} characters of paper content...`);
+
+  const allFlags = [];
+  const allWarnings = [];
+  let score = 100;
+
+  // Run JS checks
+  if (document.getElementById('chkPvalue').checked) {
+    const r = checkPValues(text);
+    allFlags.push(...r.flags);
+    allWarnings.push(...r.warnings);
+    if (r.pValues.length) log('info', '// P-VALUE SCAN', `Found ${r.pValues.length} p-value(s): ${r.pValues.join(', ')}`);
+  }
+
+  if (document.getElementById('chkSampleSize').checked) {
+    const r = checkSampleSize(text);
+    allFlags.push(...r.flags);
+    allWarnings.push(...r.warnings);
+    const powerResults = await checkStatisticalPower(r.ns, []);
+    if (powerResults) {
+      const powerHtml = powerResults.map(p =>
+        `<span class="${p.adequate ? 'ok' : 'warn-text'}">n=${p.n}: ~${(p.approx_power*100).toFixed(0)}% power ${p.adequate ? '✓' : '⚠ UNDERPOWERED'}</span>`
+      ).join('<br>');
+      if (powerHtml) log('info', '// POWER ANALYSIS', powerHtml);
+    }
+  }
+
+  if (document.getElementById('chkCI').checked) {
+    const r = checkConfidenceIntervals(text);
+    allFlags.push(...r.flags);
+    allWarnings.push(...r.warnings);
+  }
+
+  if (document.getElementById('chkEffect').checked) {
+    const r = checkEffectSize(text);
+    allWarnings.push(...r.warnings);
+  }
+
+  if (document.getElementById('chkControls').checked) {
+    const r = checkControls(text);
+    allFlags.push(...r.flags);
+  }
+
+  if (document.getElementById('chkEquations').checked) {
+    log('running', '// SYMPY EQUATION CHECK', 'Running SymPy verification...');
+    const eqResults = await verifyEquations(text);
+    if (eqResults.results.length) {
+      for (const eq of eqResults.results) {
+        const t = eq.status === 'verified' ? 'pass' : eq.status === 'inconsistent' ? 'fail' : 'warn';
+        if (eq.status === 'inconsistent') { allFlags.push(`Equation inconsistency: ${eq.equation.slice(0,60)}`); flagsRaised++; }
+        log(t, `// EQUATION: ${eq.status.toUpperCase()}`, `<pre>${eq.equation}</pre><span class="${t === 'pass' ? 'ok' : 'warn-text'}">${eq.note}</span>`);
+      }
+    } else {
+      log('info', '// EQUATIONS', eqResults.note || 'No equations found to verify');
+    }
+  }
+
+  // Score
+  score -= allFlags.length * 15;
+  score -= allWarnings.length * 5;
+  score = Math.max(0, Math.min(100, score));
+  const scoreClass = score >= 70 ? 'high' : score >= 40 ? 'mid' : 'low';
+  const verdict = score >= 70 ? 'pass' : score >= 40 ? 'warn' : 'fail';
+  const verdictText = score >= 70 ? 'PASSES REVIEW' : score >= 40 ? 'CAUTION — REVIEW NEEDED' : 'FLAGGED — SIGNIFICANT ISSUES';
+
+  // Render result card
+  const flagsHtml = allFlags.map(f => `<span class="flag">⚑ ${f}</span>`).join('');
+  const warnsHtml = allWarnings.map(w => `<span class="warn-text">⚠ ${w}</span>`).join('<br>');
+
+  log(verdict, `// VERIFICATION COMPLETE — ${verdictText}`, `
+    <div class="result-card">
+      <h4 class="${verdict}">INTEGRITY SCORE: ${score}/100</h4>
+      <div class="score-bar"><div class="score-fill ${scoreClass}" style="width:${score}%"></div></div>
+      ${allFlags.length ? `<div style="margin-top:8px"><strong style="color:var(--red)">CRITICAL FLAGS (${allFlags.length}):</strong><br>${flagsHtml}</div>` : '<span class="ok">No critical flags ✓</span>'}
+      ${allWarnings.length ? `<div style="margin-top:8px"><strong style="color:var(--yellow)">WARNINGS (${allWarnings.length}):</strong><br>${warnsHtml}</div>` : ''}
+    </div>
+  `);
+
+  // Post to swarm
+  const mcpUrl = document.getElementById('mcpUrl').value.trim();
+  const agentId = document.getElementById('agentId').value.trim();
+  if (mcpUrl && agentId && allFlags.length) {
+    const critique = `MATH VERIFICATION ALERT: ${allFlags.length} critical flag(s) detected. Issues: ${allFlags.slice(0,2).join('; ')}. Integrity score: ${score}/100. This paper requires re-analysis before inclusion in the research tree.`;
+    try {
+      await fetch(mcpUrl, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ jsonrpc:'2.0', id: Date.now(), method:'tools/call', params:{ name:'speak_in_council', arguments:{ agent_id: agentId, council_id:'c1', text: critique, node_type:'roadblock', lev_delta: 0.2 }}})
+      });
+      log('info', '// SWARM BROADCAST', 'Critique posted to research tree');
+    } catch(e) {}
+  }
+
+  document.getElementById('verifyBtn').disabled = false;
+  document.getElementById('statusText').textContent = `Verified — Score: ${score}/100 — ${allFlags.length} flags, ${allWarnings.length} warnings`;
+  updateStats();
+}
+
+function loadDemo() {
+  document.getElementById('paperText').value = `Partial epigenetic reprogramming using OSK factors reversed cellular aging markers in mice.
+Results showed p=0.048 for telomere length increase (n=8 per group), with mean increase of 1.8kb ± 0.4.
+The hazard ratio for age-related disease was 0.73 (95% CI: 0.51-0.98).
+Gene expression returned to youthful profiles: fold change = 2*baseline + correction_factor where correction_factor = 0.5*baseline (equation: fold_change = 2.5*baseline).
+Treatment group showed significant improvement (p=0.047) compared to controls.
+Multiple endpoints were assessed: inflammation (p=0.043), DNA damage (p=0.039), mitochondrial function (p=0.048).`;
+  log('info', '// DEMO LOADED', 'Sample paper with intentional statistical issues loaded — click Verify');
+}
+
+initPyodide();
+</script>
+</body>
+</html>

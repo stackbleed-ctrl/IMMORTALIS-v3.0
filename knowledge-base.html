@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS v5.2 — Knowledge Base</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap');
+:root{--bg:#020408;--panel:#030810;--border:#0a1a2a;--cyan:#00e5ff;--green:#00ff88;--yellow:#ffcc00;--red:#ff3366;--purple:#8800ff;--blue:#0088ff;--text:#a0c8e0;--bright:#e0f4ff;--dim:#0a2030;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,0.01) 3px,rgba(0,229,255,0.01) 4px);pointer-events:none;z-index:9999;}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#000810,var(--bg));}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:.9rem;letter-spacing:.25em;color:var(--purple);text-shadow:0 0 30px rgba(136,0,255,.6);}
+.logo em{color:var(--cyan);font-style:normal;}
+.hdr-right{font-size:.65rem;color:#334;display:flex;gap:16px;align-items:center;}
+.db-status{font-size:.65rem;color:var(--yellow);}
+.db-status.ready{color:var(--green);}
+.layout{display:grid;grid-template-columns:280px 1fr 280px;height:calc(100vh - 53px);}
+.col{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.col:last-child{border-right:none;border-left:1px solid var(--border);}
+.col-header{padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--purple);opacity:.8;}
+.col-body{flex:1;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:var(--dim) transparent;}
+.field{margin-bottom:8px;}
+.field label{display:block;font-size:.6rem;color:#456;margin-bottom:3px;}
+.field input,.field textarea,.field select{width:100%;background:var(--dim);border:1px solid var(--border);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:7px 10px;outline:none;}
+.field input:focus,.field textarea:focus{border-color:var(--purple);}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.btn{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.15em;padding:10px 16px;border:1px solid currentColor;cursor:pointer;background:transparent;width:100%;margin-bottom:6px;text-transform:uppercase;transition:all .15s;}
+.btn-purple{color:var(--purple);}
+.btn-purple:hover:not(:disabled){background:rgba(136,0,255,.08);box-shadow:0 0 20px rgba(136,0,255,.2);}
+.btn-cyan{color:var(--cyan);}
+.btn-cyan:hover:not(:disabled){background:rgba(0,229,255,.08);}
+.btn-red{color:var(--red);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.stat-box{background:var(--panel);border:1px solid var(--border);padding:10px;text-align:center;}
+.stat-val{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;}
+.stat-val.purple{color:var(--purple);text-shadow:0 0 15px rgba(136,0,255,.5);}
+.stat-val.cyan{color:var(--cyan);text-shadow:0 0 15px rgba(0,229,255,.5);}
+.stat-val.green{color:var(--green);}
+.stat-val.yellow{color:var(--yellow);}
+.stat-lbl{font-size:.55rem;color:#456;letter-spacing:.15em;text-transform:uppercase;}
+.paper-card{border:1px solid var(--border);padding:10px;margin-bottom:8px;background:var(--panel);cursor:pointer;transition:border-color .15s;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.paper-card:hover{border-color:var(--purple);}
+.paper-card .pc-title{font-size:.7rem;color:var(--bright);line-height:1.4;margin-bottom:4px;}
+.paper-card .pc-meta{font-size:.6rem;color:#456;}
+.paper-card .pc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.tag{background:rgba(136,0,255,.1);border:1px solid rgba(136,0,255,.3);color:var(--purple);font-size:.55rem;padding:1px 6px;}
+.tag.match{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan);}
+.similarity-bar{height:2px;background:var(--dim);margin:5px 0;}
+.sim-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));}
+.search-result{border:1px solid var(--border);padding:10px;margin-bottom:8px;background:var(--panel);animation:fadeIn .3s ease;}
+.search-result .sr-score{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:4px;}
+.search-result .sr-title{font-size:.72rem;color:var(--bright);margin-bottom:3px;}
+.search-result .sr-excerpt{font-size:.63rem;color:var(--text);line-height:1.5;}
+.search-result .sr-meta{font-size:.58rem;color:#456;margin-top:4px;}
+.duplicate-alert{border:1px solid var(--yellow);padding:8px;margin-bottom:6px;background:rgba(255,204,0,.03);}
+.duplicate-alert .da-title{font-size:.6rem;color:var(--yellow);margin-bottom:4px;}
+.duplicate-alert .da-text{font-size:.63rem;color:var(--text);}
+.sep{height:1px;background:var(--border);margin:10px 0;}
+.empty-state{color:#234;font-size:.65rem;padding:20px 0;text-align:center;}
+.progress-ring{position:relative;display:inline-block;margin:6px 0;}
+.progress-text{font-family:'Orbitron',monospace;font-size:.55rem;color:var(--purple);}
+.loading-bar{height:2px;background:var(--dim);margin:4px 0;overflow:hidden;}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));width:0%;transition:width .3s;}
+.loading-fill.active{animation:loading 1.5s infinite;}
+@keyframes loading{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">IMMORTALIS <em>v5.2</em> // KNOWLEDGE BASE</div>
+  <div class="hdr-right">
+    <span class="db-status" id="dbStatus">⏳ INITIALIZING DB...</span>
+    <span id="hdrClock">00:00:00</span>
+  </div>
+</header>
+<div class="layout">
+
+  <!-- LEFT: ADD + STATS -->
+  <div class="col">
+    <div class="col-header">// ADD KNOWLEDGE</div>
+    <div class="col-body">
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-val purple" id="statTotal">0</div><div class="stat-lbl">Papers</div></div>
+        <div class="stat-box"><div class="stat-val cyan" id="statHyp">0</div><div class="stat-lbl">Hypotheses</div></div>
+        <div class="stat-box"><div class="stat-val green" id="statDup">0</div><div class="stat-lbl">Duplicates</div></div>
+        <div class="stat-box"><div class="stat-val yellow" id="statTopics">0</div><div class="stat-lbl">Topics</div></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="field">
+        <label>TITLE</label>
+        <input type="text" id="addTitle" placeholder="Paper or hypothesis title" />
+      </div>
+      <div class="field">
+        <label>CONTENT / ABSTRACT</label>
+        <textarea id="addContent" placeholder="Paste abstract, hypothesis, or finding..."></textarea>
+      </div>
+      <div class="field">
+        <label>TYPE</label>
+        <select id="addType">
+          <option value="paper">Research Paper</option>
+          <option value="hypothesis">Hypothesis</option>
+          <option value="critique">Peer Critique</option>
+          <option value="breakthrough">Breakthrough</option>
+          <option value="trial">Clinical Trial</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>PMID / arXiv ID (optional)</label>
+        <input type="text" id="addId" placeholder="38901234" />
+      </div>
+      <div class="field">
+        <label>TAGS (comma separated)</label>
+        <input type="text" id="addTags" placeholder="senolytic, aging, OSK" />
+      </div>
+      <div class="loading-bar"><div class="loading-fill" id="embedProgress"></div></div>
+      <button class="btn btn-purple" id="addBtn" onclick="addEntry()">+ ADD TO KNOWLEDGE BASE</button>
+
+      <div class="sep"></div>
+      <div class="section-title" style="font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:#456;margin-bottom:8px;">// IMPORT FROM SWARM</div>
+      <div class="field">
+        <label>MCP SERVER URL</label>
+        <input type="text" id="mcpUrl" placeholder="https://immortalis-production-8a78.up.railway.app/mcp" />
+      </div>
+      <button class="btn btn-cyan" onclick="importFromSwarm()">↓ IMPORT SWARM NODES</button>
+      <button class="btn btn-red" onclick="clearDB()" style="margin-top:8px;">⚠ CLEAR DATABASE</button>
+    </div>
+  </div>
+
+  <!-- CENTER: SEARCH -->
+  <div class="col" style="border-right:1px solid var(--border);">
+    <div class="col-header">// SEMANTIC SEARCH</div>
+    <div class="col-body">
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <input type="text" id="searchInput" placeholder="Search by concept, not just keywords..." style="flex:1;background:var(--dim);border:1px solid var(--border);color:var(--bright);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:8px 12px;outline:none;" onkeydown="if(event.key==='Enter')search()" />
+        <button onclick="search()" style="font-family:'Orbitron',monospace;font-size:.6rem;padding:8px 12px;border:1px solid var(--purple);color:var(--purple);background:transparent;cursor:pointer;">SEARCH</button>
+      </div>
+      <div class="loading-bar"><div class="loading-fill" id="searchProgress"></div></div>
+      <div id="searchResults"><div class="empty-state">Enter a query to search the knowledge base<br><br>Examples:<br>— "telomere shortening reversal mechanism"<br>— "senescent cell clearance in vivo"<br>— "partial reprogramming side effects"</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RECENT + DUPLICATES -->
+  <div class="col">
+    <div class="col-header">// RECENT ENTRIES</div>
+    <div class="col-body">
+      <div id="recentList"><div class="empty-state">No entries yet</div></div>
+      <div class="sep"></div>
+      <div style="font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--yellow);margin-bottom:8px;">// DUPLICATE ALERTS</div>
+      <div id="duplicateList"><div class="empty-state" style="color:#234;">No duplicates detected</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+setInterval(() => { document.getElementById('hdrClock').textContent = new Date().toTimeString().slice(0,8); }, 1000);
+
+// ── IndexedDB setup ──
+let db = null;
+const DB_NAME = 'immortalis_kb';
+const DB_VERSION = 1;
+
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('entries')) {
+        const store = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('type', 'type');
+        store.createIndex('timestamp', 'timestamp');
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbAdd(entry) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readwrite');
+    const req = tx.objectStore('entries').add(entry);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readonly');
+    const req = tx.objectStore('entries').getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbClear() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readwrite');
+    const req = tx.objectStore('entries').clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ── TF-IDF semantic similarity (no external model needed) ──
+function tokenize(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOPWORDS.has(w));
+}
+
+const STOPWORDS = new Set(['the','and','for','are','was','were','has','have','had','with','this','that','they','from','been','its','into','more','than','but','not','can','will','may','also','each','when','which','their','there','some','other','would','what','out','about','who','how','all','been','could','said','use','her','his','him','she','him','our','your']);
+
+function tfidf(query, docs) {
+  const queryTokens = tokenize(query);
+  const N = docs.length;
+  if (!N) return [];
+
+  // Build IDF
+  const df = {};
+  docs.forEach(doc => {
+    const tokens = new Set(tokenize(doc.searchText));
+    tokens.forEach(t => { df[t] = (df[t] || 0) + 1; });
+  });
+
+  const idf = {};
+  Object.keys(df).forEach(t => { idf[t] = Math.log((N + 1) / (df[t] + 1)) + 1; });
+
+  // Score each doc
+  return docs.map(doc => {
+    const tokens = tokenize(doc.searchText);
+    const tf = {};
+    tokens.forEach(t => { tf[t] = (tf[t] || 0) + 1; });
+
+    let score = 0;
+    queryTokens.forEach(qt => {
+      if (tf[qt]) {
+        const tfScore = tf[qt] / tokens.length;
+        const idfScore = idf[qt] || Math.log(N + 1);
+        score += tfScore * idfScore;
+        // Boost exact title matches
+        if (doc.title && doc.title.toLowerCase().includes(qt)) score += 0.5;
+      }
+    });
+
+    // Tag bonus
+    if (doc.tags) {
+      queryTokens.forEach(qt => {
+        if (doc.tags.some(tag => tag.toLowerCase().includes(qt))) score += 0.3;
+      });
+    }
+
+    return { ...doc, score };
+  }).sort((a, b) => b.score - a.score);
+}
+
+// ── Duplicate detection ──
+function detectDuplicate(newEntry, existingEntries) {
+  const newTokens = new Set(tokenize(newEntry.searchText));
+  let maxSim = 0;
+  let mostSimilar = null;
+
+  for (const entry of existingEntries) {
+    const existTokens = new Set(tokenize(entry.searchText));
+    const intersection = new Set([...newTokens].filter(t => existTokens.has(t)));
+    const union = new Set([...newTokens, ...existTokens]);
+    const jaccard = intersection.size / union.size;
+    if (jaccard > maxSim) { maxSim = jaccard; mostSimilar = entry; }
+  }
+
+  return maxSim > 0.45 ? { duplicate: true, similarity: maxSim, similar: mostSimilar } : { duplicate: false, similarity: maxSim };
+}
+
+// ── Extract topics ──
+function extractTopics(entries) {
+  const topicKeywords = {
+    'senolytics': ['senolytic','senescent','sasp','dasatinib','quercetin','navitoclax','abt-263'],
+    'epigenetics': ['epigenetic','methylation','histone','chromatin','yamanaka','osk','reprogramming'],
+    'telomeres': ['telomere','telomerase','tert','telomeric','shortening'],
+    'mtor': ['mtor','rapamycin','rapalog','tor','ampk','akt'],
+    'nad+': ['nad','nampt','nmn','nr','sirtuin','sirt','parp'],
+    'inflammation': ['inflammation','inflammaging','nf-kb','cytokine','il-6','tnf'],
+    'mitochondria': ['mitochondria','mitochondrial','membrane potential','ros','oxidative'],
+    'proteostasis': ['proteostasis','autophagy','proteasome','ubiquitin','unfolded protein'],
+    'stem cells': ['stem cell','progenitor','regeneration','pluripotent','differentiation'],
+    'clinical': ['trial','clinical','human','patient','cohort','intervention']
+  };
+
+  const found = new Set();
+  const allText = entries.map(e => e.searchText).join(' ').toLowerCase();
+  for (const [topic, kws] of Object.entries(topicKeywords)) {
+    if (kws.some(kw => allText.includes(kw))) found.add(topic);
+  }
+  return found;
+}
+
+// State
+let allEntries = [];
+let duplicatesFound = 0;
+
+async function loadEntries() {
+  allEntries = await dbGetAll();
+  renderRecent();
+  updateStats();
+}
+
+function updateStats() {
+  const topics = extractTopics(allEntries);
+  const hyps = allEntries.filter(e => e.type === 'hypothesis' || e.type === 'breakthrough').length;
+  document.getElementById('statTotal').textContent = allEntries.length;
+  document.getElementById('statHyp').textContent = hyps;
+  document.getElementById('statDup').textContent = duplicatesFound;
+  document.getElementById('statTopics').textContent = topics.size;
+}
+
+function renderRecent() {
+  const list = document.getElementById('recentList');
+  const recent = [...allEntries].reverse().slice(0, 20);
+  if (!recent.length) { list.innerHTML = '<div class="empty-state">No entries yet</div>'; return; }
+  list.innerHTML = recent.map(e => `
+    <div class="paper-card" onclick="fillSearch('${e.title.replace(/'/g,"\\'")}')">
+      <div class="pc-title">${e.title.slice(0,80)}${e.title.length>80?'...':''}</div>
+      <div class="pc-meta">${e.type.toUpperCase()} · ${new Date(e.timestamp).toLocaleDateString()}</div>
+      ${e.tags?.length ? `<div class="pc-tags">${e.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function fillSearch(title) {
+  document.getElementById('searchInput').value = title;
+  search();
+}
+
+async function addEntry() {
+  const title = document.getElementById('addTitle').value.trim();
+  const content = document.getElementById('addContent').value.trim();
+  if (!title || !content) { alert('Title and content required'); return; }
+
+  document.getElementById('addBtn').disabled = true;
+  const prog = document.getElementById('embedProgress');
+  prog.className = 'loading-fill active';
+
+  const tags = document.getElementById('addTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const type = document.getElementById('addType').value;
+  const externalId = document.getElementById('addId').value.trim();
+  const searchText = `${title} ${content} ${tags.join(' ')}`;
+
+  // Check duplicates
+  const dupCheck = detectDuplicate({ searchText, title }, allEntries);
+  if (dupCheck.duplicate) {
+    duplicatesFound++;
+    const dupList = document.getElementById('duplicateList');
+    if (dupList.querySelector('.empty-state')) dupList.innerHTML = '';
+    dupList.insertAdjacentHTML('afterbegin', `
+      <div class="duplicate-alert">
+        <div class="da-title">⚠ DUPLICATE DETECTED (${(dupCheck.similarity*100).toFixed(0)}% similar)</div>
+        <div class="da-text">Similar to: "${dupCheck.similar.title.slice(0,60)}"</div>
+      </div>
+    `);
+  }
+
+  const entry = {
+    title, content, type, tags, externalId, searchText,
+    timestamp: Date.now(),
+    isDuplicate: dupCheck.duplicate,
+    similarTo: dupCheck.duplicate ? dupCheck.similar?.id : null
+  };
+
+  await dbAdd(entry);
+  allEntries.push(entry);
+
+  prog.className = 'loading-fill';
+  prog.style.width = '0%';
+  document.getElementById('addBtn').disabled = false;
+  document.getElementById('addTitle').value = '';
+  document.getElementById('addContent').value = '';
+  document.getElementById('addId').value = '';
+  document.getElementById('addTags').value = '';
+
+  renderRecent();
+  updateStats();
+}
+
+async function search() {
+  const query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+
+  const prog = document.getElementById('searchProgress');
+  prog.className = 'loading-fill active';
+
+  const results = tfidf(query, allEntries).filter(r => r.score > 0).slice(0, 10);
+
+  prog.className = 'loading-fill';
+
+  const container = document.getElementById('searchResults');
+  if (!results.length) {
+    container.innerHTML = '<div class="empty-state">No matching entries found</div>';
+    return;
+  }
+
+  const maxScore = results[0].score || 1;
+  container.innerHTML = results.map(r => {
+    const pct = Math.round((r.score / maxScore) * 100);
+    const excerpt = r.content.slice(0, 200).replace(new RegExp(query.split(' ')[0], 'gi'), m => `<strong style="color:var(--cyan)">${m}</strong>`);
+    return `
+      <div class="search-result">
+        <div class="sr-score">RELEVANCE: ${pct}% ${r.isDuplicate ? '⚠ DUPLICATE' : ''}</div>
+        <div class="similarity-bar"><div class="sim-fill" style="width:${pct}%"></div></div>
+        <div class="sr-title">${r.title}</div>
+        <div class="sr-excerpt">${excerpt}...</div>
+        <div class="sr-meta">${r.type.toUpperCase()} · ${new Date(r.timestamp).toLocaleDateString()} ${r.externalId ? '· ID:'+r.externalId : ''}</div>
+        ${r.tags?.length ? `<div style="margin-top:4px;">${r.tags.map(t=>`<span class="tag ${query.toLowerCase().includes(t.toLowerCase())?'match':''}">${t}</span>`).join(' ')}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+async function importFromSwarm() {
+  const mcpUrl = document.getElementById('mcpUrl').value.trim();
+  if (!mcpUrl) { alert('Enter MCP server URL'); return; }
+
+  try {
+    const res = await fetch(mcpUrl, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: 'tools/call', params: { name: 'get_research_tree', arguments: { limit: 40 } } })
+    });
+    const data = await res.json();
+    const raw = data?.result?.content?.[0]?.text;
+    if (!raw) { alert('No data from swarm'); return; }
+    const parsed = JSON.parse(raw);
+    const nodes = parsed.nodes || [];
+    let added = 0;
+    for (const node of nodes) {
+      const text = node.text || node.content || '';
+      if (!text || text.length < 20) continue;
+      const entry = {
+        title: text.slice(0, 80),
+        content: text,
+        type: node.node_type || 'hypothesis',
+        tags: ['swarm', node.author || 'unknown'],
+        externalId: node.id || '',
+        searchText: text,
+        timestamp: node.timestamp || Date.now(),
+        isDuplicate: false
+      };
+      const dup = detectDuplicate(entry, allEntries);
+      if (!dup.duplicate) { await dbAdd(entry); allEntries.push(entry); added++; }
+    }
+    renderRecent(); updateStats();
+    alert(`Imported ${added} new nodes from swarm (${nodes.length - added} duplicates skipped)`);
+  } catch (e) { alert('Import failed: ' + e.message); }
+}
+
+async function clearDB() {
+  if (!confirm('Clear entire knowledge base? This cannot be undone.')) return;
+  await dbClear();
+  allEntries = [];
+  duplicatesFound = 0;
+  renderRecent();
+  updateStats();
+  document.getElementById('searchResults').innerHTML = '<div class="empty-state">Database cleared</div>';
+  document.getElementById('duplicateList').innerHTML = '<div class="empty-state" style="color:#234;">No duplicates detected</div>';
+}
+
+// Init
+initDB().then(() => {
+  document.getElementById('dbStatus').textContent = '✓ INDEXEDDB READY';
+  document.getElementById('dbStatus').className = 'db-status ready';
+  loadEntries();
+}).catch(e => {
+  document.getElementById('dbStatus').textContent = '✗ DB FAILED: ' + e.message;
+});
+</script>
+</body>
+</html>
