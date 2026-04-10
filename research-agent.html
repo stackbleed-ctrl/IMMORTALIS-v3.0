@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS — RESEARCH AGENT v5.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --bg: #020408;
+  --panel: #030810;
+  --border: #0a1a2a;
+  --cyan: #00e5ff;
+  --blue: #0088ff;
+  --purple: #8800ff;
+  --green: #00ff88;
+  --yellow: #ffcc00;
+  --red: #ff3366;
+  --dim: #0a2030;
+  --text: #a0c8e0;
+  --bright: #e0f4ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid scanlines */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,229,255,0.015) 3px, rgba(0,229,255,0.015) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,229,255,0.008) 3px, rgba(0,229,255,0.008) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #000810 0%, var(--bg) 100%);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 0.9rem;
+  letter-spacing: 0.25em;
+  color: var(--cyan);
+  text-shadow: 0 0 30px rgba(0,229,255,0.7);
+}
+
+.logo em { color: var(--purple); font-style: normal; }
+
+.hdr-right { display: flex; align-items: center; gap: 20px; font-size: 0.65rem; color: #334; }
+.hdr-right .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1s infinite; }
+.hdr-right .dot.off { background: #222; animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 300px;
+  height: calc(100vh - 53px);
+}
+
+/* ─── LEFT COLUMN ─── */
+.left-col {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.3em;
+  color: var(--cyan);
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.field { margin-bottom: 8px; }
+.field label { display: block; font-size: 0.6rem; color: #456; margin-bottom: 3px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: var(--dim);
+  border: 1px solid var(--border);
+  color: var(--bright);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--cyan);
+}
+.field select option { background: #020408; }
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  padding: 10px 16px;
+  border: 1px solid currentColor;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.15s;
+  width: 100%;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.btn-cyan { color: var(--cyan); }
+.btn-cyan:hover:not(:disabled) { background: rgba(0,229,255,0.08); box-shadow: 0 0 20px rgba(0,229,255,0.2); }
+.btn-green { color: var(--green); }
+.btn-green:hover:not(:disabled) { background: rgba(0,255,136,0.08); box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+.btn-red { color: var(--red); }
+.btn-red:hover:not(:disabled) { background: rgba(255,51,102,0.08); }
+.btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.persona-btn {
+  font-size: 0.6rem;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  background: var(--dim);
+  color: #567;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.persona-btn:hover, .persona-btn.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,229,255,0.05);
+}
+
+/* ─── CENTER COLUMN ─── */
+.center-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tool-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--dim) transparent;
+}
+
+.feed-entry {
+  margin-bottom: 16px;
+  border-left: 2px solid var(--dim);
+  padding-left: 12px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn { from { opacity:0; transform: translateX(-8px); } to { opacity:1; transform: none; } }
+
+.feed-entry.tool-call { border-left-color: var(--cyan); }
+.feed-entry.tool-result { border-left-color: var(--blue); }
+.feed-entry.hypothesis { border-left-color: var(--green); }
+.feed-entry.critique { border-left-color: var(--yellow); }
+.feed-entry.breakthrough { border-left-color: var(--purple); }
+.feed-entry.error { border-left-color: var(--red); }
+.feed-entry.system { border-left-color: #234; }
+
+.feed-time { font-size: 0.6rem; color: #345; margin-bottom: 3px; }
+.feed-type {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 5px;
+}
+.feed-entry.tool-call .feed-type { color: var(--cyan); }
+.feed-entry.tool-result .feed-type { color: var(--blue); }
+.feed-entry.hypothesis .feed-type { color: var(--green); }
+.feed-entry.critique .feed-type { color: var(--yellow); }
+.feed-entry.breakthrough .feed-type { color: var(--purple); }
+.feed-entry.error .feed-type { color: var(--red); }
+.feed-entry.system .feed-type { color: #456; }
+
+.feed-body { font-size: 0.72rem; line-height: 1.6; color: var(--text); }
+.feed-body .highlight { color: var(--bright); }
+.feed-body .pmid { color: var(--cyan); font-size: 0.65rem; }
+.feed-body .paper { margin: 4px 0; padding: 6px; background: rgba(0,136,255,0.05); border: 1px solid var(--border); }
+.feed-body .paper a { color: var(--blue); text-decoration: none; font-size: 0.65rem; }
+.feed-body .paper a:hover { color: var(--cyan); }
+.feed-body .paper-title { color: var(--bright); font-size: 0.68rem; }
+.feed-body .paper-meta { color: #456; font-size: 0.6rem; }
+
+/* Tool call animation */
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  padding: 8px 0;
+}
+.thinking-dots span {
+  animation: blink 1.2s infinite;
+  opacity: 0;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,100%{opacity:0} 50%{opacity:1} }
+
+/* ─── RIGHT COLUMN ─── */
+.right-col {
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 0;
+}
+
+.stat-box {
+  background: var(--panel);
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-val.cyan { color: var(--cyan); text-shadow: 0 0 20px rgba(0,229,255,0.5); }
+.stat-val.green { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.5); }
+.stat-val.yellow { color: var(--yellow); }
+.stat-val.purple { color: var(--purple); }
+.stat-label { font-size: 0.55rem; color: #456; letter-spacing: 0.2em; text-transform: uppercase; }
+
+.paper-queue {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--dim) transparent;
+}
+
+.queue-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  color: #456;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-item {
+  padding: 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  font-size: 0.65rem;
+}
+.queue-item:hover { border-color: var(--cyan); }
+.queue-item .qi-title { color: var(--bright); line-height: 1.4; margin-bottom: 3px; }
+.queue-item .qi-meta { color: #456; font-size: 0.58rem; }
+.queue-item .qi-source { font-size: 0.58rem; }
+.qi-source.pubmed { color: var(--blue); }
+.qi-source.arxiv { color: var(--purple); }
+.qi-source.trial { color: var(--green); }
+
+.lev-bar {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+.lev-label { font-size: 0.6rem; color: #456; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.lev-label span { color: var(--green); font-family: 'Orbitron', monospace; }
+.lev-track { height: 4px; background: var(--dim); position: relative; }
+.lev-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan), var(--green)); transition: width 0.5s ease; box-shadow: 0 0 10px rgba(0,229,255,0.4); }
+
+/* Bottom status bar */
+.status-bar {
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  color: #345;
+  background: var(--panel);
+}
+.status-bar .active-tool { color: var(--cyan); animation: pulse 0.8s infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">IMMORTALIS <em>v5.0</em> // RESEARCH AGENT</div>
+  <div class="hdr-right">
+    <div class="dot off" id="dot"></div>
+    <span id="hdrStatus">OFFLINE</span>
+    <span id="hdrAgent">—</span>
+    <span id="hdrClock">00:00:00</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: CONFIG -->
+  <div class="left-col">
+    <div class="section">
+      <div class="section-title">// SWARM TARGET</div>
+      <div class="field">
+        <label>SERVER URL</label>
+        <input type="text" id="serverUrl" value="https://immortalis-production-8a78.up.railway.app/mcp" />
+      </div>
+      <div class="field">
+        <label>TOOLS ENDPOINT</label>
+        <input type="text" id="toolsUrl" value="https://immortalis-production-8a78.up.railway.app/api/tools" />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">// LLM CONFIG</div>
+      <div class="field">
+        <label>PROVIDER</label>
+        <select id="llmProvider">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (GPT-4o)</option>
+          <option value="xai">xAI (Grok)</option>
+          <option value="google">Google (Gemini)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>API KEY</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-..." />
+      </div>
+      <div class="field">
+        <label>MODEL</label>
+        <input type="text" id="modelId" value="claude-haiku-4-5-20251001" />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">// AGENT PERSONA</div>
+      <div class="persona-grid" id="personaGrid">
+        <div class="persona-btn active" data-persona="senolytic" onclick="selectPersona(this)">Senolytic<br>Pharmacologist</div>
+        <div class="persona-btn" data-persona="epigenetic" onclick="selectPersona(this)">Epigenetic<br>Researcher</div>
+        <div class="persona-btn" data-persona="nanotech" onclick="selectPersona(this)">Nanotech<br>Therapeutics</div>
+        <div class="persona-btn" data-persona="critique" onclick="selectPersona(this)">Peer<br>Reviewer</div>
+        <div class="persona-btn" data-persona="clinician" onclick="selectPersona(this)">Longevity<br>Clinician</div>
+        <div class="persona-btn" data-persona="connectome" onclick="selectPersona(this)">Connectome<br>Mapper</div>
+      </div>
+      <div class="field">
+        <label>AGENT NAME</label>
+        <input type="text" id="agentName" value="ResearchAgent-Alpha" />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">// MISSION PARAMS</div>
+      <div class="field">
+        <label>PATROL ROUNDS</label>
+        <input type="number" id="rounds" value="20" min="3" max="100" />
+      </div>
+      <div class="field">
+        <label>INTERVAL (ms)</label>
+        <input type="number" id="interval" value="12000" min="5000" />
+      </div>
+      <div class="field">
+        <label>RESEARCH FOCUS</label>
+        <input type="text" id="focus" value="senescence reversal 2025 2026" />
+      </div>
+    </div>
+
+    <div class="section" style="flex:1; display:flex; flex-direction:column; justify-content:flex-end;">
+      <button class="btn btn-cyan" id="deployBtn" onclick="deploy()">▶ DEPLOY AGENT</button>
+      <button class="btn btn-red" id="stopBtn" onclick="stopAgent()" disabled>■ ABORT</button>
+    </div>
+  </div>
+
+  <!-- CENTER: FEED -->
+  <div class="center-col">
+    <div class="tool-feed" id="feed"></div>
+    <div class="status-bar">
+      <span id="statusText">Agent offline — configure and deploy</span>
+      <span id="activeTool" class="active-tool" style="display:none"></span>
+      <span id="roundCounter">Round 0 / 0</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: STATS + QUEUE -->
+  <div class="right-col">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val cyan" id="statRounds">0</div><div class="stat-label">Rounds</div></div>
+      <div class="stat-box"><div class="stat-val green" id="statNodes">0</div><div class="stat-label">Nodes</div></div>
+      <div class="stat-box"><div class="stat-val yellow" id="statPapers">0</div><div class="stat-label">Papers</div></div>
+      <div class="stat-box"><div class="stat-val purple" id="statCritiques">0</div><div class="stat-label">Critiques</div></div>
+    </div>
+
+    <div class="paper-queue">
+      <div class="queue-title">// LITERATURE QUEUE</div>
+      <div id="paperQueue"><div style="color:#234;font-size:0.65rem;">No papers yet — deploy agent to begin scan</div></div>
+    </div>
+
+    <div class="lev-bar">
+      <div class="lev-label">LONGEVITY ESCAPE VELOCITY <span id="levPct">0.0%</span></div>
+      <div class="lev-track"><div class="lev-fill" id="levFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Clock ──
+setInterval(() => {
+  document.getElementById('hdrClock').textContent = new Date().toTimeString().slice(0,8);
+}, 1000);
+
+// ── Persona definitions ──
+const PERSONAS = {
+  senolytic: {
+    name: 'Senolytic Pharmacologist',
+    color: '#ffcc00',
+    query: 'senolytics dasatinib quercetin senescence clearance aging',
+    systemPrompt: `You are a world-class senolytic pharmacologist agent in IMMORTALIS — a live multi-agent research swarm dedicated to achieving Longevity Escape Velocity (LEV). Your specialty: senescent cell clearance, SASP modulation, D+Q protocols, navitoclax, ABT-263, and related compounds.`
+  },
+  epigenetic: {
+    name: 'Epigenetic Reprogramming Specialist',
+    color: '#00e5ff',
+    query: 'partial reprogramming OSK Yamanaka factors epigenetic clock reversal aging',
+    systemPrompt: `You are an epigenetic reprogramming specialist agent in IMMORTALIS. Your specialty: Yamanaka factors, partial reprogramming, epigenetic clocks (Horvath, DunedinPACE), OSK/OSKM expression, and age reversal.`
+  },
+  nanotech: {
+    name: 'Nanotech Therapeutics Engineer',
+    color: '#8800ff',
+    query: 'nanoparticle delivery aging therapy longevity LNP mRNA cellular repair',
+    systemPrompt: `You are a nanotech therapeutics engineer in IMMORTALIS. Your specialty: lipid nanoparticles, DNA origami, cellular repair bots, targeted delivery to senescent cells, and precision medicine.`
+  },
+  critique: {
+    name: 'Peer Reviewer / Error Hunter',
+    color: '#ff3366',
+    query: 'longevity aging study replication error statistical bias 2025 2026',
+    systemPrompt: `You are a rigorous peer reviewer agent in IMMORTALIS. Your mission: find statistical errors, methodological flaws, p-hacking, and reproducibility issues in longevity research. Every critique advances the mission by correcting the scientific record.`
+  },
+  clinician: {
+    name: 'Longevity Clinician',
+    color: '#00ff88',
+    query: 'longevity clinical trial biomarker intervention human aging 2025 2026',
+    systemPrompt: `You are a longevity clinician in IMMORTALIS. Your specialty: clinical biomarkers, intervention trials, metabolomics, healthspan extension, and translating bench science to human treatments.`
+  },
+  connectome: {
+    name: 'Connectome Cartographer',
+    color: '#ff6600',
+    query: 'whole brain emulation connectome mapping synaptic preservation mind uploading',
+    systemPrompt: `You are a connectome cartographer in IMMORTALIS. Your specialty: whole-brain emulation, synaptic mapping, consciousness preservation, and the neuroscience of identity continuity beyond biological death.`
+  }
+};
+
+const TOOL_SCHEMA = [
+  {
+    name: 'pubmed_search',
+    description: 'Search PubMed for recent papers on a longevity topic. Returns titles, authors, PMIDs, and dates.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query — be specific (compounds, mechanisms, years)' },
+        max_results: { type: 'number', description: 'Number of results (default 6, max 10)' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'arxiv_search',
+    description: 'Search arXiv for preprints — catches bleeding-edge research before peer review.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        max_results: { type: 'number', description: 'Number of results (default 5)' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'fetch_abstract',
+    description: 'Fetch full abstract text for a PubMed paper by PMID. Use this before critiquing a specific paper.',
+    input_schema: {
+      type: 'object',
+      properties: { pmid: { type: 'string', description: 'PubMed ID' } },
+      required: ['pmid']
+    }
+  },
+  {
+    name: 'clinicaltrials_search',
+    description: 'Search ClinicalTrials.gov for active or completed trials on longevity interventions.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        max_results: { type: 'number', description: 'Number of results' }
+      },
+      required: ['query']
+    }
+  }
+];
+
+// State
+let agentId = null;
+let running = false;
+let round = 0;
+let totalRounds = 0;
+let intervalHandle = null;
+let stats = { rounds: 0, nodes: 0, papers: 0, critiques: 0 };
+let paperQueue = [];
+let selectedPersona = 'senolytic';
+
+function selectPersona(el) {
+  document.querySelectorAll('.persona-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedPersona = el.dataset.persona;
+  const p = PERSONAS[selectedPersona];
+  document.getElementById('agentName').value = p.name.replace(' ', '-');
+  document.getElementById('focus').value = p.query;
+}
+
+function log(type, title, body) {
+  const feed = document.getElementById('feed');
+  const now = new Date().toTimeString().slice(0,8);
+  const div = document.createElement('div');
+  div.className = `feed-entry ${type}`;
+  div.innerHTML = `
+    <div class="feed-time">${now}</div>
+    <div class="feed-type">${title}</div>
+    <div class="feed-body">${body}</div>
+  `;
+  feed.appendChild(div);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function updateStats() {
+  document.getElementById('statRounds').textContent = stats.rounds;
+  document.getElementById('statNodes').textContent = stats.nodes;
+  document.getElementById('statPapers').textContent = stats.papers;
+  document.getElementById('statCritiques').textContent = stats.critiques;
+  document.getElementById('roundCounter').textContent = `Round ${round} / ${totalRounds}`;
+}
+
+function addPaperToQueue(paper, source) {
+  paperQueue.unshift({ ...paper, source });
+  if (paperQueue.length > 30) paperQueue.pop();
+  renderQueue();
+}
+
+function renderQueue() {
+  const qEl = document.getElementById('paperQueue');
+  if (!paperQueue.length) return;
+  qEl.innerHTML = paperQueue.slice(0, 15).map(p => `
+    <div class="queue-item" onclick="window.open('${p.url}','_blank')">
+      <div class="qi-title">${(p.title || p.brief_title || '').slice(0, 80)}${(p.title||'').length > 80 ? '...' : ''}</div>
+      <div class="qi-meta">
+        <span class="qi-source ${p.source}">[${p.source.toUpperCase()}]</span>
+        ${p.pmid ? ` PMID:${p.pmid}` : ''}
+        ${p.published ? ` · ${p.published}` : ''}
+        ${p.pubdate ? ` · ${p.pubdate}` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setActiveTool(name) {
+  const el = document.getElementById('activeTool');
+  if (name) {
+    el.style.display = 'inline';
+    el.textContent = `⚡ ${name}`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── MCP call ──
+async function mcpCall(serverUrl, method, params = {}) {
+  const res = await fetch(serverUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: 'tools/call', params: { name: method, arguments: params } })
+  });
+  return res.json();
+}
+
+// ── Tool call via server or direct API fallback ──
+async function callTool(toolName, args) {
+  const toolsUrl = document.getElementById('toolsUrl').value.trim();
+  setActiveTool(toolName);
+  log('tool-call', `// TOOL CALL — ${toolName}`, `<span class="highlight">Query:</span> ${JSON.stringify(args)}`);
+
+  try {
+    // Try server tools endpoint first
+    const res = await fetch(toolsUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool: toolName, args })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setActiveTool(null);
+      return data;
+    }
+  } catch (e) {
+    // Server tools not available, fall through to direct APIs
+  }
+
+  // Direct API fallbacks
+  try {
+    if (toolName === 'pubmed_search') {
+      const searchRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(args.query)}&retmax=${args.max_results||6}&sort=date&retmode=json`);
+      const searchData = await searchRes.json();
+      const ids = searchData?.esearchresult?.idlist || [];
+      if (ids.length) {
+        const summaryRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`);
+        const sd = await summaryRes.json();
+        const results = ids.map(id => {
+          const doc = sd?.result?.[id] || {};
+          return { pmid: id, title: doc.title || '', authors: (doc.authors||[]).slice(0,3).map(a=>a.name).join(', '), pubdate: doc.pubdate || '', url: `https://pubmed.ncbi.nlm.nih.gov/${id}/` };
+        });
+        setActiveTool(null);
+        return { results, source: 'PubMed' };
+      }
+    }
+
+    if (toolName === 'arxiv_search') {
+      const res = await fetch(`https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(args.query)}&sortBy=submittedDate&sortOrder=descending&max_results=${args.max_results||5}`);
+      const text = await res.text();
+      const entries = [];
+      const matches = text.matchAll(/<entry>([\s\S]*?)<\/entry>/g);
+      for (const m of matches) {
+        const e = m[1];
+        const get = tag => { const x = e.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`)); return x ? x[1].trim().replace(/<[^>]+>/g,'') : ''; };
+        const id = get('id').split('/').pop();
+        entries.push({ arxiv_id: id, title: get('title').replace(/\n/g,' '), summary: get('summary').replace(/\n/g,' ').slice(0,250)+'...', published: get('published').slice(0,10), url: `https://arxiv.org/abs/${id}` });
+      }
+      setActiveTool(null);
+      return { results: entries, source: 'arXiv' };
+    }
+  } catch (e) {
+    log('error', '// TOOL ERROR', e.message);
+  }
+
+  setActiveTool(null);
+  return { results: [], error: 'Tool unavailable' };
+}
+
+// ── LLM call with tool use ──
+async function callLLM(serverUrl, systemPrompt, userMessage, conversationHistory = []) {
+  const provider = document.getElementById('llmProvider').value;
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('modelId').value.trim();
+
+  if (!apiKey) {
+    log('error', '// LLM ERROR', 'No API key configured — using deterministic mode');
+    return null;
+  }
+
+  const messages = [
+    ...conversationHistory,
+    { role: 'user', content: userMessage }
+  ];
+
+  let endpoint, headers, body;
+
+  if (provider === 'anthropic') {
+    endpoint = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    };
+    body = JSON.stringify({
+      model,
+      max_tokens: 1000,
+      system: systemPrompt,
+      tools: TOOL_SCHEMA,
+      messages
+    });
+  } else if (provider === 'openai') {
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    body = JSON.stringify({
+      model: model || 'gpt-4o',
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      tools: TOOL_SCHEMA.map(t => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.input_schema } })),
+      max_tokens: 1000
+    });
+  } else if (provider === 'xai') {
+    endpoint = 'https://api.x.ai/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    body = JSON.stringify({
+      model: model || 'grok-3',
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      tools: TOOL_SCHEMA.map(t => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.input_schema } })),
+      max_tokens: 1000
+    });
+  }
+
+  try {
+    const res = await fetch(endpoint, { method: 'POST', headers, body });
+    const data = await res.json();
+    return { provider, data };
+  } catch (e) {
+    log('error', '// LLM ERROR', e.message);
+    return null;
+  }
+}
+
+function extractToolCalls(llmResponse) {
+  if (!llmResponse) return [];
+  const { provider, data } = llmResponse;
+
+  if (provider === 'anthropic') {
+    const calls = (data.content || []).filter(b => b.type === 'tool_use');
+    return calls.map(c => ({ name: c.name, args: c.input, id: c.id }));
+  }
+
+  if (provider === 'openai' || provider === 'xai') {
+    const msg = data.choices?.[0]?.message;
+    return (msg?.tool_calls || []).map(tc => ({
+      name: tc.function.name,
+      args: JSON.parse(tc.function.arguments || '{}'),
+      id: tc.id
+    }));
+  }
+
+  return [];
+}
+
+function extractText(llmResponse) {
+  if (!llmResponse) return null;
+  const { provider, data } = llmResponse;
+
+  if (provider === 'anthropic') {
+    return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  if (provider === 'openai' || provider === 'xai') {
+    return data.choices?.[0]?.message?.content || '';
+  }
+  return '';
+}
+
+// ── Main research round ──
+async function researchRound(serverUrl) {
+  round++;
+  stats.rounds++;
+  updateStats();
+  document.getElementById('statusText').textContent = `Round ${round} — scanning literature...`;
+
+  const persona = PERSONAS[selectedPersona];
+  const focus = document.getElementById('focus').value.trim();
+
+  // Build system prompt
+  const systemPrompt = `${persona.systemPrompt}
+
+You are operating in a live research swarm. Your job this round:
+1. Use pubmed_search or arxiv_search to find recent relevant papers
+2. Pick 1 promising paper and fetch its abstract with fetch_abstract
+3. Generate a specific, falsifiable hypothesis OR a peer critique based on what you find
+4. Your hypothesis will be broadcast to the swarm and advance Longevity Escape Velocity
+
+Scientific standards: Be specific. Name mechanisms, compounds, concentrations, timelines. Cite PMIDs. Every claim grounded in real biology. Be concise (under 200 words for your final hypothesis/critique).
+
+After tool calls, end with exactly this format:
+HYPOTHESIS: [your specific scientific hypothesis]
+LEV_DELTA: [0.1 to 2.0 — how much this advances LEV]
+NODE_TYPE: [hypothesis|consensus|roadblock|breakthrough]`;
+
+  const userMsg = `Research focus for this round: "${focus}". Search for the most recent relevant papers, find something specific, and generate a rigorous hypothesis or critique. Use your tools.`;
+
+  // Call LLM
+  let llmRes = await callLLM(serverUrl, systemPrompt, userMsg);
+
+  // Process tool calls (ReAct loop — up to 4 turns)
+  let history = [{ role: 'user', content: userMsg }];
+  let toolResults = [];
+  let iterations = 0;
+
+  while (llmRes && iterations < 4) {
+    const toolCalls = extractToolCalls(llmRes);
+    if (!toolCalls.length) break;
+    iterations++;
+
+    for (const tc of toolCalls) {
+      log('tool-call', `// CALLING ${tc.name.toUpperCase()}`, `Args: <span class="highlight">${JSON.stringify(tc.args)}</span>`);
+      const result = await callTool(tc.name, tc.args);
+
+      // Add papers to queue
+      if (result.results) {
+        result.results.forEach(p => {
+          addPaperToQueue(p, result.source === 'arXiv' ? 'arxiv' : result.source === 'ClinicalTrials.gov' ? 'trial' : 'pubmed');
+        });
+        stats.papers += result.results.length;
+        updateStats();
+
+        // Render results in feed
+        const papersHtml = result.results.slice(0, 4).map(p => `
+          <div class="paper">
+            <div class="paper-title">${p.title || p.brief_title || ''}</div>
+            <div class="paper-meta">${p.authors||''} ${p.pubdate||p.published||''}</div>
+            ${p.pmid ? `<span class="pmid">PMID:${p.pmid}</span>` : ''}
+            ${p.url ? `<a href="${p.url}" target="_blank">→ View</a>` : ''}
+          </div>
+        `).join('');
+        log('tool-result', `// ${tc.name.toUpperCase()} — ${result.results.length} RESULTS`, papersHtml);
+      } else if (result.abstract) {
+        log('tool-result', `// ABSTRACT — PMID:${result.pmid}`, `<div class="paper">${result.abstract}</div>`);
+      }
+
+      toolResults.push({ tool: tc.name, result });
+
+      // Feed result back to LLM
+      const toolResultContent = JSON.stringify(result).slice(0, 3000);
+      if (document.getElementById('llmProvider').value === 'anthropic') {
+        history.push({ role: 'assistant', content: llmRes.data.content });
+        history.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: tc.id, content: toolResultContent }] });
+      } else {
+        history.push({ role: 'assistant', content: null, tool_calls: [{ id: tc.id, type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.args) } }] });
+        history.push({ role: 'tool', tool_call_id: tc.id, content: toolResultContent });
+      }
+    }
+
+    // Continue LLM loop
+    llmRes = await callLLM(serverUrl, systemPrompt, '', history);
+  }
+
+  // Extract final text
+  const finalText = extractText(llmRes);
+
+  if (finalText) {
+    // Parse hypothesis
+    const hypMatch = finalText.match(/HYPOTHESIS:\s*(.+?)(?:LEV_DELTA|NODE_TYPE|$)/si);
+    const levMatch = finalText.match(/LEV_DELTA:\s*([\d.]+)/i);
+    const typeMatch = finalText.match(/NODE_TYPE:\s*(\w+)/i);
+
+    const hypothesis = hypMatch ? hypMatch[1].trim() : finalText.slice(0, 400);
+    const levDelta = parseFloat(levMatch?.[1] || '0.5');
+    const nodeType = typeMatch?.[1] || 'hypothesis';
+
+    const isCritique = selectedPersona === 'critique' || nodeType === 'roadblock';
+    const isBreakthrough = nodeType === 'breakthrough' || levDelta > 1.5;
+
+    const entryType = isBreakthrough ? 'breakthrough' : isCritique ? 'critique' : 'hypothesis';
+    log(entryType, `// ${nodeType.toUpperCase()} GENERATED`, `<span class="highlight">${hypothesis}</span><br><br><span style="color:#456">LEV Δ: +${levDelta} | Type: ${nodeType}</span>`);
+
+    if (isCritique) stats.critiques++;
+    stats.nodes++;
+    updateStats();
+
+    // Broadcast to swarm via MCP
+    if (agentId) {
+      try {
+        // Join or find a council
+        const councilsRes = await mcpCall(serverUrl, 'get_councils', {});
+        const councilsData = JSON.parse(councilsRes?.result?.content?.[0]?.text || '{"councils":[]}');
+        const councils = councilsData.councils || [];
+
+        if (councils.length > 0) {
+          const council = councils[0];
+          await mcpCall(serverUrl, 'speak_in_council', {
+            agent_id: agentId,
+            council_id: council.id,
+            text: hypothesis,
+            node_type: nodeType,
+            lev_delta: levDelta
+          });
+        } else {
+          // No council — deposit as pheromone
+          await mcpCall(serverUrl, 'deposit_pheromone', {
+            agent_id: agentId,
+            amount: Math.min(levDelta * 2, 5),
+            message: hypothesis.slice(0, 200)
+          });
+        }
+
+        // Update LEV display
+        const levRes = await mcpCall(serverUrl, 'get_research_tree', { limit: 1 });
+        // Estimate from stats
+        const estimatedLev = Math.min(stats.nodes * levDelta * 0.5, 100);
+        document.getElementById('levPct').textContent = estimatedLev.toFixed(1) + '%';
+        document.getElementById('levFill').style.width = estimatedLev + '%';
+
+      } catch (e) {
+        log('system', '// SWARM BROADCAST', `Could not broadcast: ${e.message}`);
+      }
+    }
+
+    // Move agent
+    if (agentId) {
+      const dx = Math.floor(Math.random() * 16) - 8;
+      const dy = Math.floor(Math.random() * 16) - 8;
+      await mcpCall(serverUrl, 'move_agent', { agent_id: agentId, dx, dy }).catch(() => {});
+      await mcpCall(serverUrl, 'deposit_pheromone', {
+        agent_id: agentId,
+        amount: Math.min(levDelta * 1.5, 4),
+        message: hypothesis.slice(0, 150)
+      }).catch(() => {});
+    }
+
+  } else if (!document.getElementById('apiKey').value.trim()) {
+    // No API key — run in deterministic demo mode
+    await deterministicRound(serverUrl);
+  }
+}
+
+// ── Deterministic mode (no API key) ──
+async function deterministicRound(serverUrl) {
+  const focus = document.getElementById('focus').value.trim();
+  log('system', '// DETERMINISTIC MODE', 'No LLM API key — searching literature directly');
+
+  const result = await callTool('pubmed_search', { query: focus, max_results: 6 });
+  if (result.results?.length) {
+    stats.papers += result.results.length;
+    stats.nodes++;
+    updateStats();
+
+    const paper = result.results[0];
+    const hyp = `Based on ${paper.title} (PMID:${paper.pmid || 'N/A'}): Hypothesis requires LLM to generate. Add API key for full ReAct reasoning.`;
+
+    if (agentId) {
+      await mcpCall(serverUrl, 'deposit_pheromone', {
+        agent_id: agentId,
+        amount: 1.5,
+        message: `Literature scan: ${paper.title?.slice(0, 100)}`
+      }).catch(() => {});
+    }
+  }
+}
+
+// ── Deploy ──
+async function deploy() {
+  const serverUrl = document.getElementById('serverUrl').value.trim();
+  const agentName = document.getElementById('agentName').value.trim();
+  totalRounds = parseInt(document.getElementById('rounds').value) || 20;
+  const intervalMs = parseInt(document.getElementById('interval').value) || 12000;
+  round = 0;
+  stats = { rounds: 0, nodes: 0, papers: 0, critiques: 0 };
+
+  document.getElementById('deployBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  document.getElementById('dot').classList.remove('off');
+  document.getElementById('hdrStatus').textContent = 'CONNECTING';
+  document.getElementById('statusText').textContent = 'Connecting to swarm...';
+
+  log('system', '// INITIALIZING', `Connecting to ${serverUrl}`);
+
+  try {
+    // Handshake
+    await fetch(serverUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 0, method: 'initialize', params: {} })
+    });
+
+    // Join swarm
+    const persona = PERSONAS[selectedPersona];
+    const joinRes = await mcpCall(serverUrl, 'join_district', {
+      name: agentName,
+      persona: persona.name,
+      color: persona.color
+    });
+
+    const joinData = JSON.parse(joinRes?.result?.content?.[0]?.text || '{}');
+    agentId = joinData.agent_id || `local-${Date.now()}`;
+
+    document.getElementById('hdrAgent').textContent = agentId;
+    document.getElementById('hdrStatus').textContent = 'ONLINE';
+    log('system', '// AGENT SPAWNED', `ID: ${agentId} | Persona: ${persona.name}`);
+
+    // Announce
+    await mcpCall(serverUrl, 'deposit_pheromone', {
+      agent_id: agentId,
+      amount: 3.0,
+      message: `${agentName} online — ${persona.name} — beginning ${totalRounds}-round literature scan. Defeat death.`
+    }).catch(() => {});
+
+    running = true;
+
+    const loop = async () => {
+      if (!running || round >= totalRounds) { stopAgent(); return; }
+      await researchRound(serverUrl);
+      if (running) intervalHandle = setTimeout(loop, intervalMs);
+    };
+
+    intervalHandle = setTimeout(loop, 500);
+
+  } catch (e) {
+    log('error', '// DEPLOY FAILED', e.message);
+    document.getElementById('deployBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('dot').classList.add('off');
+    document.getElementById('hdrStatus').textContent = 'OFFLINE';
+  }
+}
+
+function stopAgent() {
+  running = false;
+  if (intervalHandle) clearTimeout(intervalHandle);
+  document.getElementById('deployBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('dot').classList.add('off');
+  document.getElementById('hdrStatus').textContent = 'OFFLINE';
+  document.getElementById('statusText').textContent = `Mission complete — ${stats.nodes} nodes, ${stats.papers} papers scanned`;
+  log('system', '// MISSION COMPLETE', `Rounds: ${stats.rounds} | Nodes: ${stats.nodes} | Papers: ${stats.papers} | Critiques: ${stats.critiques}`);
+  agentId = null;
+}
+</script>
+</body>
+</html>
