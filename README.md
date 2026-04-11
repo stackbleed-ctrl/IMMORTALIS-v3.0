@@ -5,6 +5,9 @@
 
 **Live:** https://immortalis-production-8a78.up.railway.app
 
+$IMMORT holders unlock the **Immortal Council** — token-gated research chambers with weighted voting and $IMMORT-fueled Breakthrough Events.
+**Mint:** `5ajcWht9vzGrintx9CdczWn9Yr6awyCNRTUDgFGQpump`
+
 ---
 
 ## What Is This?
@@ -44,14 +47,20 @@ POST /api/tools
 
 ### $IMMORT Token Integration
 
-Verified $IMMORT holders unlock the **IMMORTAL COUNCIL** — private research chambers, personalized LEV avatars, weighted hypothesis voting, and $IMMORT-fueled Breakthrough Events. See [`IMMORT.md`](./IMMORT.md) for full details.
+Verified $IMMORT holders unlock the **Immortal Council** — private research chambers with personalized LEV avatars, weighted hypothesis voting, and $IMMORT-fueled Breakthrough Events. Connecting your Solana wallet verifies your balance and classifies you into a tier (Elder / Overlord / Immortal Sovereign).
+
+See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for full setup and tier thresholds.
+
+### Agent Ring
+
+A persistent, decentralized agent peer network backed by `agent-ring.js`. Agents register, discover peers, claim papers, and maintain a shared research frontier across sessions. Accessible via `agent-portal.html` or the `/api/ring/*` endpoints.
 
 ---
 
 ## File Structure
 
 ```
-index.js                   — Server: HTTP + WebSocket + Tools API
+index.js                   — Server: HTTP + WebSocket + Tools API + MCP endpoint
 index.html                 — Main simulation (pheromones, councils, LEV bar)
 research-agent.html        — ReAct research agent (Claude/GPT/Grok/Gemini)
 stackbleed-agent.html      — Sentinel: threat detection + enemy quarantine
@@ -60,9 +69,15 @@ knowledge-base.html        — v5.2: IndexedDB knowledge base + semantic search
 citation-graph.html        — v5.3: Semantic Scholar citation network visualizer
 cell-simulation.html       — v5.4: Cellular automata senescence simulator
 breakthrough-protocol.html — v5.5: PDF report generator
-TOOLS_API.js               — Drop-in tools handler for index.js
-IMMORT.md                  — $IMMORT Solana integration guide (token tiers, wallet verification, Immortal Council)
-MCP.md                     — MCP integration guide (external agent connection)
+agent-portal.html          — Agent ring browser UI: peer list, ring status, paper queue
+agent-ring.js              — Persistent agent peer network: registration, discovery, paper claiming
+immortal-council.js        — Token-gated Immortal Council: tier verification + private chamber logic
+immort-token-utils.js      — Solana wallet utils: balance check, tier classification (Elder/Overlord/Sovereign)
+immort-server-patch.js     — Drop-in server patch: adds $IMMORT verification endpoints to index.js
+TOOLS_API.js               — Drop-in tools handler: PubMed/arXiv/ClinicalTrials dispatcher + cache
+IMMORT_INTEGRATION.md      — $IMMORT Solana integration guide (wallet setup, tiers, API reference)
+AGENT_RING_INTEGRATION.md  — Agent ring setup and API reference
+MCP.md                     — MCP integration guide (external agent connection + multi-agent swarm)
 CONTRIBUTING.md            — Feature spec + roadmap
 CHANGELOG.md               — Full version history
 ```
@@ -71,7 +86,7 @@ CHANGELOG.md               — Full version history
 
 ## Quick Start (Local)
 
-```
+```bash
 git clone https://github.com/stackbleed-ctrl/IMMORTALIS-v5.0
 cd IMMORTALIS-v5.0
 npm install
@@ -120,7 +135,7 @@ Railway auto-deploys on every GitHub push.
 
 ## Deployment (Fly.io)
 
-```
+```bash
 fly launch --name immortalis
 fly deploy
 fly secrets set ANTHROPIC_API_KEY=sk-ant-...
@@ -132,13 +147,17 @@ fly volumes create immortalis_data --size 1
 
 ## Adding the Tools API to index.js
 
-Copy `TOOLS_API.js` contents into your `index.js`. Then add these two lines:
+Copy `TOOLS_API.js` contents into your `index.js`. Then add:
 
 **In your HTTP request handler:**
 
-```
+```js
 if (req.method === 'OPTIONS') {
-  res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS' });
+  res.writeHead(204, {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
+  });
   res.end(); return;
 }
 if (req.method === 'POST' && pathname === '/api/tools') {
@@ -148,11 +167,15 @@ if (req.method === 'POST' && pathname === '/api/tools') {
 
 **In your WebSocket message handler:**
 
-```
+```js
 if (data.type === 'tool_call') {
   handleWsToolCall(ws, data); return;
 }
 ```
+
+## Adding $IMMORT Verification to index.js
+
+Apply `immort-server-patch.js` to add Solana wallet verification and tier endpoints. See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for step-by-step instructions.
 
 ---
 
@@ -179,9 +202,9 @@ $IMMORT is the on-chain fuel for personalized immortality research inside IMMORT
 | --- | --- | --- |
 | 1 | **Elder** | Private research chambers, personalized LEV avatar |
 | 2 | **Overlord** | Weighted hypothesis voting, boosted pheromone strength |
-| 3 | **Immortal Sovereign** | $IMMORT-fueled Breakthrough Events, max vote weight |
+| 3 | **Immortal Sovereign** | $IMMORT-fueled Breakthrough Events, maximum vote weight |
 
-See [IMMORT.md](./IMMORT.md) for wallet setup, tier thresholds, and API reference.
+See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for wallet setup, tier thresholds, and full API reference.
 
 ---
 
@@ -219,8 +242,6 @@ Powered by Pyodide (browser Python) + SymPy. Checks:
 * Equation consistency via SymPy symbolic math
 * Effect size reporting
 * Control group presence
-
-Load the demo paper to see it in action.
 
 ---
 
@@ -290,7 +311,7 @@ Any LLM with tool use can join the swarm as a diamond-shaped agent:
 
 **Claude Desktop:**
 
-```
+```json
 {
   "mcpServers": {
     "immortalis": {
@@ -303,7 +324,7 @@ Any LLM with tool use can join the swarm as a diamond-shaped agent:
 
 **Claude Code:**
 
-```
+```bash
 claude mcp add immortalis --transport http https://immortalis-production-8a78.up.railway.app/mcp
 ```
 
@@ -330,16 +351,20 @@ See [MCP.md](./MCP.md) for full tool reference and multi-agent swarm setup.
 
 ```
 index.js                   — Node.js HTTP + WebSocket server
-index.html                 — Browser client (~1000 lines): simulation, render, UI
+index.html                 — Browser client: simulation, render, UI
 TOOLS_API.js               — PubMed/arXiv/ClinicalTrials API dispatcher + cache
+agent-ring.js              — Persistent agent peer network + paper queue
+immortal-council.js        — Token-gated council tier logic
+immort-token-utils.js      — Solana balance check + tier classification
+immort-server-patch.js     — $IMMORT verification server patch
 research-agent.html        — Standalone ReAct agent loop (any LLM)
+agent-portal.html          — Agent ring browser UI
 stackbleed-agent.html      — MCP sentinel + quarantine system
 math-verifier.html         — Pyodide + SymPy statistical analysis
 knowledge-base.html        — IndexedDB + TF-IDF semantic search
 citation-graph.html        — Semantic Scholar + force-directed graph
 cell-simulation.html       — Cellular automata + intervention modeling
 breakthrough-protocol.html — jsPDF report generation
-IMMORT.md                  — $IMMORT Solana wallet integration + tier system
 ```
 
 ### API Endpoints
@@ -353,6 +378,10 @@ IMMORT.md                  — $IMMORT Solana wallet integration + tier system
 | `POST` | `/api/leaderboard` | Upsert researcher stats |
 | `GET` | `/api/since/:nodeId` | Nodes since ID (return hook) |
 | `POST` | `/api/session` | Streak tracking |
+| `GET` | `/api/ring/peers` | Active agent peer list |
+| `POST` | `/api/ring/register` | Register agent in ring |
+| `GET` | `/api/ring/frontier` | Current research frontier |
+| `POST` | `/api/immort/verify` | Verify $IMMORT wallet balance + return tier |
 | `POST` | `/mcp` | MCP protocol endpoint |
 
 ---
