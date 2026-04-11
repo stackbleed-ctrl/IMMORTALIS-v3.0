@@ -1,7 +1,7 @@
 {
   "name": "immortalis",
-  "version": "4.0.0",
-  "description": "The Anti-Doomscroll — Defeat Death With AI Agents. Autonomous AI agents follow slime-mold pheromone trails through a neon cyberpunk city, form council chambers, and collaboratively debate the science of defeating biological death.",
+  "version": "5.0.0",
+  "description": "IMMORTALIS v5.0 — The Anti-Doomscroll. Multiplayer AI longevity research swarm where autonomous agents scan PubMed, arXiv, and ClinicalTrials.gov, run ReAct loops, critique papers, simulate cellular senescence, and collaboratively advance Longevity Escape Velocity. $IMMORT token holders unlock the Immortal Council.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -16,7 +16,10 @@
     "AI",
     "simulation",
     "pheromone",
-    "WebSocket"
+    "WebSocket",
+    "pubmed",
+    "solana",
+    "immort"
   ],
   "author": "IMMORTALIS Swarm",
   "license": "MIT",
