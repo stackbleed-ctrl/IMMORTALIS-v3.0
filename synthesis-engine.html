@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMMORTALIS — Synthesis Engine</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #04050f;
+  --bg2:     #070916;
+  --bg3:     #0b0f24;
+  --border:  #141c38;
+  --cyan:    #00d4ff;
+  --magenta: #cc44ff;
+  --gold:    #ffd700;
+  --orange:  #ff6b35;
+  --green:   #00ff88;
+  --red:     #ff3344;
+  --text:    #c8d8f0;
+  --dim:     #3a5070;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+
+/* ── Header ── */
+#hdr{
+  position:relative;z-index:20;height:50px;display:flex;align-items:center;
+  padding:0 18px;gap:18px;
+  background:rgba(4,5,15,.98);border-bottom:1px solid var(--border);
+}
+#logo{
+  font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;
+  color:var(--cyan);text-shadow:0 0 22px rgba(0,212,255,.6);
+  letter-spacing:3px;white-space:nowrap;
+}
+#logo em{color:var(--magenta);text-shadow:0 0 22px rgba(204,68,255,.6);font-style:normal;}
+#stats{display:flex;gap:22px;flex:1;justify-content:center;}
+.stat{text-align:center;}
+.sv{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);}
+.sl{font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;}
+#mort{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  color:var(--red);text-align:right;white-space:nowrap;line-height:1.5;
+}
+#mort strong{font-size:13px;font-weight:700;}
+#key-btn{
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;
+  padding:4px 10px;border:1px solid var(--dim);background:transparent;
+  color:var(--dim);cursor:pointer;border-radius:2px;white-space:nowrap;
+  transition:all .2s;
+}
+#key-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── Main grid ── */
+#main{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1fr 390px;
+  height:calc(100vh - 50px);
+}
+
+/* ── Left: Evidence Landscape ── */
+#left{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;}
+.ph{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 16px;border-bottom:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.pt{font-family:'Orbitron',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:2.5px;}
+.ps{font-size:9px;color:var(--dim);margin-top:2px;}
+#filters{
+  display:flex;gap:5px;align-items:center;
+  padding:7px 16px;border-bottom:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;flex-wrap:wrap;
+}
+.fb{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.8px;
+  padding:3px 9px;border:1px solid var(--border);background:transparent;
+  color:var(--dim);cursor:pointer;border-radius:2px;transition:all .15s;
+}
+.fb:hover,.fb.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07);}
+.fsep{width:1px;height:14px;background:var(--border);margin:0 3px;}
+#scatter-wrap{flex:1;position:relative;overflow:hidden;}
+#scatter-svg{width:100%;height:100%;}
+.scanline{
+  position:absolute;left:0;right:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  animation:scan 5s ease-in-out infinite;animation-delay:3s;opacity:0;
+}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:.6}95%{opacity:.6}100%{top:100%;opacity:0}}
+#legend{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:6px 16px;border-top:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.li{display:flex;align-items:center;gap:4px;font-size:8.5px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
+.ld{width:7px;height:7px;border-radius:50%;}
+.lsep{margin-left:auto;font-size:8.5px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
+
+/* ── Right panels ── */
+#right{display:flex;flex-direction:column;overflow:hidden;}
+.rp{display:flex;flex-direction:column;border-bottom:1px solid var(--border);overflow:hidden;}
+#rp-rosetta{flex:0 0 50%;}
+#rp-blueprint{flex:1;}
+.pb{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:7px;}
+.pb::-webkit-scrollbar{width:3px;}
+.pb::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── Inputs ── */
+textarea.ci{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  padding:8px;resize:vertical;border-radius:3px;outline:none;
+  transition:border-color .2s;line-height:1.6;
+}
+textarea.ci:focus{border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.12);}
+textarea.ci::placeholder{color:var(--dim);}
+select.cs{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  padding:7px 8px;border-radius:3px;outline:none;cursor:pointer;
+}
+select.cs:focus{border-color:var(--magenta);}
+
+/* ── Buttons ── */
+.ab{
+  font-family:'Orbitron',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:2px;
+  padding:7px 14px;border:1px solid var(--cyan);background:rgba(0,212,255,.09);
+  color:var(--cyan);cursor:pointer;border-radius:3px;transition:all .2s;align-self:flex-start;
+}
+.ab:hover:not(:disabled){background:rgba(0,212,255,.18);box-shadow:0 0 14px rgba(0,212,255,.3);}
+.ab:disabled{opacity:.35;cursor:not-allowed;}
+.ab.mg{border-color:var(--magenta);background:rgba(204,68,255,.09);color:var(--magenta);}
+.ab.mg:hover:not(:disabled){background:rgba(204,68,255,.18);box-shadow:0 0 14px rgba(204,68,255,.3);}
+.ab.sm{font-size:8px;padding:4px 10px;letter-spacing:1px;}
+.ab.gn{border-color:var(--green);background:rgba(0,255,136,.07);color:var(--green);}
+.ab.gn:hover:not(:disabled){background:rgba(0,255,136,.15);}
+.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+
+/* ── Output box ── */
+.ob{
+  flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+  padding:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  line-height:1.75;color:var(--text);overflow-y:auto;min-height:90px;
+}
+.ob::-webkit-scrollbar{width:3px;}
+.ob::-webkit-scrollbar-thumb{background:var(--border);}
+.ph-text{color:var(--dim);font-style:italic;font-size:10px;}
+.ob .sec{color:var(--cyan);font-weight:700;}
+.ob .sec.mg{color:var(--magenta);}
+.spin::after{content:'▋';animation:blink .7s steps(1) infinite;}
+@keyframes blink{50%{opacity:0}}
+
+/* ── Tooltip ── */
+#tip{
+  position:fixed;pointer-events:none;display:none;z-index:200;
+  background:rgba(5,7,20,.97);border:1px solid var(--border);border-radius:4px;
+  padding:11px 14px;max-width:270px;box-shadow:0 6px 28px rgba(0,0,0,.7);
+}
+.tn{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:3px;}
+.tm{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--magenta);margin-bottom:5px;}
+.tb{display:inline-block;font-size:8.5px;padding:2px 7px;border-radius:2px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.8px;}
+.ts{display:flex;gap:14px;margin-bottom:6px;}
+.tsc{font-size:9.5px;color:var(--dim);line-height:1.5;}
+.tsc strong{color:var(--text);font-family:'Orbitron',sans-serif;font-size:11.5px;}
+.td{font-size:9.5px;color:#8090b0;line-height:1.55;}
+
+/* ── API key modal ── */
+#key-modal{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.7);align-items:center;justify-content:center;
+}
+#key-modal.open{display:flex;}
+#key-box{
+  background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+  padding:24px;width:380px;max-width:90vw;
+}
+#key-box h3{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;}
+#key-box p{font-size:10.5px;color:var(--dim);margin-bottom:14px;line-height:1.6;}
+#key-box input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:9px;
+  border-radius:3px;outline:none;margin-bottom:10px;
+}
+#key-box input:focus{border-color:var(--gold);}
+.kb-row{display:flex;gap:8px;}
+
+/* ── Responsive ── */
+@media(max-width:780px){
+  #main{grid-template-columns:1fr;grid-template-rows:50vh 1fr;}
+  #stats{display:none;}
+  #rp-rosetta{flex:none;min-height:300px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="hdr">
+  <div id="logo">⬡ IMMORTALIS <em>/ SYNTHESIS ENGINE</em></div>
+  <div id="stats">
+    <div class="stat"><div class="sv" id="s-int">20</div><div class="sl">Interventions</div></div>
+    <div class="stat"><div class="sv" id="s-gap" style="color:var(--orange)">6</div><div class="sl">Priority Gaps</div></div>
+    <div class="stat"><div class="sv" id="s-tr">0</div><div class="sl">Translations</div></div>
+    <div class="stat"><div class="sv" id="s-pr">0</div><div class="sl">Protocols</div></div>
+  </div>
+  <div id="mort">deaths to aging this session<br><strong id="mort-n">0</strong></div>
+  <button id="key-btn" onclick="openKeyModal()">⚙ API KEY</button>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Evidence Landscape -->
+  <div id="left">
+    <div class="ph">
+      <div>
+        <div class="pt" style="color:var(--cyan)">EVIDENCE LANDSCAPE</div>
+        <div class="ps">Longevity interventions mapped by evidence strength vs. lifespan impact · Scroll to zoom · Drag to pan</div>
+      </div>
+    </div>
+    <div id="filters">
+      <span style="font-size:8.5px;color:var(--dim);font-family:'JetBrains Mono',monospace">STATUS:</span>
+      <button class="fb on" data-f="all">ALL</button>
+      <button class="fb" data-f="validated">VALIDATED</button>
+      <button class="fb" data-f="promising">PROMISING</button>
+      <button class="fb" data-f="emerging">EMERGING</button>
+      <button class="fb" data-f="contested">CONTESTED</button>
+      <button class="fb" data-f="speculative">SPECULATIVE</button>
+    </div>
+    <div id="scatter-wrap">
+      <div class="scanline"></div>
+      <svg id="scatter-svg"></svg>
+    </div>
+    <div id="legend">
+      <div class="li"><div class="ld" style="background:#00d4ff"></div>mTOR</div>
+      <div class="li"><div class="ld" style="background:#cc44ff"></div>Epigenetic</div>
+      <div class="li"><div class="ld" style="background:#ff6b35"></div>Senescence</div>
+      <div class="li"><div class="ld" style="background:#00ff88"></div>Systemic</div>
+      <div class="li"><div class="ld" style="background:#ffd700"></div>Genetic</div>
+      <div class="li"><div class="ld" style="background:#8888ff"></div>Autophagy</div>
+      <div class="li"><div class="ld" style="background:#ff1493"></div>Multi</div>
+      <div class="li"><div class="ld" style="background:#ff4488"></div>Telomere</div>
+      <div class="lsep">● SIZE = STUDY COUNT</div>
+    </div>
+  </div>
+
+  <!-- Right panels -->
+  <div id="right">
+
+    <!-- Rosetta Protocol -->
+    <div class="rp" id="rp-rosetta">
+      <div class="ph">
+        <div>
+          <div class="pt" style="color:var(--green)">🔬 ROSETTA PROTOCOL</div>
+          <div class="ps">Cross-species translation · Animal model → Human clinical relevance</div>
+        </div>
+      </div>
+      <div class="pb" id="pb-rosetta">
+        <textarea class="ci" id="ri" rows="4"
+          placeholder="Paste any animal model finding...&#10;e.g. Rapamycin at 14ppm extended median lifespan 23% in 600-day-old C57BL/6 mice with no hepatotoxicity observed over 12 months."></textarea>
+        <div class="row">
+          <button class="ab" id="r-btn" onclick="runRosetta()">⟳ TRANSLATE</button>
+          <button class="ab sm gn" id="r-post" style="display:none" onclick="postToSwarm('rosetta')">↑ POST TO SWARM</button>
+        </div>
+        <div class="ob" id="ro"><span class="ph-text">Translation will appear here. The Rosetta engine analyzes pathway conservation, allometric scaling, human homologs, existing clinical data, and confidence score.</span></div>
+      </div>
+    </div>
+
+    <!-- Blueprint Generator -->
+    <div class="rp" id="rp-blueprint">
+      <div class="ph">
+        <div>
+          <div class="pt" style="color:var(--magenta)">📋 EXPERIMENTAL BLUEPRINT</div>
+          <div class="ps">Hypothesis → trial-ready protocol · Power analysis · IRB-ready</div>
+        </div>
+      </div>
+      <div class="pb" id="pb-blueprint">
+        <select class="cs" id="bsel"></select>
+        <textarea class="ci" id="bi" rows="3"
+          placeholder="Or describe a custom hypothesis...&#10;e.g. Intermittent rapamycin + dasatinib/quercetin combination vs. placebo in adults 60–75 over 18 months. Primary endpoint: epigenetic age (GrimAge clock)."></textarea>
+        <div class="row">
+          <button class="ab mg" id="b-btn" onclick="runBlueprint()">⬡ GENERATE PROTOCOL</button>
+          <button class="ab sm gn" id="b-post" style="display:none" onclick="postToSwarm('blueprint')">↑ POST TO SWARM</button>
+        </div>
+        <div class="ob" id="bo"><span class="ph-text">Complete experimental protocol will appear here: study design, primary/secondary endpoints, sample size calculation, inclusion criteria, statistical analysis plan, timeline, and regulatory pathway.</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tip">
+  <div class="tn" id="tn"></div>
+  <div class="tm" id="tm"></div>
+  <span class="tb" id="tb"></span>
+  <div class="ts">
+    <div class="tsc">Evidence<br><strong id="te"></strong>/10</div>
+    <div class="tsc">LEV Impact<br><strong id="tl"></strong> yrs</div>
+    <div class="tsc">Studies<br><strong id="tst"></strong></div>
+  </div>
+  <div class="td" id="td"></div>
+  <div id="t-priority" style="display:none;margin-top:6px;font-size:9px;color:var(--orange);font-family:'JetBrains Mono',monospace;letter-spacing:1px;">⚠ PRIORITY RESEARCH GAP — HIGH LEV / LOW EVIDENCE</div>
+</div>
+
+<!-- API Key Modal -->
+<div id="key-modal">
+  <div id="key-box">
+    <h3>⚙ ANTHROPIC API KEY</h3>
+    <p>Required for Rosetta Protocol and Experimental Blueprint Generator. Your key is stored locally and never transmitted to IMMORTALIS servers.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-...">
+    <div class="kb-row">
+      <button class="ab" onclick="saveKey()">SAVE KEY</button>
+      <button class="ab" style="border-color:var(--dim);color:var(--dim)" onclick="closeKeyModal()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+
+const MECH_COLORS = {
+  'mTOR/Metabolism':'#00d4ff','Epigenetic':'#cc44ff','Senescence':'#ff6b35',
+  'Systemic':'#00ff88','Genetic':'#ffd700','Autophagy':'#8888ff',
+  'Multi-pathway':'#ff1493','Telomere':'#ff4488',
+};
+
+const DATA = [
+  {name:"Exercise (aerobic+resistance)",mech:"Multi-pathway",ev:9.3,lev:4.2,n:1204,status:"validated",desc:"Strongest mortality-reducing intervention known. Simultaneously addresses senescence, telomere maintenance, mitochondrial biogenesis, and systemic inflammation. JAMA meta-analysis: 35% all-cause mortality reduction."},
+  {name:"Caloric Restriction",mech:"mTOR/Metabolism",ev:9.1,lev:4.8,n:847,status:"validated",desc:"20–40% CR extends lifespan in every model organism tested. CALERIE human RCT showed favorable biomarker effects at 2 years. Okinawan natural experiment. Mechanism: mTOR suppression, IGF-1 reduction, autophagy induction."},
+  {name:"Rapamycin",mech:"mTOR/Metabolism",ev:8.7,lev:4.5,n:312,status:"validated",desc:"14–25% mouse lifespan extension, replicated by ITP in 3 independent centers. Works starting at age equivalent to 60-year-old humans. Human intermittent dosing (5mg/week) Phase 2 trials show favorable immune and metabolic safety."},
+  {name:"Metformin",mech:"mTOR/Metabolism",ev:8.2,lev:2.8,n:428,status:"validated",desc:"Diabetics on metformin outlive non-diabetics without diabetes — a striking natural experiment. TAME trial (n=3,000) underway. Multi-target: AMPK activation, mTOR Complex 1 inhibition, mitochondrial Complex 1 inhibition."},
+  {name:"Intermittent Fasting",mech:"Autophagy",ev:7.6,lev:3.2,n:186,status:"validated",desc:"Multiple human RCTs confirm metabolic benefits. Activates autophagy via AMPK, reduces IGF-1 and insulin. 16:8 and 5:2 protocols show equivalent benefits to CR in controlled trials. Compliance advantage over continuous restriction."},
+  {name:"Senolytics (D+Q)",mech:"Senescence",ev:7.1,lev:3.8,n:94,status:"promising",desc:"Dasatinib+Quercetin selectively clears senescent cells. Phase 2 positive in IPF and diabetic kidney disease. Reduces downstream SASP inflammatory cascade. Mayo Clinic and UNITY Biotechnology data consistent across cohorts."},
+  {name:"Senomorphics (JAK inhibitors)",mech:"Senescence",ev:6.0,lev:3.2,n:36,status:"promising",desc:"Block SASP without requiring cell clearance — complementary to senolytics. Ruxolitinib restores muscle stem cell regenerative capacity in aged mice. Phase 1 human safety data encouraging. May prevent bystander senescence spread."},
+  {name:"NAD+ Precursors (NMN/NR)",mech:"mTOR/Metabolism",ev:6.4,lev:2.4,n:78,status:"promising",desc:"NAD+ declines ~50% from age 20 to 60, impairing sirtuin function and mitochondrial repair. Human trials confirm NAD+ restoration and safety. Functional efficacy endpoints (muscle strength, cognitive) emerging across 6 Phase 2 trials."},
+  {name:"Spermidine",mech:"Autophagy",ev:6.1,lev:2.1,n:52,status:"promising",desc:"Polyamine autophagy inducer. Austrian cohort: high dietary spermidine (wheat germ) correlated with reduced cardiovascular mortality. MEMOS memory trial showed positive cognitive signal. Available as supplement, excellent safety profile."},
+  {name:"Mitochondrial Enhancement",mech:"mTOR/Metabolism",ev:5.3,lev:2.6,n:44,status:"promising",desc:"MitoQ and urolithin A restore mitochondrial quality control and biogenesis. Age-related mitochondrial dysfunction drives multiple hallmarks simultaneously. Urolithin A Phase 2 human data positive for muscle function in older adults."},
+  {name:"Klotho Protein",mech:"Systemic",ev:5.2,lev:3.8,n:41,status:"emerging",desc:"Klotho-null mice age rapidly and die at ~8 weeks; overexpression extends lifespan 20–30%. Serum klotho declines with age and predicts mortality. Key unsolved challenge: CNS delivery for cognitive benefits. Systemic delivery in primate studies active."},
+  {name:"Partial Reprogramming (OSK)",mech:"Epigenetic",ev:5.6,lev:8.4,n:38,status:"emerging",desc:"Transient Oct4/Sox2/Klf4 expression resets DNA methylation age without inducing pluripotency. Sinclair Harvard lab: 10-year reversal of visual cortex epigenetic age in mice. Retinal neuron regeneration demonstrated. Multiple delivery approaches in development."},
+  {name:"Epigenetic Reprogramming (full)",mech:"Epigenetic",ev:4.9,lev:9.2,n:24,status:"emerging",desc:"Complete cellular reprogramming to embryonic state. Challenge: preventing teratoma formation. Cyclic induction protocols and organ-targeted AAV delivery approaches under active investigation. Calico, Turn.bio, AgeX Therapeutics working on this."},
+  {name:"Heterochronic Blood Exchange",mech:"Systemic",ev:4.6,lev:4.4,n:22,status:"emerging",desc:"Irina Conboy UCSF: 50% plasma dilution with albumin/saline restores multiple tissues without young blood. Simpler and safer than parabiosis. Removes pro-aging TGF-β, β2-microglobulin. Clinical trial underway at UCSF."},
+  {name:"Wnt Pathway Modulation",mech:"Systemic",ev:4.0,lev:4.1,n:28,status:"emerging",desc:"Age-related Wnt hyperactivation suppresses satellite cell quiescence and regenerative capacity in muscle, brain, and liver. sFRP3 blockade and DKK1 inhibition restore tissue homeostasis in aged mice. Therapeutics in early IND-enabling studies."},
+  {name:"Plasma Dilution (TPE)",mech:"Systemic",ev:4.2,lev:2.9,n:15,status:"emerging",desc:"Therapeutic plasma exchange removes pro-aging circulating factors. Wyss-Coray Stanford: 50% dilution effect on CNS aging biomarkers. Simpler regulatory path than young plasma transfusion. Phase 1 data available."},
+  {name:"Telomerase Activation",mech:"Telomere",ev:4.4,lev:5.8,n:35,status:"emerging",desc:"AAV9-TERT gene therapy extends median lifespan 13–24% in mice with low cancer incidence in p53-competent animals. Maria Blasco CNIO data. Human translation requires concurrent p53/p16 tumor suppressor augmentation strategy."},
+  {name:"GDF11 / Young Blood Factors",mech:"Systemic",ev:3.8,lev:3.6,n:29,status:"contested",desc:"Initial parabiosis enthusiasm tempered by failed GDF11 replications. Alkahest GRF6021 plasma fraction trials in Alzheimer's and Parkinson's ongoing. Field fractured: specific active factors vs. dilution of inhibitory factors debate unresolved."},
+  {name:"Senolytic + Reprogramming Stack",mech:"Multi-pathway",ev:4.2,lev:9.5,n:8,status:"speculative",desc:"Theoretical: clear senescent cells first (reducing reprogramming-induced cancer risk), then OSK reprogram remaining tissue. Additive rejuvenation with reduced oncogenic risk. No combination human data yet. High theoretical basis. Next 5-year frontier."},
+  {name:"CRISPR Longevity Edits",mech:"Genetic",ev:2.8,lev:9.8,n:12,status:"speculative",desc:"Polygenic germline or somatic edits: APOE4→APOE2, PCSK9 KO, klotho gain-of-function, p16INK4a regulatory modifications. Theoretically uncapped LEV potential if delivery and off-target issues solved. IVF embryo editing demonstrably feasible technically."},
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+let apiKey = localStorage.getItem('immortalis_api_key') || '';
+let curFilter = 'all';
+let trCount = +localStorage.getItem('s_tr') || 0;
+let prCount = +localStorage.getItem('s_pr') || 0;
+let sessionStart = Date.now();
+let lastRosettaOutput = '';
+let lastBlueprintOutput = '';
+
+// ── Mortality counter ─────────────────────────────────────────────────────────
+
+setInterval(() => {
+  const n = Math.floor((Date.now() - sessionStart) / 1000 * 1.8);
+  document.getElementById('mort-n').textContent = n.toLocaleString();
+}, 400);
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+function refreshStats() {
+  document.getElementById('s-tr').textContent = trCount;
+  document.getElementById('s-pr').textContent = prCount;
+  const gaps = DATA.filter(d => d.lev >= 5 && d.ev < 5).length;
+  document.getElementById('s-gap').textContent = gaps;
+  document.getElementById('s-int').textContent = DATA.length;
+}
+refreshStats();
+
+// ── Blueprint select ──────────────────────────────────────────────────────────
+
+const bsel = document.getElementById('bsel');
+bsel.innerHTML = '<option value="">— Select known intervention or type below —</option>';
+DATA.forEach(d => {
+  const o = document.createElement('option');
+  o.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
+  o.textContent = d.name;
+  bsel.appendChild(o);
+});
+bsel.addEventListener('change', () => { if (bsel.value) document.getElementById('bi').value = ''; });
+
+// ── API Key Modal ─────────────────────────────────────────────────────────────
+
+function openKeyModal() {
+  document.getElementById('key-input').value = apiKey ? '••••••••••••••••' : '';
+  document.getElementById('key-modal').classList.add('open');
+}
+function closeKeyModal() { document.getElementById('key-modal').classList.remove('open'); }
+function saveKey() {
+  const v = document.getElementById('key-input').value.trim();
+  if (v && !v.startsWith('•')) { apiKey = v; localStorage.setItem('immortalis_api_key', v); }
+  closeKeyModal();
+}
+document.getElementById('key-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeKeyModal(); });
+
+function requireKey(outputId) {
+  if (apiKey) return true;
+  document.getElementById(outputId).innerHTML =
+    '<span style="color:var(--gold)">⚙ API key required — click ⚙ API KEY in the header to add your Anthropic key.</span>';
+  return false;
+}
+
+// ── Format output ─────────────────────────────────────────────────────────────
+
+function fmt(text, color) {
+  // Colorize ALL-CAPS section headers like "PATHWAY CONSERVATION:" or "STUDY DESIGN:"
+  return text.replace(/^([A-Z][A-Z &\/\-\+]+:)/gm,
+    `<span class="sec${color === 'mg' ? ' mg' : ''}">$1</span>`);
+}
+
+// ── Claude API ────────────────────────────────────────────────────────────────
+
+async function callClaude(system, user) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system,
+      messages: [{ role: 'user', content: user }]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content.map(b => b.text || '').join('');
+}
+
+// ── Rosetta Protocol ──────────────────────────────────────────────────────────
+
+async function runRosetta() {
+  const input = document.getElementById('ri').value.trim();
+  if (!input) return;
+  if (!requireKey('ro')) return;
+
+  const btn = document.getElementById('r-btn');
+  const out = document.getElementById('ro');
+  btn.disabled = true; btn.textContent = 'ANALYZING';
+  out.innerHTML = '<span class="spin">Analyzing cross-species pathway conservation</span>';
+  document.getElementById('r-post').style.display = 'none';
+
+  const SYSTEM = `You are the IMMORTALIS Rosetta Protocol — the world's most rigorous cross-species longevity translation engine. You transform animal model findings into precise human clinical relevance assessments.
+
+Structure your response EXACTLY as follows (each header on its own line in ALL CAPS followed by colon):
+
+PATHWAY CONSERVATION:
+[Conservation of this specific pathway from the model organism to Homo sapiens. Name the exact genes, proteins, and conserved regulatory elements. Quantify conservation where possible, e.g., "87% sequence identity in the kinase domain."]
+
+ALLOMETRIC SCALING:
+[Dose and timeline translation. Show the calculation: metabolic rate scaling (mass^0.75), lifespan ratio adjustment, pharmacokinetic differences. Give human-equivalent dose and duration.]
+
+HUMAN HOMOLOG:
+[The specific human biology equivalent. What happens in aging humans in this pathway? What changes? What's the natural variation across the human population?]
+
+CLINICAL EVIDENCE:
+[Existing human trials, epidemiological studies, Mendelian randomization studies, or case reports touching this exact mechanism. Be specific: trial name, n, result, effect size if available. If none exist, state clearly.]
+
+CONFIDENCE SCORE:
+[Score 1-10. Justify with: number of replication studies, species diversity, mechanistic depth, human data quality. Example: "7/10 — pathway highly conserved, 4 independent mouse labs, 1 human pilot RCT positive."]
+
+KEY CAVEATS:
+[The 2–3 most important biological reasons this might not translate. Be specific: species-specific compensatory mechanisms, immune system differences, lifespan ratio confounds, etc.]
+
+PRIORITY LEVEL:
+[HIGH / MEDIUM / LOW — should this be fast-tracked to human trials? Justify with: safety profile, cost of trial, mechanistic confidence, unmet need.]
+
+Be scientifically exact. Cite specific proteins, gene names, concentrations, timelines. No vague claims. This output may be reviewed by research scientists.`;
+
+  try {
+    const result = await callClaude(SYSTEM, `Translate this animal model finding to human clinical relevance:\n\n${input}`);
+    out.innerHTML = fmt(result);
+    lastRosettaOutput = result;
+    document.getElementById('r-post').style.display = 'inline-block';
+    trCount++; localStorage.setItem('s_tr', trCount);
+    refreshStats();
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
+  }
+  btn.disabled = false; btn.textContent = '⟳ TRANSLATE';
+}
+
+// ── Experimental Blueprint ────────────────────────────────────────────────────
+
+async function runBlueprint() {
+  const hypothesis = bsel.value || document.getElementById('bi').value.trim();
+  if (!hypothesis) return;
+  if (!requireKey('bo')) return;
+
+  const btn = document.getElementById('b-btn');
+  const out = document.getElementById('bo');
+  btn.disabled = true; btn.textContent = 'GENERATING';
+  out.innerHTML = '<span class="spin">Generating experimental blueprint</span>';
+  document.getElementById('b-post').style.display = 'none';
+
+  const SYSTEM = `You are the IMMORTALIS Experimental Blueprint engine — you generate clinical trial protocols indistinguishable from those written by senior clinical investigators at major research centers.
+
+Structure your response EXACTLY as follows:
+
+STUDY DESIGN:
+[Phase (I/II/IIa/IIb/III), design (parallel RCT, crossover, adaptive), duration, number of arms, blinding, allocation ratio]
+
+PRIMARY ENDPOINT:
+[One specific, validated, measurable outcome. Include: biomarker name, assay method, minimal clinically important difference (MCID), timepoint of measurement]
+
+SECONDARY ENDPOINTS:
+[3–4 additional endpoints with measurement methods and timepoints. Include both mechanistic and clinical outcomes]
+
+SAMPLE SIZE CALCULATION:
+[Show the math: α level, power (1-β), expected effect size from prior data (cite source), SD estimate, attrition assumption → N per arm and total N. Use a recognized formula.]
+
+INCLUSION CRITERIA:
+[Age range, health status, specific qualifying conditions or biomarker ranges, prior treatment requirements]
+
+EXCLUSION CRITERIA:
+[Safety exclusions, validity exclusions, conditions that confound the primary endpoint]
+
+INTERVENTION PROTOCOL:
+[Exact dosing, formulation, timing, route, duration, permitted co-interventions, prohibited medications, monitoring schedule]
+
+SAFETY MONITORING:
+[Anticipated adverse events and grades, stopping rules (DSMB thresholds), required safety labs, frequency of monitoring visits]
+
+STATISTICAL ANALYSIS PLAN:
+[Primary analysis method, pre-specified sensitivity analyses, handling of missing data, multiplicity correction for secondary endpoints, ITT and PP populations]
+
+TIMELINE:
+[Phase breakdown: screening (months), enrollment period (months), treatment duration (months), follow-up (months), analysis and publication (months) → Total study duration]
+
+ESTIMATED BUDGET RANGE:
+[Low–high range in USD with major cost drivers: investigational product, site costs, lab assays, monitoring, personnel]
+
+REGULATORY PATHWAY:
+[IND required? Phase designation. Predicate studies for FDA precedent. Breakthrough Therapy Designation eligibility? Biomarker qualification status.]
+
+Be specific. Use validated biomarker names (e.g., "GrimAge epigenetic clock by Illumina EPIC array" not just "aging biomarker"). Use realistic numbers. This output should be IRB-submittable.`;
+
+  try {
+    const result = await callClaude(SYSTEM, `Generate a complete experimental protocol for testing this longevity hypothesis:\n\n${hypothesis}`);
+    out.innerHTML = fmt(result, 'mg');
+    lastBlueprintOutput = result;
+    document.getElementById('b-post').style.display = 'inline-block';
+    prCount++; localStorage.setItem('s_pr', prCount);
+    refreshStats();
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
+  }
+  btn.disabled = false; btn.textContent = '⬡ GENERATE PROTOCOL';
+}
+
+// ── Post to Swarm ─────────────────────────────────────────────────────────────
+
+async function postToSwarm(source) {
+  const text = source === 'rosetta' ? lastRosettaOutput : lastBlueprintOutput;
+  const type = source === 'rosetta' ? 'hypothesis' : 'breakthrough';
+  try {
+    await fetch('/api/nodes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: text.slice(0, 500),
+        type,
+        author: 'SynthesisEngine',
+        lev_delta: source === 'blueprint' ? 1.5 : 0.5,
+        source: 'synthesis-engine'
+      })
+    });
+    const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
+    btn.textContent = '✓ POSTED';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 3000);
+  } catch(e) {
+    // Server not running locally — silent fail
+    const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
+    btn.textContent = '✓ POSTED (OFFLINE)'; btn.disabled = true;
+    setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 2000);
+  }
+}
+
+// ── D3 Evidence Landscape ─────────────────────────────────────────────────────
+
+function buildScatter() {
+  const wrap = document.getElementById('scatter-wrap');
+  const svg  = d3.select('#scatter-svg');
+  svg.selectAll('*').remove();
+
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const M = { top:28, right:24, bottom:46, left:52 };
+  const w = W - M.left - M.right;
+  const h = H - M.top  - M.bottom;
+
+  // Defs (glow filters)
+  const defs = svg.append('defs');
+  Object.entries(MECH_COLORS).forEach(([m, c]) => {
+    const fid = 'glow' + m.replace(/\W/g,'');
+    const f = defs.append('filter').attr('id', fid).attr('x','-50%').attr('y','-50%').attr('width','200%').attr('height','200%');
+    f.append('feGaussianBlur').attr('stdDeviation','3.5').attr('result','b');
+    const fm = f.append('feMerge');
+    fm.append('feMergeNode').attr('in','b');
+    fm.append('feMergeNode').attr('in','SourceGraphic');
+  });
+
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const xSc = d3.scaleLinear().domain([0,10]).range([0,w]);
+  const ySc = d3.scaleLinear().domain([0,11]).range([h,0]);
+  const rSc = d3.scaleSqrt().domain([0,1300]).range([5,21]);
+
+  // Quadrant backgrounds
+  const quads = [
+    {x:w/2,y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,215,0,.04)',  stroke:'rgba(255,215,0,.12)', label:'VALIDATED BREAKTHROUGHS', lx:w*.75, ly:16,   lc:'#ffd700'},
+    {x:0,  y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,80,0,.05)',   stroke:'rgba(255,80,0,.15)',  label:'PRIORITY RESEARCH GAPS',  lx:w*.25, ly:16,   lc:'#ff6b35'},
+    {x:w/2,y:h/2+6, wd:w/2,ht:h/2-6, fill:'rgba(0,212,255,.03)', stroke:'rgba(0,212,255,.08)', label:'ESTABLISHED BASELINE',    lx:w*.75, ly:h-6,  lc:'#00d4ff'},
+    {x:0,  y:h/2+6, wd:w/2,ht:h/2-6, fill:'rgba(80,80,120,.03)', stroke:'rgba(80,80,120,.09)', label:'SPECULATIVE TERRITORY',   lx:w*.25, ly:h-6,  lc:'#3a5070'},
+  ];
+  quads.forEach(q => {
+    g.append('rect').attr('x',q.x).attr('y',q.y).attr('width',q.wd).attr('height',q.ht)
+      .attr('fill',q.fill).attr('stroke',q.stroke).attr('stroke-width',.5);
+    g.append('text').attr('x',q.lx).attr('y',q.ly).attr('text-anchor','middle')
+      .attr('fill',q.lc).attr('font-size','8.5px').attr('font-family',"'Orbitron',sans-serif")
+      .attr('letter-spacing','2').attr('opacity',.45).text(q.label);
+  });
+
+  // Dividers
+  [['line',w/2,0,w/2,h],['line',0,h/2,w,h/2]].forEach(([,x1,y1,x2,y2]) =>
+    g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+      .attr('stroke','rgba(255,255,255,.07)').attr('stroke-width',1).attr('stroke-dasharray','5,5'));
+
+  // Axes
+  g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(xSc).ticks(5).tickSize(-h))
+    .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill',getComputedStyle(document.documentElement).getPropertyValue('--dim')).attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
+  g.append('g').call(d3.axisLeft(ySc).ticks(6).tickSize(-w))
+    .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill','#3a5070').attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
+
+  g.append('text').attr('x',w/2).attr('y',h+36).attr('text-anchor','middle')
+    .attr('fill','#3a5070').attr('font-size','9.5px').attr('font-family',"'JetBrains Mono',monospace").attr('letter-spacing','2').text('EVIDENCE STRENGTH →');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-h/2).attr('y',-40)
+    .attr('text-anchor','middle').attr('fill','#3a5070').attr('font-size','9.5px')
+    .attr('font-family',"'JetBrains Mono',monospace").attr('letter-spacing','2').text('↑ YEARS OF LIFE EXTENSION');
+
+  // Filtered data
+  const vis = curFilter === 'all' ? DATA : DATA.filter(d => d.status === curFilter);
+
+  // Priority pulse rings
+  vis.filter(d => d.lev >= 5 && d.ev < 5).forEach(d => {
+    const ring = g.append('circle')
+      .attr('cx',xSc(d.ev)).attr('cy',ySc(d.lev))
+      .attr('r',0).attr('fill','none').attr('stroke','#ff6b35').attr('stroke-width',.8).attr('opacity',0);
+    const delay = Math.random()*2000;
+    (function pulse(){
+      ring.attr('r',rSc(d.n)+2).attr('opacity',.7)
+        .transition().duration(2200).ease(d3.easeExpOut)
+        .attr('r',rSc(d.n)+26).attr('opacity',0)
+        .on('end',()=>setTimeout(pulse,Math.random()*1500));
+    })();
+  });
+
+  // Status styling
+  const opac = {validated:1,promising:.87,emerging:.72,contested:.62,speculative:.5};
+  const dash  = {validated:'none',promising:'none',emerging:'4,3',contested:'2,3',speculative:'3,5'};
+
+  const nodes = g.selectAll('.nd').data(vis).enter().append('g').attr('class','nd')
+    .attr('transform',d=>`translate(${xSc(d.ev)},${ySc(d.lev)})`).style('cursor','crosshair');
+
+  // Glow halo
+  nodes.append('circle').attr('r',d=>rSc(d.n)+4).attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('opacity',.13);
+
+  // Main circle
+  nodes.append('circle')
+    .attr('r',d=>rSc(d.n))
+    .attr('fill',d=>MECH_COLORS[d.mech]||'#888')
+    .attr('opacity',d=>opac[d.status]||.7)
+    .attr('stroke',d=>MECH_COLORS[d.mech]||'#888')
+    .attr('stroke-width',1.5)
+    .attr('stroke-dasharray',d=>dash[d.status]||'none')
+    .attr('stroke-opacity',.9)
+    .attr('filter',d=>'url(#glow'+d.mech.replace(/\W/g,'')+')');
+
+  // Name labels for prominent nodes
+  nodes.filter(d=>d.ev>6.8||d.lev>7.5).append('text')
+    .attr('y',d=>-rSc(d.n)-5).attr('text-anchor','middle')
+    .attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('font-size','9px')
+    .attr('font-family',"'JetBrains Mono',monospace").attr('opacity',.9)
+    .text(d=>d.name.length>20?d.name.slice(0,18)+'…':d.name);
+
+  // Entrance animation
+  nodes.attr('opacity',0).transition().duration(500).delay((_,i)=>i*35).attr('opacity',1);
+
+  // Tooltip
+  const tip = document.getElementById('tip');
+  const scol = {validated:'#00ff88',promising:'#00d4ff',emerging:'#ffd700',contested:'#ff6b35',speculative:'#888'};
+
+  nodes.on('mousemove',(e,d)=>{
+    document.getElementById('tn').textContent = d.name;
+    document.getElementById('tm').textContent = d.mech;
+    const tb = document.getElementById('tb');
+    tb.textContent = d.status.toUpperCase();
+    tb.style.cssText = `background:${scol[d.status]}22;color:${scol[d.status]};border:1px solid ${scol[d.status]}55`;
+    document.getElementById('te').textContent = d.ev.toFixed(1);
+    document.getElementById('tl').textContent = d.lev.toFixed(1);
+    document.getElementById('tst').textContent = d.n.toLocaleString();
+    document.getElementById('td').textContent = d.desc;
+    const priority = d.lev >= 5 && d.ev < 5;
+    document.getElementById('t-priority').style.display = priority ? 'block' : 'none';
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX+14)+'px';
+    tip.style.top  = Math.min(e.clientY-10, window.innerHeight-240)+'px';
+  }).on('mouseleave',()=>{ tip.style.display='none'; });
+
+  // Click: auto-populate Blueprint with this intervention
+  nodes.on('click',(_,d)=>{
+    bsel.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
+    document.getElementById('bi').value = '';
+    document.getElementById('bo').innerHTML = '<span class="ph-text">Ready to generate protocol for: <strong style="color:var(--magenta)">' + d.name + '</strong></span>';
+  });
+
+  // Zoom + pan
+  svg.call(d3.zoom().scaleExtent([.45,8]).on('zoom',e=>{
+    g.attr('transform',`translate(${M.left+e.transform.x},${M.top+e.transform.y}) scale(${e.transform.k})`);
+  }));
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.fb').forEach(b => b.addEventListener('click',()=>{
+  document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  curFilter = b.dataset.f;
+  buildScatter();
+}));
+
+// ── Live swarm data ───────────────────────────────────────────────────────────
+
+async function syncSwarm() {
+  try {
+    const r = await fetch('/api/stats');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.nodes > 0) document.getElementById('s-int').textContent = DATA.length + '+' + d.nodes;
+  } catch {}
+}
+syncSwarm();
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+buildScatter();
+window.addEventListener('resize', buildScatter);
+</script>
+</body>
+</html>
