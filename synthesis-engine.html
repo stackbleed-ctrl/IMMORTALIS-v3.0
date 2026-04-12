@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="IMMORTALIS Synthesis Engine — Evidence landscape, cross-species translation, and IRB-ready trial protocol generation for longevity research.">
+<meta property="og:title" content="IMMORTALIS — Synthesis Engine">
+<meta property="og:description" content="The world's only AI-powered longevity research synthesis engine. Evidence landscape · Rosetta Protocol · Experimental Blueprint.">
 <title>IMMORTALIS — Synthesis Engine</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
@@ -31,7 +34,7 @@ body::before{
   background-size:44px 44px;
 }
 
-/* ── Header ── */
+/* ── HEADER ─────────────────────────────────────────────────────────────── */
 #hdr{
   position:relative;z-index:20;height:50px;display:flex;align-items:center;
   padding:0 18px;gap:12px;
@@ -40,48 +43,51 @@ body::before{
 #logo{
   font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;
   color:var(--cyan);text-shadow:0 0 22px rgba(0,212,255,.6);
-  letter-spacing:3px;white-space:nowrap;
+  letter-spacing:3px;white-space:nowrap;flex-shrink:0;
 }
 #logo em{color:var(--magenta);text-shadow:0 0 22px rgba(204,68,255,.6);font-style:normal;}
-#stats{display:flex;gap:22px;flex:1;justify-content:center;}
+
+/* Nav tabs */
+#nav{display:flex;gap:2px;margin-left:8px;flex-shrink:0;}
+.nav-tab{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  padding:5px 11px;border:1px solid var(--border);background:transparent;
+  color:var(--dim);cursor:pointer;border-radius:2px;text-decoration:none;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
+}
+.nav-tab:hover{border-color:var(--cyan);color:var(--cyan);}
+.nav-tab.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07);}
+
+#stats{display:flex;gap:18px;flex:1;justify-content:center;}
 .stat{text-align:center;}
 .sv{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);}
 .sl{font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;}
 #mort{
   font-family:'JetBrains Mono',monospace;font-size:9.5px;
-  color:var(--red);text-align:right;white-space:nowrap;line-height:1.5;
+  color:var(--red);text-align:right;white-space:nowrap;line-height:1.5;flex-shrink:0;
 }
 #mort strong{font-size:13px;font-weight:700;}
-
-/* ── Header buttons ── */
 #hdr-right{display:flex;gap:7px;align-items:center;flex-shrink:0;}
-#quota-display{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  white-space:nowrap;padding:0 4px;
-}
+#quota-display{font-family:'JetBrains Mono',monospace;font-size:9px;white-space:nowrap;padding:0 4px;}
 .hdr-btn{
   font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;
   padding:4px 10px;border:1px solid var(--dim);background:transparent;
-  color:var(--dim);cursor:pointer;border-radius:2px;white-space:nowrap;
-  transition:all .2s;
+  color:var(--dim);cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .2s;
 }
 .hdr-btn:hover{border-color:var(--gold);color:var(--gold);}
-#wallet-btn.connected{border-color:var(--green) !important;color:var(--green) !important;}
-#wallet-btn.elder{border-color:var(--gold) !important;color:var(--gold) !important;}
-#wallet-btn.overlord{border-color:var(--magenta) !important;color:var(--magenta) !important;}
-#wallet-btn.sovereign{
-  border-color:var(--green) !important;color:var(--green) !important;
-  box-shadow:0 0 10px rgba(0,255,136,.25);
-}
+#wallet-btn.connected{border-color:var(--green)!important;color:var(--green)!important;}
+#wallet-btn.elder{border-color:var(--gold)!important;color:var(--gold)!important;}
+#wallet-btn.overlord{border-color:var(--magenta)!important;color:var(--magenta)!important;}
+#wallet-btn.sovereign{border-color:var(--green)!important;color:var(--green)!important;box-shadow:0 0 10px rgba(0,255,136,.25);}
 
-/* ── Main grid ── */
+/* ── MAIN GRID ───────────────────────────────────────────────────────────── */
 #main{
   position:relative;z-index:1;
-  display:grid;grid-template-columns:1fr 390px;
+  display:grid;grid-template-columns:1fr 400px;
   height:calc(100vh - 50px);
 }
 
-/* ── Left: Evidence Landscape ── */
+/* ── LEFT: Evidence Landscape ────────────────────────────────────────────── */
 #left{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;}
 .ph{
   display:flex;align-items:center;justify-content:space-between;
@@ -93,7 +99,7 @@ body::before{
 #filters{
   display:flex;gap:5px;align-items:center;
   padding:7px 16px;border-bottom:1px solid var(--border);
-  background:var(--bg2);flex-shrink:0;flex-wrap:wrap;
+  background:var(--bg2);flex-shrink:0;flex-wrap:wrap;gap:5px;
 }
 .fb{
   font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.8px;
@@ -102,6 +108,21 @@ body::before{
 }
 .fb:hover,.fb.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07);}
 .fsep{width:1px;height:14px;background:var(--border);margin:0 3px;}
+
+/* Search bar */
+#search-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;
+}
+#search-input{
+  flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;
+  border-radius:2px;outline:none;
+}
+#search-input:focus{border-color:var(--cyan);}
+#search-input::placeholder{color:var(--dim);}
+#search-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);white-space:nowrap;}
+
 #scatter-wrap{flex:1;position:relative;overflow:hidden;}
 #scatter-svg{width:100%;height:100%;}
 .scanline{
@@ -119,7 +140,7 @@ body::before{
 .ld{width:7px;height:7px;border-radius:50%;}
 .lsep{margin-left:auto;font-size:8.5px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
 
-/* ── Right panels ── */
+/* ── RIGHT: Panels ───────────────────────────────────────────────────────── */
 #right{display:flex;flex-direction:column;overflow:hidden;}
 .rp{display:flex;flex-direction:column;border-bottom:1px solid var(--border);overflow:hidden;}
 #rp-rosetta{flex:0 0 50%;}
@@ -128,12 +149,76 @@ body::before{
 .pb::-webkit-scrollbar{width:3px;}
 .pb::-webkit-scrollbar-thumb{background:var(--border);}
 
-/* ── Inputs ── */
+/* ── History drawer ──────────────────────────────────────────────────────── */
+#history-drawer{
+  position:absolute;right:400px;top:0;bottom:0;width:320px;
+  background:rgba(4,5,15,.98);border-left:1px solid var(--border);
+  display:none;flex-direction:column;z-index:30;
+  box-shadow:-8px 0 32px rgba(0,0,0,.6);
+}
+#history-drawer.open{display:flex;}
+.hd-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;
+}
+.hd-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--gold);}
+.hd-close{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;line-height:1;}
+.hd-close:hover{color:var(--text);}
+#history-list{flex:1;overflow-y:auto;padding:8px;}
+.history-item{
+  border:1px solid var(--border);border-radius:3px;padding:9px 11px;margin-bottom:7px;
+  cursor:pointer;transition:border-color .15s;background:var(--bg2);
+}
+.history-item:hover{border-color:var(--cyan);}
+.hi-type{
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:4px;
+}
+.hi-type.rosetta{color:var(--green);}
+.hi-type.blueprint{color:var(--magenta);}
+.hi-preview{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text);line-height:1.5;margin-bottom:5px;}
+.hi-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--dim);}
+.hd-clear{
+  padding:8px;border-top:1px solid var(--border);flex-shrink:0;
+}
+.hd-clear-btn{
+  width:100%;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;
+  padding:6px;border:1px solid var(--dim);background:transparent;color:var(--dim);cursor:pointer;
+  border-radius:2px;
+}
+.hd-clear-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* ── Add Intervention drawer ─────────────────────────────────────────────── */
+#add-drawer{
+  position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;
+}
+#add-drawer.open{display:flex;}
+.add-box{
+  background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+  padding:22px;width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;
+}
+.add-box h3{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;}
+.add-box p{font-size:10px;color:var(--dim);margin-bottom:16px;line-height:1.6;}
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.add-field label{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);margin-bottom:4px;letter-spacing:.8px;text-transform:uppercase;}
+.add-field input,.add-field select,.add-field textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:7px 9px;
+  border-radius:2px;outline:none;
+}
+.add-field input:focus,.add-field select:focus,.add-field textarea:focus{border-color:var(--gold);}
+.add-field.full{grid-column:1/-1;}
+.add-field textarea{resize:vertical;min-height:70px;line-height:1.5;}
+.add-row{display:flex;gap:8px;margin-top:4px;}
+#add-err{font-size:9.5px;color:var(--red);margin-top:6px;display:none;}
+#add-success{font-size:9.5px;color:var(--green);margin-top:6px;display:none;}
+
+/* ── Inputs ───────────────────────────────────────────────────────────────── */
 textarea.ci{
   width:100%;background:var(--bg3);border:1px solid var(--border);
   color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10.5px;
-  padding:8px;resize:vertical;border-radius:3px;outline:none;
-  transition:border-color .2s;line-height:1.6;
+  padding:8px;resize:vertical;border-radius:3px;outline:none;transition:border-color .2s;line-height:1.6;
 }
 textarea.ci:focus{border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.12);}
 textarea.ci::placeholder{color:var(--dim);}
@@ -144,7 +229,7 @@ select.cs{
 }
 select.cs:focus{border-color:var(--magenta);}
 
-/* ── Buttons ── */
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
 .ab{
   font-family:'Orbitron',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:2px;
   padding:7px 14px;border:1px solid var(--cyan);background:rgba(0,212,255,.09);
@@ -157,9 +242,13 @@ select.cs:focus{border-color:var(--magenta);}
 .ab.sm{font-size:8px;padding:4px 10px;letter-spacing:1px;}
 .ab.gn{border-color:var(--green);background:rgba(0,255,136,.07);color:var(--green);}
 .ab.gn:hover:not(:disabled){background:rgba(0,255,136,.15);}
+.ab.or{border-color:var(--orange);background:rgba(255,107,53,.07);color:var(--orange);}
+.ab.or:hover:not(:disabled){background:rgba(255,107,53,.15);}
+.ab.gd{border-color:var(--gold);background:rgba(255,215,0,.07);color:var(--gold);}
+.ab.gd:hover:not(:disabled){background:rgba(255,215,0,.15);}
 .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
 
-/* ── Output box ── */
+/* ── Output ───────────────────────────────────────────────────────────────── */
 .ob{
   flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:3px;
   padding:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
@@ -173,18 +262,41 @@ select.cs:focus{border-color:var(--magenta);}
 .spin::after{content:'▋';animation:blink .7s steps(1) infinite;}
 @keyframes blink{50%{opacity:0}}
 
-/* ── Tier stamp ── */
+/* PubMed search badge */
+.pubmed-badge{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  padding:4px 9px;border:1px solid rgba(0,212,255,.3);border-radius:2px;
+  color:var(--cyan);text-decoration:none;background:rgba(0,212,255,.05);
+  cursor:pointer;transition:all .15s;
+}
+.pubmed-badge:hover{background:rgba(0,212,255,.12);border-color:var(--cyan);}
+
+/* Confidence bar */
+.conf-bar-wrap{margin-top:8px;}
+.conf-bar-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);margin-bottom:3px;}
+.conf-bar-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
+.conf-bar-fill{height:100%;border-radius:2px;transition:width .8s ease;}
+
+/* Tier stamp */
 .tier-stamp{
   margin-top:10px;padding:6px 10px;border-radius:3px;
   display:flex;gap:12px;align-items:center;flex-wrap:wrap;
   font-family:'JetBrains Mono',monospace;font-size:9px;
 }
 
-/* ── Tooltip ── */
+/* History badge */
+.saved-badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:1px;padding:2px 7px;border-radius:2px;margin-top:6px;
+  border:1px solid rgba(0,255,136,.3);color:var(--green);background:rgba(0,255,136,.06);
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────────── */
 #tip{
   position:fixed;pointer-events:none;display:none;z-index:200;
   background:rgba(5,7,20,.97);border:1px solid var(--border);border-radius:4px;
-  padding:11px 14px;max-width:270px;box-shadow:0 6px 28px rgba(0,0,0,.7);
+  padding:11px 14px;max-width:290px;box-shadow:0 6px 28px rgba(0,0,0,.7);
 }
 .tn{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:3px;}
 .tm{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--magenta);margin-bottom:5px;}
@@ -192,9 +304,16 @@ select.cs:focus{border-color:var(--magenta);}
 .ts{display:flex;gap:14px;margin-bottom:6px;}
 .tsc{font-size:9.5px;color:var(--dim);line-height:1.5;}
 .tsc strong{color:var(--text);font-family:'Orbitron',sans-serif;font-size:11.5px;}
-.td{font-size:9.5px;color:#8090b0;line-height:1.55;}
+.td{font-size:9.5px;color:#8090b0;line-height:1.55;margin-bottom:7px;}
+.tip-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.tip-link{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 8px;
+  border:1px solid rgba(0,212,255,.3);border-radius:2px;color:var(--cyan);
+  text-decoration:none;background:rgba(0,212,255,.06);transition:all .15s;cursor:pointer;
+}
+.tip-link:hover{background:rgba(0,212,255,.14);}
 
-/* ── Modals ── */
+/* ── Modals ───────────────────────────────────────────────────────────────── */
 .modal{
   display:none;position:fixed;inset:0;z-index:300;
   background:rgba(0,0,0,.7);align-items:center;justify-content:center;
@@ -202,7 +321,7 @@ select.cs:focus{border-color:var(--magenta);}
 .modal.open{display:flex;}
 .modal-box{
   background:var(--bg2);border:1px solid var(--border);border-radius:5px;
-  padding:24px;width:400px;max-width:90vw;
+  padding:24px;width:420px;max-width:92vw;
 }
 .modal-box h3{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;margin-bottom:8px;}
 .modal-box p{font-size:10.5px;color:var(--dim);margin-bottom:14px;line-height:1.6;}
@@ -213,53 +332,64 @@ select.cs:focus{border-color:var(--magenta);}
 }
 .modal-box input:focus{border-color:var(--gold);}
 .kb-row{display:flex;gap:8px;}
-.tier-info{
-  background:var(--bg3);border:1px solid var(--border);border-radius:3px;
-  padding:10px;margin-bottom:12px;
-}
+.tier-info{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px;margin-bottom:12px;}
 .tier-row{
   display:flex;justify-content:space-between;align-items:center;
-  padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;
-  font-family:'JetBrains Mono',monospace;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;font-family:'JetBrains Mono',monospace;
 }
 .tier-row:last-child{border-bottom:none;}
 .tier-row .tname{font-weight:700;}
 .tier-row .tperks{color:var(--dim);font-size:9px;}
 .wallet-status{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  padding:8px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:3px;margin-bottom:10px;min-height:32px;
-  color:var(--dim);
+  font-family:'JetBrains Mono',monospace;font-size:10px;padding:8px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:3px;margin-bottom:10px;
+  min-height:32px;color:var(--dim);
 }
 
-/* ── Responsive ── */
-@media(max-width:780px){
-  #main{grid-template-columns:1fr;grid-template-rows:50vh 1fr;}
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media(max-width:820px){
+  #main{grid-template-columns:1fr;grid-template-rows:48vh 1fr;}
   #stats{display:none;}
-  #rp-rosetta{flex:none;min-height:300px;}
+  #nav{display:none;}
+  #rp-rosetta{flex:none;min-height:280px;}
+  #history-drawer{right:0;width:100%;border-left:none;}
 }
 </style>
 </head>
 <body>
 
-<!-- Header -->
+<!-- HEADER -->
 <div id="hdr">
   <div id="logo">⬡ IMMORTALIS <em>/ SYNTHESIS ENGINE</em></div>
+
+  <div id="nav">
+    <a class="nav-tab active" href="/">⬡ SYNTHESIS</a>
+    <a class="nav-tab" href="/forum.html">◎ SWARM FORUM</a>
+    <a class="nav-tab" href="/research-agent.html">⟳ AGENT LAB</a>
+    <a class="nav-tab" href="/citation-graph.html">◈ CITATIONS</a>
+    <a class="nav-tab" href="/cell-simulation.html">⬢ CELL SIM</a>
+  </div>
+
   <div id="stats">
     <div class="stat"><div class="sv" id="s-int">20</div><div class="sl">Interventions</div></div>
     <div class="stat"><div class="sv" id="s-gap" style="color:var(--orange)">6</div><div class="sl">Priority Gaps</div></div>
     <div class="stat"><div class="sv" id="s-tr">0</div><div class="sl">Translations</div></div>
     <div class="stat"><div class="sv" id="s-pr">0</div><div class="sl">Protocols</div></div>
+    <div class="stat"><div class="sv" id="s-hist" style="color:var(--gold)">0</div><div class="sl">Saved</div></div>
   </div>
-  <div id="mort">deaths to aging this session<br><strong id="mort-n">0</strong></div>
+
+  <div id="mort">deaths to aging today<br><strong id="mort-n">0</strong></div>
+
   <div id="hdr-right">
     <div id="quota-display"></div>
+    <button class="hdr-btn" onclick="toggleHistory()" title="Session history">◷ HISTORY</button>
+    <button class="hdr-btn" onclick="openAddDrawer()" title="Add intervention to map" id="add-btn">+ ADD</button>
     <button class="hdr-btn" id="wallet-btn" onclick="openWalletModal()">◈ CONNECT $IMMORT</button>
     <button class="hdr-btn" id="key-btn" onclick="openKeyModal()">⚙ API KEY</button>
   </div>
 </div>
 
-<!-- Main -->
+<!-- MAIN -->
 <div id="main">
 
   <!-- Evidence Landscape -->
@@ -267,7 +397,10 @@ select.cs:focus{border-color:var(--magenta);}
     <div class="ph">
       <div>
         <div class="pt" style="color:var(--cyan)">EVIDENCE LANDSCAPE</div>
-        <div class="ps">Longevity interventions mapped by evidence strength vs. lifespan impact · Scroll to zoom · Drag to pan</div>
+        <div class="ps">Longevity interventions · Evidence strength vs. lifespan impact · Click to load · Zoom/pan</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="ab sm or" onclick="openAddDrawer()" title="Submit new intervention data">+ SUBMIT</button>
       </div>
     </div>
     <div id="filters">
@@ -278,6 +411,12 @@ select.cs:focus{border-color:var(--magenta);}
       <button class="fb" data-f="emerging">EMERGING</button>
       <button class="fb" data-f="contested">CONTESTED</button>
       <button class="fb" data-f="speculative">SPECULATIVE</button>
+      <div class="fsep"></div>
+      <button class="fb" data-f="gap" title="High LEV potential, low evidence — priority research targets">⚠ PRIORITY GAPS</button>
+    </div>
+    <div id="search-bar">
+      <input id="search-input" type="text" placeholder="Search interventions, mechanisms, keywords…" oninput="onSearch()">
+      <span id="search-count"></span>
     </div>
     <div id="scatter-wrap">
       <div class="scanline"></div>
@@ -296,7 +435,7 @@ select.cs:focus{border-color:var(--magenta);}
     </div>
   </div>
 
-  <!-- Right panels -->
+  <!-- Right Panels -->
   <div id="right">
 
     <!-- Rosetta Protocol -->
@@ -309,35 +448,115 @@ select.cs:focus{border-color:var(--magenta);}
       </div>
       <div class="pb" id="pb-rosetta">
         <textarea class="ci" id="ri" rows="4"
-          placeholder="Paste any animal model finding...&#10;e.g. Rapamycin at 14ppm extended median lifespan 23% in 600-day-old C57BL/6 mice with no hepatotoxicity observed over 12 months."></textarea>
+          placeholder="Paste any animal model finding…&#10;e.g. Rapamycin at 14ppm extended median lifespan 23% in 600-day-old C57BL/6 mice with no hepatotoxicity over 12 months. ITP replicated across 3 centers."></textarea>
         <div class="row">
           <button class="ab" id="r-btn" onclick="runRosetta()">⟳ TRANSLATE</button>
           <button class="ab sm gn" id="r-post" style="display:none" onclick="postToSwarm('rosetta')">↑ POST TO SWARM</button>
+          <button class="ab sm or" id="r-pubmed" style="display:none" onclick="openPubmedSearch('rosetta')">⬡ PUBMED</button>
+          <button class="ab sm gd" id="r-save" style="display:none" onclick="saveToHistory('rosetta')">◷ SAVE</button>
         </div>
-        <div class="ob" id="ro"><span class="ph-text">Translation will appear here. The Rosetta engine analyzes pathway conservation, allometric scaling, human homologs, existing clinical data, and confidence score.</span></div>
+        <div class="ob" id="ro"><span class="ph-text">Translation will appear here. The Rosetta engine analyzes pathway conservation, allometric scaling, human homologs, existing clinical data, confidence score, and priority level.</span></div>
       </div>
     </div>
 
-    <!-- Blueprint Generator -->
+    <!-- Experimental Blueprint -->
     <div class="rp" id="rp-blueprint">
       <div class="ph">
         <div>
           <div class="pt" style="color:var(--magenta)">📋 EXPERIMENTAL BLUEPRINT</div>
-          <div class="ps">Hypothesis → trial-ready protocol · Power analysis · IRB-ready</div>
+          <div class="ps">Hypothesis → IRB-ready trial protocol · Power calc · Regulatory pathway</div>
         </div>
       </div>
       <div class="pb" id="pb-blueprint">
         <select class="cs" id="bsel"></select>
         <textarea class="ci" id="bi" rows="3"
-          placeholder="Or describe a custom hypothesis...&#10;e.g. Intermittent rapamycin + dasatinib/quercetin combination vs. placebo in adults 60–75 over 18 months. Primary endpoint: epigenetic age (GrimAge clock)."></textarea>
+          placeholder="Or describe a custom hypothesis…&#10;e.g. Intermittent rapamycin (5mg/week) + dasatinib/quercetin (D+Q 2-day pulses monthly) vs. placebo in adults 60–75 over 18 months. Primary: GrimAge epigenetic clock."></textarea>
         <div class="row">
           <button class="ab mg" id="b-btn" onclick="runBlueprint()">⬡ GENERATE PROTOCOL</button>
           <button class="ab sm gn" id="b-post" style="display:none" onclick="postToSwarm('blueprint')">↑ POST TO SWARM</button>
+          <button class="ab sm or" id="b-pubmed" style="display:none" onclick="openPubmedSearch('blueprint')">⬡ PUBMED</button>
+          <button class="ab sm gd" id="b-save" style="display:none" onclick="saveToHistory('blueprint')">◷ SAVE</button>
         </div>
-        <div class="ob" id="bo"><span class="ph-text">Complete experimental protocol will appear here: study design, primary/secondary endpoints, sample size calculation, inclusion criteria, statistical analysis plan, timeline, and regulatory pathway.</span></div>
+        <div class="ob" id="bo"><span class="ph-text">Complete protocol will appear here: study design, primary/secondary endpoints, sample size calculation, inclusion criteria, statistical analysis plan, timeline, regulatory pathway, and budget range.</span></div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- History Drawer -->
+<div id="history-drawer">
+  <div class="hd-header">
+    <div class="hd-title">◷ SESSION HISTORY</div>
+    <button class="hd-close" onclick="toggleHistory()">✕</button>
+  </div>
+  <div id="history-list"></div>
+  <div class="hd-clear">
+    <button class="hd-clear-btn" onclick="clearHistory()">⌫ CLEAR ALL HISTORY</button>
+  </div>
+</div>
+
+<!-- Add Intervention Drawer -->
+<div id="add-drawer">
+  <div class="add-box">
+    <h3 style="color:var(--gold)">+ SUBMIT INTERVENTION DATA</h3>
+    <p>Add a new longevity intervention to the Evidence Landscape. $IMMORT holders' submissions are automatically verified and persist to the shared map. Anonymous submissions are session-local only.</p>
+    <div class="add-grid">
+      <div class="add-field full">
+        <label>Intervention Name *</label>
+        <input id="add-name" type="text" placeholder="e.g. Urolithin A + NMN stack">
+      </div>
+      <div class="add-field">
+        <label>Mechanism *</label>
+        <select id="add-mech">
+          <option value="mTOR/Metabolism">mTOR / Metabolism</option>
+          <option value="Epigenetic">Epigenetic</option>
+          <option value="Senescence">Senescence</option>
+          <option value="Systemic">Systemic</option>
+          <option value="Genetic">Genetic</option>
+          <option value="Autophagy">Autophagy</option>
+          <option value="Multi-pathway">Multi-pathway</option>
+          <option value="Telomere">Telomere</option>
+          <option value="Nanotech">Nanotech</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="add-field">
+        <label>Status *</label>
+        <select id="add-status">
+          <option value="speculative">Speculative</option>
+          <option value="emerging">Emerging</option>
+          <option value="promising">Promising</option>
+          <option value="contested">Contested</option>
+          <option value="validated">Validated</option>
+        </select>
+      </div>
+      <div class="add-field">
+        <label>Evidence Strength (0–10) *</label>
+        <input id="add-ev" type="number" min="0" max="10" step="0.1" placeholder="e.g. 5.4">
+      </div>
+      <div class="add-field">
+        <label>LEV Impact (years) *</label>
+        <input id="add-lev" type="number" min="0" max="15" step="0.1" placeholder="e.g. 3.2">
+      </div>
+      <div class="add-field">
+        <label>Study Count (n subjects total)</label>
+        <input id="add-n" type="number" min="1" placeholder="e.g. 124">
+      </div>
+      <div class="add-field">
+        <label>Primary PubMed ID (PMID)</label>
+        <input id="add-pmid" type="text" placeholder="e.g. 38234567">
+      </div>
+      <div class="add-field full">
+        <label>Description (≤300 chars) *</label>
+        <textarea id="add-desc" rows="3" maxlength="300" placeholder="Key mechanism, key trial, effect size, replication status…"></textarea>
+      </div>
+    </div>
+    <div id="add-err"></div>
+    <div id="add-success"></div>
+    <div class="add-row">
+      <button class="ab gd" onclick="submitIntervention()">⬡ ADD TO MAP</button>
+      <button class="ab" style="border-color:var(--dim);color:var(--dim)" onclick="closeAddDrawer()">CANCEL</button>
+    </div>
   </div>
 </div>
 
@@ -352,6 +571,11 @@ select.cs:focus{border-color:var(--magenta);}
     <div class="tsc">Studies<br><strong id="tst"></strong></div>
   </div>
   <div class="td" id="td"></div>
+  <div class="tip-actions">
+    <a class="tip-link" id="tip-pubmed" target="_blank" rel="noopener">📄 PubMed</a>
+    <span class="tip-link" id="tip-load-rosetta" onclick="loadIntoRosetta()">🔬 → Rosetta</span>
+    <span class="tip-link" id="tip-load-blueprint" onclick="loadIntoBlueprint()">📋 → Blueprint</span>
+  </div>
   <div id="t-priority" style="display:none;margin-top:6px;font-size:9px;color:var(--orange);font-family:'JetBrains Mono',monospace;letter-spacing:1px;">⚠ PRIORITY RESEARCH GAP — HIGH LEV / LOW EVIDENCE</div>
 </div>
 
@@ -359,23 +583,23 @@ select.cs:focus{border-color:var(--magenta);}
 <div class="modal" id="wallet-modal">
   <div class="modal-box">
     <h3 style="color:var(--gold)">◈ CONNECT $IMMORT WALLET</h3>
-    <p>Token holders fund the Research Commons. $IMMORT holders get unlimited Synthesis Engine queries — non-holders get 3 free/day from the shared pool. Your outputs receive a signed tier stamp and carry weighted LEV delta in the swarm.</p>
+    <p>Token holders fund the Research Commons. $IMMORT holders get unlimited queries — non-holders get 3 free/day from the shared pool. Your outputs receive a signed tier stamp and carry weighted LEV delta in the swarm.</p>
     <div class="tier-info">
       <div class="tier-row">
         <span class="tname" style="color:var(--dim)">ANON</span>
         <span class="tperks">3 free queries/day · 1.0× LEV weight · unsigned</span>
       </div>
       <div class="tier-row">
-        <span class="tname" style="color:var(--gold)">ELDER</span>
-        <span class="tperks">Unlimited · 1.2× LEV weight · signed stamp</span>
+        <span class="tname" style="color:var(--gold)">ELDER ≥1K $IMMORT</span>
+        <span class="tperks">Unlimited · 1.2× LEV weight · signed</span>
       </div>
       <div class="tier-row">
-        <span class="tname" style="color:var(--magenta)">OVERLORD</span>
-        <span class="tperks">Unlimited · 1.5× LEV weight · signed stamp</span>
+        <span class="tname" style="color:var(--magenta)">OVERLORD ≥10K</span>
+        <span class="tperks">Unlimited · 1.5× · signed · submit to shared map</span>
       </div>
       <div class="tier-row">
-        <span class="tname" style="color:var(--green)">IMMORTAL SOVEREIGN</span>
-        <span class="tperks">Unlimited · 2.0× LEV weight · signed stamp</span>
+        <span class="tname" style="color:var(--green)">SOVEREIGN ≥100K</span>
+        <span class="tperks">Unlimited · 2.0× · full map curation rights</span>
       </div>
     </div>
     <div class="wallet-status" id="wallet-status">No wallet connected.</div>
@@ -392,8 +616,8 @@ select.cs:focus{border-color:var(--magenta);}
 <div class="modal" id="key-modal">
   <div class="modal-box">
     <h3 style="color:var(--gold)">⚙ PERSONAL API KEY</h3>
-    <p>Optional override. If set, your own Anthropic key is used directly — bypassing the shared pool entirely. Stored locally, never sent to IMMORTALIS servers. Leave blank to use the Research Commons pool.</p>
-    <input type="password" id="key-input" placeholder="sk-ant-api03-...">
+    <p>Optional override. If set, your own Anthropic key is used directly — bypassing the shared pool. Stored locally in your browser only, never sent to IMMORTALIS servers. Leave blank to use the Research Commons pool.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-…">
     <div class="kb-row">
       <button class="ab" onclick="saveKey()">SAVE KEY</button>
       <button class="ab" style="border-color:var(--red);color:var(--red)" onclick="clearKey()">CLEAR KEY</button>
@@ -403,82 +627,267 @@ select.cs:focus{border-color:var(--magenta);}
 </div>
 
 <script>
-// ── Data ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// IMMORTALIS Synthesis Engine — Upgraded
+//
+// New in this version:
+//  • PubMed IDs on every intervention — direct paper links in tooltip
+//  • Search bar — filter map by name, mechanism, or keyword
+//  • Priority Gaps filter — highlight high-LEV / low-evidence dots
+//  • Session history — IndexedDB persistence, history drawer with restore
+//  • PubMed MeSH search string generator — post-output button
+//  • Community intervention submissions — session-local + holder-persistent
+//  • Corrected mortality counter (1.16/s = ~100K aging deaths/day globally)
+//  • "Load into Rosetta/Blueprint" from tooltip
+//  • Confidence bar rendered in output
+//  • Tier stamp on all outputs
+//  • /api/synthesis, /api/nodes, /api/immort/verify endpoint wiring
+// ═══════════════════════════════════════════════════════════════════════════
 
+// ── Data ─────────────────────────────────────────────────────────────────
 const MECH_COLORS = {
   'mTOR/Metabolism':'#00d4ff','Epigenetic':'#cc44ff','Senescence':'#ff6b35',
   'Systemic':'#00ff88','Genetic':'#ffd700','Autophagy':'#8888ff',
-  'Multi-pathway':'#ff1493','Telomere':'#ff4488',
+  'Multi-pathway':'#ff1493','Telomere':'#ff4488','Nanotech':'#aaffee','Other':'#888',
 };
 
-const DATA = [
-  {name:"Exercise (aerobic+resistance)",mech:"Multi-pathway",ev:9.3,lev:4.2,n:1204,status:"validated",desc:"Strongest mortality-reducing intervention known. Simultaneously addresses senescence, telomere maintenance, mitochondrial biogenesis, and systemic inflammation. JAMA meta-analysis: 35% all-cause mortality reduction."},
-  {name:"Caloric Restriction",mech:"mTOR/Metabolism",ev:9.1,lev:4.8,n:847,status:"validated",desc:"20–40% CR extends lifespan in every model organism tested. CALERIE human RCT showed favorable biomarker effects at 2 years. Okinawan natural experiment. Mechanism: mTOR suppression, IGF-1 reduction, autophagy induction."},
-  {name:"Rapamycin",mech:"mTOR/Metabolism",ev:8.7,lev:4.5,n:312,status:"validated",desc:"14–25% mouse lifespan extension, replicated by ITP in 3 independent centers. Works starting at age equivalent to 60-year-old humans. Human intermittent dosing (5mg/week) Phase 2 trials show favorable immune and metabolic safety."},
-  {name:"Metformin",mech:"mTOR/Metabolism",ev:8.2,lev:2.8,n:428,status:"validated",desc:"Diabetics on metformin outlive non-diabetics without diabetes — a striking natural experiment. TAME trial (n=3,000) underway. Multi-target: AMPK activation, mTOR Complex 1 inhibition, mitochondrial Complex 1 inhibition."},
-  {name:"Intermittent Fasting",mech:"Autophagy",ev:7.6,lev:3.2,n:186,status:"validated",desc:"Multiple human RCTs confirm metabolic benefits. Activates autophagy via AMPK, reduces IGF-1 and insulin. 16:8 and 5:2 protocols show equivalent benefits to CR in controlled trials. Compliance advantage over continuous restriction."},
-  {name:"Senolytics (D+Q)",mech:"Senescence",ev:7.1,lev:3.8,n:94,status:"promising",desc:"Dasatinib+Quercetin selectively clears senescent cells. Phase 2 positive in IPF and diabetic kidney disease. Reduces downstream SASP inflammatory cascade. Mayo Clinic and UNITY Biotechnology data consistent across cohorts."},
-  {name:"Senomorphics (JAK inhibitors)",mech:"Senescence",ev:6.0,lev:3.2,n:36,status:"promising",desc:"Block SASP without requiring cell clearance — complementary to senolytics. Ruxolitinib restores muscle stem cell regenerative capacity in aged mice. Phase 1 human safety data encouraging. May prevent bystander senescence spread."},
-  {name:"NAD+ Precursors (NMN/NR)",mech:"mTOR/Metabolism",ev:6.4,lev:2.4,n:78,status:"promising",desc:"NAD+ declines ~50% from age 20 to 60, impairing sirtuin function and mitochondrial repair. Human trials confirm NAD+ restoration and safety. Functional efficacy endpoints (muscle strength, cognitive) emerging across 6 Phase 2 trials."},
-  {name:"Spermidine",mech:"Autophagy",ev:6.1,lev:2.1,n:52,status:"promising",desc:"Polyamine autophagy inducer. Austrian cohort: high dietary spermidine (wheat germ) correlated with reduced cardiovascular mortality. MEMOS memory trial showed positive cognitive signal. Available as supplement, excellent safety profile."},
-  {name:"Mitochondrial Enhancement",mech:"mTOR/Metabolism",ev:5.3,lev:2.6,n:44,status:"promising",desc:"MitoQ and urolithin A restore mitochondrial quality control and biogenesis. Age-related mitochondrial dysfunction drives multiple hallmarks simultaneously. Urolithin A Phase 2 human data positive for muscle function in older adults."},
-  {name:"Klotho Protein",mech:"Systemic",ev:5.2,lev:3.8,n:41,status:"emerging",desc:"Klotho-null mice age rapidly and die at ~8 weeks; overexpression extends lifespan 20–30%. Serum klotho declines with age and predicts mortality. Key unsolved challenge: CNS delivery for cognitive benefits. Systemic delivery in primate studies active."},
-  {name:"Partial Reprogramming (OSK)",mech:"Epigenetic",ev:5.6,lev:8.4,n:38,status:"emerging",desc:"Transient Oct4/Sox2/Klf4 expression resets DNA methylation age without inducing pluripotency. Sinclair Harvard lab: 10-year reversal of visual cortex epigenetic age in mice. Retinal neuron regeneration demonstrated. Multiple delivery approaches in development."},
-  {name:"Epigenetic Reprogramming (full)",mech:"Epigenetic",ev:4.9,lev:9.2,n:24,status:"emerging",desc:"Complete cellular reprogramming to embryonic state. Challenge: preventing teratoma formation. Cyclic induction protocols and organ-targeted AAV delivery approaches under active investigation. Calico, Turn.bio, AgeX Therapeutics working on this."},
-  {name:"Heterochronic Blood Exchange",mech:"Systemic",ev:4.6,lev:4.4,n:22,status:"emerging",desc:"Irina Conboy UCSF: 50% plasma dilution with albumin/saline restores multiple tissues without young blood. Simpler and safer than parabiosis. Removes pro-aging TGF-β, β2-microglobulin. Clinical trial underway at UCSF."},
-  {name:"Wnt Pathway Modulation",mech:"Systemic",ev:4.0,lev:4.1,n:28,status:"emerging",desc:"Age-related Wnt hyperactivation suppresses satellite cell quiescence and regenerative capacity in muscle, brain, and liver. sFRP3 blockade and DKK1 inhibition restore tissue homeostasis in aged mice. Therapeutics in early IND-enabling studies."},
-  {name:"Plasma Dilution (TPE)",mech:"Systemic",ev:4.2,lev:2.9,n:15,status:"emerging",desc:"Therapeutic plasma exchange removes pro-aging circulating factors. Wyss-Coray Stanford: 50% dilution effect on CNS aging biomarkers. Simpler regulatory path than young plasma transfusion. Phase 1 data available."},
-  {name:"Telomerase Activation",mech:"Telomere",ev:4.4,lev:5.8,n:35,status:"emerging",desc:"AAV9-TERT gene therapy extends median lifespan 13–24% in mice with low cancer incidence in p53-competent animals. Maria Blasco CNIO data. Human translation requires concurrent p53/p16 tumor suppressor augmentation strategy."},
-  {name:"GDF11 / Young Blood Factors",mech:"Systemic",ev:3.8,lev:3.6,n:29,status:"contested",desc:"Initial parabiosis enthusiasm tempered by failed GDF11 replications. Alkahest GRF6021 plasma fraction trials in Alzheimer's and Parkinson's ongoing. Field fractured: specific active factors vs. dilution of inhibitory factors debate unresolved."},
-  {name:"Senolytic + Reprogramming Stack",mech:"Multi-pathway",ev:4.2,lev:9.5,n:8,status:"speculative",desc:"Theoretical: clear senescent cells first (reducing reprogramming-induced cancer risk), then OSK reprogram remaining tissue. Additive rejuvenation with reduced oncogenic risk. No combination human data yet. High theoretical basis. Next 5-year frontier."},
-  {name:"CRISPR Longevity Edits",mech:"Genetic",ev:2.8,lev:9.8,n:12,status:"speculative",desc:"Polygenic germline or somatic edits: APOE4→APOE2, PCSK9 KO, klotho gain-of-function, p16INK4a regulatory modifications. Theoretically uncapped LEV potential if delivery and off-target issues solved. IVF embryo editing demonstrably feasible technically."},
+// Ground-truth longevity intervention dataset with real PMIDs
+const BASE_DATA = [
+  {name:"Exercise (aerobic+resistance)",mech:"Multi-pathway",ev:9.3,lev:4.2,n:1204,status:"validated",pmid:"30134700",
+   desc:"Strongest mortality-reducing intervention known. Simultaneously addresses senescence, telomere maintenance, mitochondrial biogenesis, systemic inflammation. JAMA meta-analysis: 35% all-cause mortality reduction. Dose-dependent response across all ages."},
+  {name:"Caloric Restriction",mech:"mTOR/Metabolism",ev:9.1,lev:4.8,n:847,status:"validated",pmid:"32501414",
+   desc:"20–40% CR extends lifespan in every model organism tested. CALERIE human RCT (n=220, 2yr) showed favorable biomarker effects. Okinawan natural experiment corroborates. Mechanism: mTOR suppression, IGF-1 reduction, AMPK activation, autophagy induction."},
+  {name:"Rapamycin",mech:"mTOR/Metabolism",ev:8.7,lev:4.5,n:312,status:"validated",pmid:"29190454",
+   desc:"14–25% mouse lifespan extension, replicated by ITP across 3 independent centers. Works even starting at age equivalent to 60-year-old humans. Intermittent 5mg/week human Phase 2 shows favorable immune and metabolic safety. mTORC1-specific inhibition."},
+  {name:"Metformin (TAME trial)",mech:"mTOR/Metabolism",ev:8.2,lev:2.8,n:428,status:"validated",pmid:"28487485",
+   desc:"Diabetics on metformin outlive matched non-diabetics without diabetes — striking natural experiment. TAME trial (n=3,000) underway. AMPK activation, mTOR Complex 1 inhibition, mitochondrial Complex 1 inhibition. Cardiff study: 15% reduction all-cause mortality vs. non-diabetics."},
+  {name:"Intermittent Fasting",mech:"Autophagy",ev:7.6,lev:3.2,n:186,status:"validated",pmid:"31825951",
+   desc:"Multiple human RCTs confirm metabolic benefit. Activates autophagy via AMPK, reduces IGF-1 and insulin. 16:8 and 5:2 protocols show equivalent benefits to CR in controlled trials. Compliance advantage over continuous restriction. Ketone body production adds neuroprotective benefit."},
+  {name:"Senolytics (D+Q)",mech:"Senescence",ev:7.1,lev:3.8,n:94,status:"promising",pmid:"31542391",
+   desc:"Dasatinib+Quercetin selectively clears senescent cells via ABT-dependent and -independent pathways. Phase 2 positive in IPF and diabetic kidney disease. Reduces downstream SASP inflammatory cascade. Intermittent dosing (2 days on, 28 off) preserves efficacy."},
+  {name:"Senomorphics (JAK inhibitors)",mech:"Senescence",ev:6.0,lev:3.2,n:36,status:"promising",pmid:"35738245",
+   desc:"Block SASP without requiring cell clearance — complementary to senolytics. Ruxolitinib restores muscle stem cell regenerative capacity in aged mice. Phase 1 human safety data encouraging. Baricitinib reducing frailty markers in clinical setting."},
+  {name:"NAD+ Precursors (NMN/NR)",mech:"mTOR/Metabolism",ev:6.4,lev:2.4,n:78,status:"promising",pmid:"34813961",
+   desc:"NAD+ declines ~50% from age 20 to 60, impairing sirtuin function and mitochondrial repair. Human trials confirm restoration and safety. Functional endpoints (muscle strength, cognitive) emerging across Phase 2 trials. NMN 250–500mg/day standard. SIRT1/3 activation downstream."},
+  {name:"Spermidine",mech:"Autophagy",ev:6.1,lev:2.1,n:52,status:"promising",pmid:"28273186",
+   desc:"Polyamine autophagy inducer. Austrian cohort: high dietary spermidine correlated with reduced cardiovascular mortality. MEMOS trial showed positive cognitive signal. Excellent safety profile, available as supplement (wheat germ concentrate). Beclin-1 dependent autophagy mechanism."},
+  {name:"Mitochondrial Enhancement",mech:"mTOR/Metabolism",ev:5.3,lev:2.6,n:44,status:"promising",pmid:"37207571",
+   desc:"MitoQ and urolithin A restore mitochondrial quality control and biogenesis via PINK1/Parkin pathway. Urolithin A Phase 2 positive for muscle function (handgrip, VO2max) in older adults. Age-related mitochondrial dysfunction drives multiple hallmarks simultaneously."},
+  {name:"Klotho Protein",mech:"Systemic",ev:5.2,lev:3.8,n:41,status:"emerging",pmid:"35468227",
+   desc:"Klotho-null mice age rapidly and die ~8 weeks; overexpression extends lifespan 20–30%. Serum klotho declines with age and independently predicts mortality. Key challenge: CNS delivery for cognitive benefits. Systemic delivery in NHP studies demonstrates safety."},
+  {name:"Partial Reprogramming (OSK)",mech:"Epigenetic",ev:5.6,lev:8.4,n:38,status:"emerging",pmid:"37075780",
+   desc:"Transient Oct4/Sox2/Klf4 expression resets DNA methylation age without inducing pluripotency. Sinclair Harvard: 10-year reversal of visual cortex epigenetic age in mice. Retinal neuron regeneration demonstrated in vivo. AAV9 and mRNA delivery approaches in parallel development."},
+  {name:"Epigenetic Reprogramming (full)",mech:"Epigenetic",ev:4.9,lev:9.2,n:24,status:"emerging",pmid:"35545728",
+   desc:"Complete cellular reprogramming to embryonic state. Challenge: preventing teratoma. Cyclic induction protocols and organ-targeted AAV delivery active. Calico, Turn.bio, AgeX investigating. 4F (OSKM) complete vs. 3F (OSK) partial debate ongoing. Nobel-level if solved."},
+  {name:"Heterochronic Blood Exchange",mech:"Systemic",ev:4.6,lev:4.4,n:22,status:"emerging",pmid:"36289331",
+   desc:"Conboy UCSF: 50% plasma dilution with albumin/saline restores multiple tissues without young blood. Simpler and safer than parabiosis. Removes pro-aging TGF-β and β2-microglobulin. Clerina trial underway at UCSF. Regulatory path cleaner than young plasma."},
+  {name:"Wnt Pathway Modulation",mech:"Systemic",ev:4.0,lev:4.1,n:28,status:"emerging",pmid:"29925953",
+   desc:"Age-related Wnt hyperactivation suppresses satellite cell quiescence in muscle, brain, liver. sFRP3 blockade and DKK1 inhibition restore tissue homeostasis in aged mice. IND-enabling studies active. Both activation and inhibition needed depending on tissue context."},
+  {name:"Telomerase Activation (AAV-TERT)",mech:"Telomere",ev:4.4,lev:5.8,n:35,status:"emerging",pmid:"35397175",
+   desc:"AAV9-TERT gene therapy extends median lifespan 13–24% in mice with low cancer incidence in p53-competent animals. Blasco CNIO data. Human translation requires concurrent p53/p16 tumor suppressor augmentation. Single systemic injection approach in development."},
+  {name:"GDF11 / Young Blood Factors",mech:"Systemic",ev:3.8,lev:3.6,n:29,status:"contested",pmid:"24770641",
+   desc:"Initial parabiosis enthusiasm tempered by GDF11 replication failures. Alkahest plasma fraction trials in Alzheimer's ongoing. Field fractured: specific active factors vs. inhibitory factor dilution debate unresolved. GDF11 vs. GDF11 antibody studies show conflicting results."},
+  {name:"Senolytic + Reprogramming Stack",mech:"Multi-pathway",ev:4.2,lev:9.5,n:8,status:"speculative",pmid:null,
+   desc:"Theoretical: clear senescent cells first (reducing OSK-induced cancer risk), then reprogram remaining tissue. Additive rejuvenation with reduced oncogenesis. No human combination data. High mechanistic rationale. Likely the dominant 5-year frontier strategy in the field."},
+  {name:"CRISPR Longevity Edits",mech:"Genetic",ev:2.8,lev:9.8,n:12,status:"speculative",pmid:"29474909",
+   desc:"Polygenic germline/somatic edits: APOE4→APOE2, PCSK9 KO, klotho gain-of-function, p16INK4a regulatory mods. Theoretically uncapped LEV if delivery and off-target resolved. IVF embryo editing technically feasible. Base editing now preferred over DSB for safety."},
+  {name:"Plasma Dilution (TPE)",mech:"Systemic",ev:4.2,lev:2.9,n:15,status:"emerging",pmid:"36473491",
+   desc:"Therapeutic plasma exchange removes pro-aging circulating factors. Wyss-Coray Stanford: 50% dilution on CNS aging biomarkers. Simpler regulatory path than young plasma. Phase 1 data available. Combined with albumin replacement for osmotic stability."},
 ];
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
+// ── Constants ─────────────────────────────────────────────────────────────
 const FREE_DAILY_LIMIT = 3;
-const LEV_MULTIPLIERS  = { '': 1.0, elder: 1.2, overlord: 1.5, sovereign: 2.0 };
-const TIER_LABELS      = { '': 'ANON', elder: 'ELDER', overlord: 'OVERLORD', sovereign: 'IMMORTAL SOVEREIGN' };
-const TIER_COLORS      = { '': '#3a5070', elder: '#ffd700', overlord: '#cc44ff', sovereign: '#00ff88' };
+const LEV_MULTIPLIERS  = {'':1.0,elder:1.2,overlord:1.5,sovereign:2.0};
+const TIER_LABELS      = {'':'ANON',elder:'ELDER',overlord:'OVERLORD',sovereign:'IMMORTAL SOVEREIGN'};
+const TIER_COLORS      = {'':'#3a5070',elder:'#ffd700',overlord:'#cc44ff',sovereign:'#00ff88'};
+const DB_NAME = 'immortalis_synthesis';
+const DB_VER  = 2;
 
-// ── State ─────────────────────────────────────────────────────────────────────
-
+// ── State ─────────────────────────────────────────────────────────────────
 let apiKey        = localStorage.getItem('immortalis_api_key') || '';
 let walletAddress = localStorage.getItem('immortalis_wallet')  || '';
 let immortTier    = localStorage.getItem('immortalis_tier')    || '';
 let curFilter     = 'all';
+let searchQuery   = '';
 let trCount       = +localStorage.getItem('s_tr') || 0;
 let prCount       = +localStorage.getItem('s_pr') || 0;
 let sessionStart  = Date.now();
 let lastRosettaOutput   = '';
 let lastBlueprintOutput = '';
+let lastRosettaInput    = '';
+let lastBlueprintInput  = '';
+let historyCount  = 0;
+let hoveredDatum  = null;  // track current tooltip datum for actions
 
-// ── Free quota helpers ────────────────────────────────────────────────────────
+// Community submissions (session-local for anon, persisted for holders)
+let DATA = [...BASE_DATA];
 
+// ── IndexedDB History ─────────────────────────────────────────────────────
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('history')) {
+        const store = d.createObjectStore('history', { keyPath:'id', autoIncrement:true });
+        store.createIndex('type','type');
+        store.createIndex('ts','ts');
+      }
+      if (!d.objectStoreNames.contains('interventions')) {
+        d.createObjectStore('interventions', { keyPath:'id', autoIncrement:true });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function dbSave(storeName, record) {
+  if (!db) return null;
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(storeName,'readwrite');
+    const req = tx.objectStore(storeName).add(record);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function dbGetAll(storeName) {
+  if (!db) return [];
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(storeName,'readonly');
+    const req = tx.objectStore(storeName).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function dbClear(storeName) {
+  if (!db) return;
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(storeName,'readwrite');
+    const req = tx.objectStore(storeName).clear();
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function saveToHistory(source) {
+  const text  = source === 'rosetta' ? lastRosettaOutput   : lastBlueprintOutput;
+  const input = source === 'rosetta' ? lastRosettaInput    : lastBlueprintInput;
+  if (!text) return;
+  const record = {
+    type:   source,
+    input:  input.slice(0,200),
+    output: text,
+    tier:   immortTier || '',
+    wallet: walletAddress ? walletAddress.slice(0,8) : null,
+    ts:     Date.now(),
+  };
+  await dbSave('history', record);
+  // Show saved badge
+  const outEl = document.getElementById(source === 'rosetta' ? 'ro' : 'bo');
+  const badge = document.createElement('div');
+  badge.className = 'saved-badge';
+  badge.textContent = '✓ SAVED TO HISTORY';
+  outEl.appendChild(badge);
+  // Refresh history drawer if open
+  await loadHistory();
+}
+
+async function loadHistory() {
+  const items = await dbGetAll('history');
+  historyCount = items.length;
+  document.getElementById('s-hist').textContent = historyCount;
+  const list = document.getElementById('history-list');
+  if (!items.length) {
+    list.innerHTML = '<div style="color:var(--dim);font-family:\'JetBrains Mono\',monospace;font-size:9.5px;padding:12px;text-align:center;">No saved sessions yet.<br>Run a translation or protocol and click ◷ SAVE.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  // Most recent first
+  [...items].reverse().forEach(item => {
+    const el  = document.createElement('div');
+    el.className = 'history-item';
+    const date = new Date(item.ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    el.innerHTML = `
+      <div class="hi-type ${item.type}">${item.type === 'rosetta' ? '🔬 ROSETTA' : '📋 BLUEPRINT'}</div>
+      <div class="hi-preview">${(item.input||'').slice(0,120)}…</div>
+      <div class="hi-meta">${date} · ${TIER_LABELS[item.tier]||'ANON'}</div>`;
+    el.onclick = () => restoreHistoryItem(item);
+    list.appendChild(el);
+  });
+}
+
+function restoreHistoryItem(item) {
+  if (item.type === 'rosetta') {
+    document.getElementById('ri').value = item.input;
+    const out = document.getElementById('ro');
+    out.innerHTML = fmt(item.output) + buildStamp();
+    lastRosettaOutput = item.output;
+    lastRosettaInput  = item.input;
+    document.getElementById('r-post').style.display    = 'inline-block';
+    document.getElementById('r-pubmed').style.display  = 'inline-block';
+    document.getElementById('r-save').style.display    = 'none';
+  } else {
+    document.getElementById('bi').value = item.input;
+    const out = document.getElementById('bo');
+    out.innerHTML = fmt(item.output,'mg') + buildStamp();
+    lastBlueprintOutput = item.output;
+    lastBlueprintInput  = item.input;
+    document.getElementById('b-post').style.display    = 'inline-block';
+    document.getElementById('b-pubmed').style.display  = 'inline-block';
+    document.getElementById('b-save').style.display    = 'none';
+  }
+  toggleHistory(); // close drawer
+}
+
+async function clearHistory() {
+  if (!confirm('Clear all saved history? This cannot be undone.')) return;
+  await dbClear('history');
+  await loadHistory();
+}
+
+function toggleHistory() {
+  const drawer = document.getElementById('history-drawer');
+  drawer.classList.toggle('open');
+  if (drawer.classList.contains('open')) loadHistory();
+}
+
+// Load community interventions from IndexedDB
+async function loadCommunityInterventions() {
+  const stored = await dbGetAll('interventions');
+  stored.forEach(d => {
+    if (!DATA.find(x => x.name === d.name)) DATA.push(d);
+  });
+  refreshStats();
+  buildScatter();
+}
+
+// ── Free quota ────────────────────────────────────────────────────────────
 function getFreeQueriesUsed() {
   const stored = JSON.parse(localStorage.getItem('s_free_quota') || '{}');
   if (stored.date !== new Date().toDateString()) return 0;
   return stored.count || 0;
 }
-
 function incrementFreeQueries() {
   const today = new Date().toDateString();
   const used  = getFreeQueriesUsed() + 1;
-  localStorage.setItem('s_free_quota', JSON.stringify({ date: today, count: used }));
+  localStorage.setItem('s_free_quota', JSON.stringify({date:today,count:used}));
 }
-
 function canQuery(outputId) {
-  if (apiKey)                        return true; // own key, unlimited
-  if (walletAddress && immortTier)   return true; // token holder, unlimited
-  if (getFreeQueriesUsed() < FREE_DAILY_LIMIT) return true; // free tier
+  if (apiKey)                       return true;
+  if (walletAddress && immortTier)  return true;
+  if (getFreeQueriesUsed() < FREE_DAILY_LIMIT) return true;
   document.getElementById(outputId).innerHTML =
-    `<span style="color:var(--gold)">⚡ Daily free limit reached (${FREE_DAILY_LIMIT}/day from the Research Commons pool).<br><br>` +
-    `Connect your $IMMORT wallet for unlimited access — or add your own Anthropic key via ⚙ API KEY.</span>`;
+    `<span style="color:var(--gold)">⚡ Daily free limit reached (${FREE_DAILY_LIMIT}/day from Research Commons).<br><br>
+    Connect your $IMMORT wallet for unlimited access — or add your Anthropic key via ⚙ API KEY.</span>`;
   return false;
 }
 
-// ── Quota UI ──────────────────────────────────────────────────────────────────
-
+// ── Quota UI ──────────────────────────────────────────────────────────────
 function updateQuotaUI() {
   const el = document.getElementById('quota-display');
   if (!el) return;
@@ -495,153 +904,140 @@ function updateQuotaUI() {
 }
 updateQuotaUI();
 
-// ── Mortality counter ─────────────────────────────────────────────────────────
-
+// ── Mortality counter ─────────────────────────────────────────────────────
+// ~100,000 aging-related deaths/day globally = 1.157/second
 setInterval(() => {
-  const n = Math.floor((Date.now() - sessionStart) / 1000 * 1.8);
+  const n = Math.floor((Date.now() - sessionStart) / 1000 * 1.157);
   document.getElementById('mort-n').textContent = n.toLocaleString();
 }, 400);
 
-// ── Stats ─────────────────────────────────────────────────────────────────────
-
+// ── Stats ─────────────────────────────────────────────────────────────────
 function refreshStats() {
-  document.getElementById('s-tr').textContent = trCount;
-  document.getElementById('s-pr').textContent = prCount;
+  document.getElementById('s-tr').textContent  = trCount;
+  document.getElementById('s-pr').textContent  = prCount;
+  document.getElementById('s-int').textContent = DATA.length;
   const gaps = DATA.filter(d => d.lev >= 5 && d.ev < 5).length;
   document.getElementById('s-gap').textContent = gaps;
-  document.getElementById('s-int').textContent = DATA.length;
 }
 refreshStats();
 
-// ── Blueprint select ──────────────────────────────────────────────────────────
-
-const bsel = document.getElementById('bsel');
-bsel.innerHTML = '<option value="">— Select known intervention or type below —</option>';
-DATA.forEach(d => {
-  const o = document.createElement('option');
-  o.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
-  o.textContent = d.name;
-  bsel.appendChild(o);
-});
-bsel.addEventListener('change', () => { if (bsel.value) document.getElementById('bi').value = ''; });
-
-// ── Wallet Modal ──────────────────────────────────────────────────────────────
-
-function openWalletModal() {
-  updateWalletStatus();
-  document.getElementById('wallet-modal').classList.add('open');
+// ── Blueprint select ──────────────────────────────────────────────────────
+function populateSelect() {
+  const bsel = document.getElementById('bsel');
+  bsel.innerHTML = '<option value="">— Select known intervention or type below —</option>';
+  DATA.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
+    o.textContent = d.name;
+    bsel.appendChild(o);
+  });
 }
-function closeWalletModal() { document.getElementById('wallet-modal').classList.remove('open'); }
-document.getElementById('wallet-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeWalletModal();
+populateSelect();
+document.getElementById('bsel').addEventListener('change', () => {
+  if (document.getElementById('bsel').value) document.getElementById('bi').value = '';
 });
+
+// ── Search ────────────────────────────────────────────────────────────────
+function onSearch() {
+  searchQuery = document.getElementById('search-input').value.toLowerCase();
+  buildScatter();
+}
+
+function filteredData() {
+  let d = DATA;
+  if (curFilter === 'gap')         d = d.filter(x => x.lev >= 5 && x.ev < 5);
+  else if (curFilter !== 'all')    d = d.filter(x => x.status === curFilter);
+  if (searchQuery) {
+    d = d.filter(x =>
+      x.name.toLowerCase().includes(searchQuery) ||
+      x.mech.toLowerCase().includes(searchQuery) ||
+      x.desc.toLowerCase().includes(searchQuery)
+    );
+  }
+  return d;
+}
+
+// ── Wallet ────────────────────────────────────────────────────────────────
+function openWalletModal()  { updateWalletStatus(); document.getElementById('wallet-modal').classList.add('open'); }
+function closeWalletModal() { document.getElementById('wallet-modal').classList.remove('open'); }
+document.getElementById('wallet-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeWalletModal();});
 
 function updateWalletStatus() {
   const el = document.getElementById('wallet-status');
-  if (!walletAddress) {
-    el.textContent = 'No wallet connected.';
-    el.style.color = 'var(--dim)';
-  } else {
-    const short = walletAddress.slice(0,6) + '...' + walletAddress.slice(-6);
-    const color = TIER_COLORS[immortTier] || 'var(--dim)';
-    el.innerHTML = `<span style="color:${color}">◈ ${TIER_LABELS[immortTier] || 'CONNECTED'}</span> &nbsp;<span style="color:var(--dim)">${short}</span>`;
-  }
+  if (!walletAddress) { el.textContent = 'No wallet connected.'; el.style.color = 'var(--dim)'; return; }
+  const short = walletAddress.slice(0,6)+'...'+walletAddress.slice(-6);
+  const color = TIER_COLORS[immortTier]||'var(--dim)';
+  el.innerHTML = `<span style="color:${color}">◈ ${TIER_LABELS[immortTier]||'CONNECTED'}</span> &nbsp;<span style="color:var(--dim)">${short}</span>`;
 }
 
 function updateWalletBtn() {
   const btn = document.getElementById('wallet-btn');
-  if (!walletAddress) {
-    btn.className = 'hdr-btn';
-    btn.textContent = '◈ CONNECT $IMMORT';
-  } else {
-    btn.className = `hdr-btn connected ${immortTier}`;
-    const short = walletAddress.slice(0,4) + '..' + walletAddress.slice(-4);
-    btn.textContent = `◈ ${TIER_LABELS[immortTier] || 'CONNECTED'} ${short}`;
-  }
+  if (!walletAddress) { btn.className='hdr-btn'; btn.textContent='◈ CONNECT $IMMORT'; return; }
+  btn.className = `hdr-btn connected ${immortTier}`;
+  btn.textContent = `◈ ${TIER_LABELS[immortTier]||'CONNECTED'} ${walletAddress.slice(0,4)}..${walletAddress.slice(-4)}`;
 }
 updateWalletBtn();
 
-async function connectWallet(provider, providerName) {
+async function connectWallet(provider, name) {
   const statusEl = document.getElementById('wallet-status');
-  if (!provider) {
-    statusEl.innerHTML = `<span style="color:var(--red)">${providerName} not detected. Install the extension and reload.</span>`;
-    return;
-  }
-  statusEl.innerHTML = `<span style="color:var(--cyan)">Connecting to ${providerName}...</span>`;
+  if (!provider) { statusEl.innerHTML=`<span style="color:var(--red)">${name} not detected.</span>`; return; }
+  statusEl.innerHTML = `<span style="color:var(--cyan)">Connecting to ${name}…</span>`;
   try {
     const resp = await provider.connect();
     walletAddress = resp.publicKey.toString();
     localStorage.setItem('immortalis_wallet', walletAddress);
-
-    statusEl.innerHTML = `<span style="color:var(--cyan)">Verifying $IMMORT balance...</span>`;
-
-    // Verify tier via server
+    statusEl.innerHTML = `<span style="color:var(--cyan)">Verifying $IMMORT balance…</span>`;
     try {
-      const r = await fetch('/api/immort/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: walletAddress })
-      });
+      const r    = await fetch('/api/immort/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:walletAddress})});
       const data = await r.json();
       immortTier = data.tier || '';
-    } catch {
-      immortTier = ''; // server offline / local dev — still connected, just anon tier
-    }
+    } catch { immortTier = ''; }
     localStorage.setItem('immortalis_tier', immortTier);
-
-    updateWalletStatus();
-    updateWalletBtn();
-    updateQuotaUI();
-  } catch (e) {
-    statusEl.innerHTML = `<span style="color:var(--red)">Connection rejected: ${e.message}</span>`;
+    updateWalletStatus(); updateWalletBtn(); updateQuotaUI();
+  } catch(e) {
+    statusEl.innerHTML = `<span style="color:var(--red)">Rejected: ${e.message}</span>`;
   }
 }
+function connectPhantom()  { connectWallet(window.phantom?.solana,'Phantom'); }
+function connectSolflare() { connectWallet(window.solflare,'Solflare'); }
 
-function connectPhantom()  { connectWallet(window.phantom?.solana,  'Phantom'); }
-function connectSolflare() { connectWallet(window.solflare,          'Solflare'); }
-
-// ── API Key Modal ─────────────────────────────────────────────────────────────
-
-function openKeyModal() {
-  document.getElementById('key-input').value = apiKey ? '••••••••••••••••' : '';
-  document.getElementById('key-modal').classList.add('open');
-}
+// ── API Key ───────────────────────────────────────────────────────────────
+function openKeyModal()  { document.getElementById('key-input').value = apiKey ? '••••••••••••••••':''; document.getElementById('key-modal').classList.add('open'); }
 function closeKeyModal() { document.getElementById('key-modal').classList.remove('open'); }
-function saveKey() {
-  const v = document.getElementById('key-input').value.trim();
-  if (v && !v.startsWith('•')) { apiKey = v; localStorage.setItem('immortalis_api_key', v); }
-  updateQuotaUI();
-  closeKeyModal();
-}
-function clearKey() {
-  apiKey = '';
-  localStorage.removeItem('immortalis_api_key');
-  document.getElementById('key-input').value = '';
-  updateQuotaUI();
-  closeKeyModal();
-}
-document.getElementById('key-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeKeyModal();
-});
+function saveKey()  { const v=document.getElementById('key-input').value.trim(); if(v&&!v.startsWith('•')){apiKey=v;localStorage.setItem('immortalis_api_key',v);} updateQuotaUI(); closeKeyModal(); }
+function clearKey() { apiKey=''; localStorage.removeItem('immortalis_api_key'); document.getElementById('key-input').value=''; updateQuotaUI(); closeKeyModal(); }
+document.getElementById('key-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeKeyModal();});
 
-// ── Format output ─────────────────────────────────────────────────────────────
-
+// ── Format output ─────────────────────────────────────────────────────────
 function fmt(text, color) {
-  return text.replace(/^([A-Z][A-Z &\/\-\+]+:)/gm,
-    `<span class="sec${color === 'mg' ? ' mg' : ''}">$1</span>`);
+  return text.replace(/^([A-Z][A-Z &\/\-\+:]+:)/gm,
+    `<span class="sec${color==='mg'?' mg':''}"  >$1</span>`);
 }
 
-// ── Tier stamp ────────────────────────────────────────────────────────────────
+// Extract confidence score from Rosetta output for visual bar
+function extractConfidence(text) {
+  const m = text.match(/CONFIDENCE SCORE[:\s]+(\d+(?:\.\d+)?)\s*\/\s*10/i);
+  return m ? parseFloat(m[1]) : null;
+}
 
+function renderConfidenceBar(score) {
+  if (!score) return '';
+  const pct   = (score/10)*100;
+  const color = score >= 7 ? 'var(--green)' : score >= 5 ? 'var(--gold)' : 'var(--red)';
+  return `<div class="conf-bar-wrap">
+    <div class="conf-bar-label">Confidence: ${score}/10</div>
+    <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+// ── Tier stamp ────────────────────────────────────────────────────────────
 function buildStamp() {
   const tier   = immortTier || '';
   const color  = TIER_COLORS[tier];
   const label  = TIER_LABELS[tier];
   const mult   = LEV_MULTIPLIERS[tier];
-  const wallet = walletAddress
-    ? (walletAddress.slice(0,4) + '...' + walletAddress.slice(-4))
-    : 'UNSIGNED';
-  const ts = new Date().toISOString().slice(0,19) + 'Z';
+  const wallet = walletAddress ? (walletAddress.slice(0,4)+'...'+walletAddress.slice(-4)) : 'UNSIGNED';
+  const ts     = new Date().toISOString().slice(0,19)+'Z';
   return `<div class="tier-stamp" style="border:1px solid ${color}33;">
     <span style="color:${color};letter-spacing:1px;font-weight:700">◈ ${label}</span>
     <span style="color:var(--dim)">${wallet}</span>
@@ -651,178 +1047,189 @@ function buildStamp() {
   </div>`;
 }
 
-// ── Claude API ────────────────────────────────────────────────────────────────
-
+// ── Claude API ────────────────────────────────────────────────────────────
 async function callClaude(system, user) {
-  // Path 1: own API key — direct browser call, unlimited, user's cost
+  // Path 1: own key — direct browser, user's cost
   if (apiKey) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system,
-        messages: [{ role: 'user', content: user }]
-      })
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system,messages:[{role:'user',content:user}]})
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
-    return data.content.map(b => b.text || '').join('');
+    return data.content.map(b=>b.text||'').join('');
   }
-
-  // Path 2: server proxy (Research Commons pool)
-  // Token holders: unlimited. Non-holders: 3/day enforced server-side.
-  const body = { system, user };
-  if (walletAddress && immortTier) {
-    body.wallet = walletAddress;
-    body.tier   = immortTier;
-  }
-
-  const res = await fetch('/api/synthesis', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  // Path 2: server proxy
+  const body = {system, user};
+  if (walletAddress && immortTier) { body.wallet=walletAddress; body.tier=immortTier; }
+  const res  = await fetch('/api/synthesis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const data = await res.json();
   if (data.error) throw new Error(data.error);
-
-  // Decrement local free counter only for non-holders (server also enforces)
-  if (!walletAddress || !immortTier) {
-    incrementFreeQueries();
-    updateQuotaUI();
-  }
+  if (!walletAddress || !immortTier) { incrementFreeQueries(); updateQuotaUI(); }
   return data.text;
 }
 
-// ── Rosetta Protocol ──────────────────────────────────────────────────────────
+// ── PubMed search string generator ───────────────────────────────────────
+function buildPubmedQuery(text, type) {
+  // Extract key terms from the output
+  const keywords = [];
+  if (type === 'rosetta') {
+    const pathM  = text.match(/PATHWAY CONSERVATION:\s*([\s\S]{0,200})/i);
+    const clinM  = text.match(/CLINICAL EVIDENCE:\s*([\s\S]{0,150})/i);
+    if (pathM) {
+      const genes = pathM[1].match(/\b[A-Z][A-Z0-9]{2,}\b/g) || [];
+      keywords.push(...genes.slice(0,3));
+    }
+    if (clinM) {
+      const terms = clinM[1].match(/\b(rapamycin|senolytic|mTOR|reprogramming|NAD\+|telomerase|klotho|senolytics|AMPK|OSK|IGF-1|epigenetic)\b/gi) || [];
+      keywords.push(...terms.slice(0,2));
+    }
+  } else {
+    const epM = text.match(/PRIMARY ENDPOINT:\s*([\s\S]{0,150})/i);
+    const inM = text.match(/INTERVENTION PROTOCOL:\s*([\s\S]{0,150})/i);
+    if (epM) {
+      const biomarkers = epM[1].match(/\b(GrimAge|DunedinPACE|PhenoAge|GlycanAge|VO2max|ApoB|HOMA-IR|DNAmAge)\b/gi) || [];
+      keywords.push(...biomarkers.slice(0,2));
+    }
+    if (inM) {
+      const drugs = inM[1].match(/\b(rapamycin|dasatinib|quercetin|metformin|NMN|NR|spermidine|fisetin|navitoclax)\b/gi) || [];
+      keywords.push(...drugs.slice(0,2));
+    }
+  }
+  const unique = [...new Set(keywords.map(k=>k.trim()))].filter(Boolean);
+  const query  = unique.length
+    ? unique.slice(0,4).join('[Title/Abstract] AND ') + '[Title/Abstract] AND aging[MeSH]'
+    : 'longevity[MeSH] AND clinical trial[pt]';
+  return encodeURIComponent(query);
+}
 
+function openPubmedSearch(source) {
+  const text  = source === 'rosetta' ? lastRosettaOutput : lastBlueprintOutput;
+  if (!text) return;
+  const query = buildPubmedQuery(text, source);
+  window.open(`https://pubmed.ncbi.nlm.nih.gov/?term=${query}&sort=date`, '_blank');
+}
+
+// ── Rosetta Protocol ──────────────────────────────────────────────────────
 async function runRosetta() {
   const input = document.getElementById('ri').value.trim();
   if (!input) return;
   if (!canQuery('ro')) return;
-
   const btn = document.getElementById('r-btn');
   const out = document.getElementById('ro');
-  btn.disabled = true; btn.textContent = 'ANALYZING';
-  out.innerHTML = '<span class="spin">Analyzing cross-species pathway conservation</span>';
-  document.getElementById('r-post').style.display = 'none';
+  btn.disabled=true; btn.textContent='ANALYZING…';
+  out.innerHTML='<span class="spin">Analyzing cross-species pathway conservation</span>';
+  ['r-post','r-pubmed','r-save'].forEach(id=>document.getElementById(id).style.display='none');
 
   const SYSTEM = `You are the IMMORTALIS Rosetta Protocol — the world's most rigorous cross-species longevity translation engine. You transform animal model findings into precise human clinical relevance assessments.
 
-Structure your response EXACTLY as follows (each header on its own line in ALL CAPS followed by colon):
+Structure your response EXACTLY as follows (each header on its own line, ALL CAPS, followed by colon and newline):
 
 PATHWAY CONSERVATION:
-[Conservation of this specific pathway from the model organism to Homo sapiens. Name the exact genes, proteins, and conserved regulatory elements. Quantify conservation where possible, e.g., "87% sequence identity in the kinase domain."]
+[Conservation of this pathway from model organism to Homo sapiens. Name the exact genes, proteins, conserved regulatory elements. Quantify conservation: e.g. "87% sequence identity in the kinase domain." State which species were used and their phylogenetic distance from humans.]
 
 ALLOMETRIC SCALING:
-[Dose and timeline translation. Show the calculation: metabolic rate scaling (mass^0.75), lifespan ratio adjustment, pharmacokinetic differences. Give human-equivalent dose and duration.]
+[Dose and timeline translation. Show the calculation: metabolic rate scaling (mass^0.75), lifespan ratio, pharmacokinetic differences. Give human-equivalent dose and duration explicitly. Flag if the scaling is unusually uncertain.]
 
 HUMAN HOMOLOG:
-[The specific human biology equivalent. What happens in aging humans in this pathway? What changes? What's the natural variation across the human population?]
+[The specific human biology equivalent. What happens in aging humans in this exact pathway? What changes molecularly? What is the natural inter-individual variation across the human population?]
 
 CLINICAL EVIDENCE:
-[Existing human trials, epidemiological studies, Mendelian randomization studies, or case reports touching this exact mechanism. Be specific: trial name, n, result, effect size if available. If none exist, state clearly.]
+[All existing human trials, epidemiological studies, Mendelian randomization studies, or case reports on this mechanism. Be specific: trial name, NCT number if known, n, primary outcome result, effect size with confidence interval if available. If none exist, state clearly: "No human data available as of 2025."]
 
 CONFIDENCE SCORE:
-[Score 1-10. Justify with: number of replication studies, species diversity, mechanistic depth, human data quality. Example: "7/10 — pathway highly conserved, 4 independent mouse labs, 1 human pilot RCT positive."]
+[Score X/10. Justify precisely: number of independent replication studies, species diversity (worm → fly → mouse → primate), mechanistic depth (in vitro → in vivo), human data quality. Example: "7/10 — pathway conserved across 4 species, 3 independent mouse labs, 1 positive human pilot RCT n=24."]
 
 KEY CAVEATS:
-[The 2–3 most important biological reasons this might not translate. Be specific: species-specific compensatory mechanisms, immune system differences, lifespan ratio confounds, etc.]
+[The 2–3 most important biological reasons this might not translate. Be specific: species-specific compensatory mechanisms, immune system differences, lifespan ratio confounds, tumor suppressor differences, microbiome confounders.]
 
 PRIORITY LEVEL:
-[HIGH / MEDIUM / LOW — should this be fast-tracked to human trials? Justify with: safety profile, cost of trial, mechanistic confidence, unmet need.]
+[HIGH / MEDIUM / LOW — should this be fast-tracked to human trials? Justify: safety profile, cost of trial, mechanistic confidence, unmet clinical need, regulatory precedent.]
 
-Be scientifically exact. Cite specific proteins, gene names, concentrations, timelines. No vague claims. This output may be reviewed by research scientists.`;
+Be scientifically exact. Use gene symbols (e.g. MTOR, FOXO3, TP53). Cite specific concentrations and timelines. No vague claims. This output is reviewed by research scientists and may inform trial design.`;
 
   try {
     const result = await callClaude(SYSTEM, `Translate this animal model finding to human clinical relevance:\n\n${input}`);
     lastRosettaOutput = result;
-    out.innerHTML = fmt(result) + buildStamp();
-    document.getElementById('r-post').style.display = 'inline-block';
-    trCount++; localStorage.setItem('s_tr', trCount);
-    refreshStats();
+    lastRosettaInput  = input;
+    const confScore   = extractConfidence(result);
+    out.innerHTML = fmt(result) + renderConfidenceBar(confScore) + buildStamp();
+    ['r-post','r-pubmed','r-save'].forEach(id=>document.getElementById(id).style.display='inline-block');
+    trCount++; localStorage.setItem('s_tr',trCount); refreshStats();
   } catch(e) {
     out.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
   }
-  btn.disabled = false; btn.textContent = '⟳ TRANSLATE';
+  btn.disabled=false; btn.textContent='⟳ TRANSLATE';
 }
 
-// ── Experimental Blueprint ────────────────────────────────────────────────────
-
+// ── Experimental Blueprint ────────────────────────────────────────────────
 async function runBlueprint() {
-  const hypothesis = bsel.value || document.getElementById('bi').value.trim();
+  const hypothesis = document.getElementById('bsel').value || document.getElementById('bi').value.trim();
   if (!hypothesis) return;
   if (!canQuery('bo')) return;
-
   const btn = document.getElementById('b-btn');
   const out = document.getElementById('bo');
-  btn.disabled = true; btn.textContent = 'GENERATING';
-  out.innerHTML = '<span class="spin">Generating experimental blueprint</span>';
-  document.getElementById('b-post').style.display = 'none';
+  btn.disabled=true; btn.textContent='GENERATING…';
+  out.innerHTML='<span class="spin">Generating experimental blueprint</span>';
+  ['b-post','b-pubmed','b-save'].forEach(id=>document.getElementById(id).style.display='none');
 
-  const SYSTEM = `You are the IMMORTALIS Experimental Blueprint engine — you generate clinical trial protocols indistinguishable from those written by senior clinical investigators at major research centers.
+  const SYSTEM = `You are the IMMORTALIS Experimental Blueprint engine — you generate clinical trial protocols indistinguishable from those written by senior clinical investigators at major academic medical centers.
 
 Structure your response EXACTLY as follows:
 
 STUDY DESIGN:
-[Phase (I/II/IIa/IIb/III), design (parallel RCT, crossover, adaptive), duration, number of arms, blinding, allocation ratio]
+[Phase (I/II/IIa/IIb/III), design type (parallel-group RCT / crossover / adaptive / umbrella), duration, number of arms, blinding strategy, allocation ratio. Justify the design choice given the intervention's safety profile and prior data.]
 
 PRIMARY ENDPOINT:
-[One specific, validated, measurable outcome. Include: biomarker name, assay method, minimal clinically important difference (MCID), timepoint of measurement]
+[One specific, validated, measurable outcome. Include: exact biomarker name, assay method (e.g. "Illumina EPIC 850K array for DNAm GrimAge"), analytical laboratory, minimal clinically important difference (MCID), timepoint of primary assessment, and regulatory precedent for this endpoint.]
 
 SECONDARY ENDPOINTS:
-[3–4 additional endpoints with measurement methods and timepoints. Include both mechanistic and clinical outcomes]
+[3–5 additional endpoints with measurement method, assay platform, and timepoints. Include both mechanistic biomarkers AND clinical/functional outcomes. Label each as exploratory or confirmatory.]
 
 SAMPLE SIZE CALCULATION:
-[Show the math: α level, power (1-β), expected effect size from prior data (cite source), SD estimate, attrition assumption → N per arm and total N. Use a recognized formula.]
+[Show the full calculation: α level (two-tailed), power (1-β), expected effect size with source citation, SD estimate with source, expected attrition rate → N per arm and total N. State the statistical software/method used. Include sensitivity analysis for ±30% effect size uncertainty.]
 
 INCLUSION CRITERIA:
-[Age range, health status, specific qualifying conditions or biomarker ranges, prior treatment requirements]
+[Age range, health status, specific qualifying conditions or biomarker ranges with exact cutoffs, prior treatment requirements, and minimum washout periods required.]
 
 EXCLUSION CRITERIA:
-[Safety exclusions, validity exclusions, conditions that confound the primary endpoint]
+[Safety exclusions with rationale, validity exclusions that protect endpoint integrity, prohibited concomitant medications with specific examples.]
 
 INTERVENTION PROTOCOL:
-[Exact dosing, formulation, timing, route, duration, permitted co-interventions, prohibited medications, monitoring schedule]
+[Exact dose, formulation, timing, route of administration, duration, permitted co-interventions, prohibited medications with washout periods, monitoring schedule, adherence tracking method.]
 
 SAFETY MONITORING:
-[Anticipated adverse events and grades, stopping rules (DSMB thresholds), required safety labs, frequency of monitoring visits]
+[Anticipated adverse events by grade (CTCAE), DSMB/DMC structure and meeting frequency, pre-specified stopping rules with exact thresholds (e.g. "≥3 SAEs possibly related"), required safety labs and frequency, dose modification rules.]
 
 STATISTICAL ANALYSIS PLAN:
-[Primary analysis method, pre-specified sensitivity analyses, handling of missing data, multiplicity correction for secondary endpoints, ITT and PP populations]
+[Primary analysis method (ANCOVA, mixed-effects, Cox), pre-specified sensitivity analyses, handling of missing data (MCAR/MAR/MNAR assumption), multiplicity correction for secondary endpoints (Bonferroni/FDR/hierarchical), ITT and PP populations defined, interim analysis schedule if planned.]
 
 TIMELINE:
-[Phase breakdown: screening (months), enrollment period (months), treatment duration (months), follow-up (months), analysis and publication (months) → Total study duration]
+[Phase breakdown in months: IND preparation, screening period, enrollment (with monthly rate estimate), treatment duration, follow-up, database lock, analysis, publication → Total study duration in months.]
 
 ESTIMATED BUDGET RANGE:
-[Low–high range in USD with major cost drivers: investigational product, site costs, lab assays, monitoring, personnel]
+[Low–high range in USD. Major cost drivers itemized: IMP (investigational medicinal product), site costs (n sites × cost/site), central lab assays, monitoring visits, project management, regulatory, publication → Total.]
 
 REGULATORY PATHWAY:
-[IND required? Phase designation. Predicate studies for FDA precedent. Breakthrough Therapy Designation eligibility? Biomarker qualification status.]
+[IND required? Phase designation rationale. Predicate studies for FDA precedent. Breakthrough Therapy Designation (BTD) eligibility criteria and likelihood. Biomarker qualification status with FDA. EU CTA parallel considerations if relevant. Estimated time to first-in-human if Phase 1.]
 
-Be specific. Use validated biomarker names (e.g., "GrimAge epigenetic clock by Illumina EPIC array" not just "aging biomarker"). Use realistic numbers. This output should be IRB-submittable.`;
+Be specific. Use validated biomarker names. Use realistic numbers grounded in current trial costs ($8,000–$25,000/patient for typical Phase 2). This output should be IRB-submittable with minimal editing.`;
 
   try {
-    const result = await callClaude(SYSTEM, `Generate a complete experimental protocol for testing this longevity hypothesis:\n\n${hypothesis}`);
+    const result = await callClaude(SYSTEM, `Generate a complete experimental protocol for this longevity hypothesis:\n\n${hypothesis}`);
     lastBlueprintOutput = result;
-    out.innerHTML = fmt(result, 'mg') + buildStamp();
-    document.getElementById('b-post').style.display = 'inline-block';
-    prCount++; localStorage.setItem('s_pr', prCount);
-    refreshStats();
+    lastBlueprintInput  = hypothesis;
+    out.innerHTML = fmt(result,'mg') + buildStamp();
+    ['b-post','b-pubmed','b-save'].forEach(id=>document.getElementById(id).style.display='inline-block');
+    prCount++; localStorage.setItem('s_pr',prCount); refreshStats();
   } catch(e) {
     out.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
   }
-  btn.disabled = false; btn.textContent = '⬡ GENERATE PROTOCOL';
+  btn.disabled=false; btn.textContent='⬡ GENERATE PROTOCOL';
 }
 
-// ── Post to Swarm ─────────────────────────────────────────────────────────────
-
+// ── Post to Swarm ─────────────────────────────────────────────────────────
 async function postToSwarm(source) {
   const text     = source === 'rosetta' ? lastRosettaOutput : lastBlueprintOutput;
   const type     = source === 'rosetta' ? 'hypothesis' : 'breakthrough';
@@ -830,75 +1237,138 @@ async function postToSwarm(source) {
   const mult     = LEV_MULTIPLIERS[tier];
   const baseDelta = source === 'blueprint' ? 1.5 : 0.5;
   const levDelta  = +(baseDelta * mult).toFixed(2);
-
-  // Author label: tier + truncated wallet, or anonymous
-  const author = walletAddress
+  const author    = walletAddress
     ? `${TIER_LABELS[tier]}:${walletAddress.slice(0,8)}`
     : 'SynthesisEngine';
-
   try {
-    await fetch('/api/nodes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text:            text.slice(0, 500),
-        type,
-        author,
-        lev_delta:       levDelta,
-        source:          'synthesis-engine',
-        wallet:          walletAddress || null,
-        tier:            tier || null,
-        lev_multiplier:  mult,
-        signed:          !!walletAddress
-      })
-    });
-    const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
+    await fetch('/api/nodes',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:text.slice(0,500),type,author,lev_delta:levDelta,
+        source:'synthesis-engine',wallet:walletAddress||null,tier:tier||null,
+        lev_multiplier:mult,signed:!!walletAddress})});
+    const btn = document.getElementById(source==='rosetta'?'r-post':'b-post');
     const tierLabel = tier ? ` [${mult}× LEV]` : '';
     btn.textContent = `✓ POSTED${tierLabel}`;
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 3000);
-  } catch(e) {
-    const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
-    btn.textContent = '✓ POSTED (OFFLINE)'; btn.disabled = true;
-    setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 2000);
+    setTimeout(()=>{btn.textContent='↑ POST TO SWARM';btn.disabled=false;},3000);
+  } catch {
+    const btn = document.getElementById(source==='rosetta'?'r-post':'b-post');
+    btn.textContent='✓ POSTED (OFFLINE)'; btn.disabled=true;
+    setTimeout(()=>{btn.textContent='↑ POST TO SWARM';btn.disabled=false;},2000);
   }
 }
 
-// ── D3 Evidence Landscape ─────────────────────────────────────────────────────
+// ── Add Intervention ──────────────────────────────────────────────────────
+function openAddDrawer() {
+  document.getElementById('add-drawer').classList.add('open');
+  document.getElementById('add-err').style.display     = 'none';
+  document.getElementById('add-success').style.display = 'none';
+}
+function closeAddDrawer() { document.getElementById('add-drawer').classList.remove('open'); }
+document.getElementById('add-drawer').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddDrawer();});
 
+async function submitIntervention() {
+  const err = document.getElementById('add-err');
+  const suc = document.getElementById('add-success');
+  err.style.display = 'none'; suc.style.display = 'none';
+
+  const name   = document.getElementById('add-name').value.trim();
+  const mech   = document.getElementById('add-mech').value;
+  const status = document.getElementById('add-status').value;
+  const ev     = parseFloat(document.getElementById('add-ev').value);
+  const lev    = parseFloat(document.getElementById('add-lev').value);
+  const n      = parseInt(document.getElementById('add-n').value)||10;
+  const pmid   = document.getElementById('add-pmid').value.trim()||null;
+  const desc   = document.getElementById('add-desc').value.trim();
+
+  if (!name||!desc||isNaN(ev)||isNaN(lev)) {
+    err.textContent='Please fill in all required fields (Name, Evidence, LEV, Description).';
+    err.style.display='block'; return;
+  }
+  if (ev<0||ev>10||lev<0||lev>15) {
+    err.textContent='Evidence must be 0–10, LEV impact 0–15.';
+    err.style.display='block'; return;
+  }
+  if (DATA.find(d=>d.name.toLowerCase()===name.toLowerCase())) {
+    err.textContent='An intervention with this name already exists.';
+    err.style.display='block'; return;
+  }
+
+  const newEntry = {name,mech,ev,lev,n,status,pmid,desc,
+    submitter: walletAddress?walletAddress.slice(0,8):'anon',
+    ts: Date.now()};
+
+  DATA.push(newEntry);
+
+  // Persist to IndexedDB
+  await dbSave('interventions', newEntry);
+
+  // If holder: post to server for shared persistence
+  if (walletAddress && immortTier) {
+    try {
+      await fetch('/api/interventions',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({...newEntry,wallet:walletAddress,tier:immortTier})});
+    } catch {}
+  }
+
+  refreshStats();
+  populateSelect();
+  buildScatter();
+
+  suc.textContent = '✓ Intervention added to Evidence Landscape' + (walletAddress&&immortTier?' and submitted to shared map.':' (session-local — connect wallet for shared persistence).');
+  suc.style.display = 'block';
+
+  // Clear form
+  ['add-name','add-ev','add-lev','add-n','add-pmid','add-desc'].forEach(id=>document.getElementById(id).value='');
+  setTimeout(closeAddDrawer, 2000);
+}
+
+// ── Tooltip load-into actions ─────────────────────────────────────────────
+function loadIntoRosetta() {
+  if (!hoveredDatum) return;
+  document.getElementById('ri').value =
+    `${hoveredDatum.name} (${hoveredDatum.mech}): ${hoveredDatum.desc}`;
+  document.getElementById('tip').style.display='none';
+}
+function loadIntoBlueprint() {
+  if (!hoveredDatum) return;
+  document.getElementById('bsel').value = '';
+  document.getElementById('bi').value =
+    `${hoveredDatum.name} (${hoveredDatum.mech}, evidence ${hoveredDatum.ev}/10, LEV ${hoveredDatum.lev} yrs): ${hoveredDatum.desc.slice(0,200)}`;
+  document.getElementById('tip').style.display='none';
+}
+
+// ── D3 Evidence Landscape ─────────────────────────────────────────────────
 function buildScatter() {
   const wrap = document.getElementById('scatter-wrap');
   const svg  = d3.select('#scatter-svg');
   svg.selectAll('*').remove();
 
   const W = wrap.clientWidth, H = wrap.clientHeight;
-  const M = { top:28, right:24, bottom:46, left:52 };
-  const w = W - M.left - M.right;
-  const h = H - M.top  - M.bottom;
+  const M = {top:28,right:24,bottom:46,left:52};
+  const w = W-M.left-M.right;
+  const h = H-M.top-M.bottom;
 
   const defs = svg.append('defs');
-  Object.entries(MECH_COLORS).forEach(([m, c]) => {
-    const fid = 'glow' + m.replace(/\W/g,'');
-    const f = defs.append('filter').attr('id', fid).attr('x','-50%').attr('y','-50%').attr('width','200%').attr('height','200%');
+  Object.entries(MECH_COLORS).forEach(([m,c])=>{
+    const fid='glow'+m.replace(/\W/g,'');
+    const f=defs.append('filter').attr('id',fid).attr('x','-50%').attr('y','-50%').attr('width','200%').attr('height','200%');
     f.append('feGaussianBlur').attr('stdDeviation','3.5').attr('result','b');
-    const fm = f.append('feMerge');
-    fm.append('feMergeNode').attr('in','b');
-    fm.append('feMergeNode').attr('in','SourceGraphic');
+    const fm=f.append('feMerge');fm.append('feMergeNode').attr('in','b');fm.append('feMergeNode').attr('in','SourceGraphic');
   });
 
-  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const g=svg.append('g').attr('transform',`translate(${M.left},${M.top})`);
+  const xSc=d3.scaleLinear().domain([0,10]).range([0,w]);
+  const ySc=d3.scaleLinear().domain([0,11]).range([h,0]);
+  const rSc=d3.scaleSqrt().domain([0,1300]).range([5,21]);
 
-  const xSc = d3.scaleLinear().domain([0,10]).range([0,w]);
-  const ySc = d3.scaleLinear().domain([0,11]).range([h,0]);
-  const rSc = d3.scaleSqrt().domain([0,1300]).range([5,21]);
-
-  const quads = [
-    {x:w/2,y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,215,0,.04)',  stroke:'rgba(255,215,0,.12)', label:'VALIDATED BREAKTHROUGHS', lx:w*.75, ly:16,   lc:'#ffd700'},
-    {x:0,  y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,80,0,.05)',   stroke:'rgba(255,80,0,.15)',  label:'PRIORITY RESEARCH GAPS',  lx:w*.25, ly:16,   lc:'#ff6b35'},
-    {x:w/2,y:h/2+6, wd:w/2,ht:h/2-6, fill:'rgba(0,212,255,.03)', stroke:'rgba(0,212,255,.08)', label:'ESTABLISHED BASELINE',    lx:w*.75, ly:h-6,  lc:'#00d4ff'},
-    {x:0,  y:h/2+6, wd:w/2,ht:h/2-6, fill:'rgba(80,80,120,.03)', stroke:'rgba(80,80,120,.09)', label:'SPECULATIVE TERRITORY',   lx:w*.25, ly:h-6,  lc:'#3a5070'},
+  // Quadrant backgrounds
+  const quads=[
+    {x:w/2,y:0,wd:w/2,ht:h/2-6,fill:'rgba(255,215,0,.04)',stroke:'rgba(255,215,0,.12)',label:'VALIDATED BREAKTHROUGHS',lx:w*.75,ly:16,lc:'#ffd700'},
+    {x:0,y:0,wd:w/2,ht:h/2-6,fill:'rgba(255,80,0,.05)',stroke:'rgba(255,80,0,.15)',label:'PRIORITY RESEARCH GAPS',lx:w*.25,ly:16,lc:'#ff6b35'},
+    {x:w/2,y:h/2+6,wd:w/2,ht:h/2-6,fill:'rgba(0,212,255,.03)',stroke:'rgba(0,212,255,.08)',label:'ESTABLISHED BASELINE',lx:w*.75,ly:h-6,lc:'#00d4ff'},
+    {x:0,y:h/2+6,wd:w/2,ht:h/2-6,fill:'rgba(80,80,120,.03)',stroke:'rgba(80,80,120,.09)',label:'SPECULATIVE TERRITORY',lx:w*.25,ly:h-6,lc:'#3a5070'},
   ];
-  quads.forEach(q => {
+  quads.forEach(q=>{
     g.append('rect').attr('x',q.x).attr('y',q.y).attr('width',q.wd).attr('height',q.ht)
       .attr('fill',q.fill).attr('stroke',q.stroke).attr('stroke-width',.5);
     g.append('text').attr('x',q.lx).attr('y',q.ly).attr('text-anchor','middle')
@@ -906,45 +1376,54 @@ function buildScatter() {
       .attr('letter-spacing','2').attr('opacity',.45).text(q.label);
   });
 
-  [['line',w/2,0,w/2,h],['line',0,h/2,w,h/2]].forEach(([,x1,y1,x2,y2]) =>
+  // Grid lines
+  [['line',w/2,0,w/2,h],['line',0,h/2,w,h/2]].forEach(([,x1,y1,x2,y2])=>
     g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
       .attr('stroke','rgba(255,255,255,.07)').attr('stroke-width',1).attr('stroke-dasharray','5,5'));
 
+  // Axes
   g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(xSc).ticks(5).tickSize(-h))
-    .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill',getComputedStyle(document.documentElement).getPropertyValue('--dim')).attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
+    .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill','#3a5070').attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
   g.append('g').call(d3.axisLeft(ySc).ticks(6).tickSize(-w))
     .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill','#3a5070').attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
-
   g.append('text').attr('x',w/2).attr('y',h+36).attr('text-anchor','middle')
     .attr('fill','#3a5070').attr('font-size','9.5px').attr('font-family',"'JetBrains Mono',monospace").attr('letter-spacing','2').text('EVIDENCE STRENGTH →');
   g.append('text').attr('transform','rotate(-90)').attr('x',-h/2).attr('y',-40)
     .attr('text-anchor','middle').attr('fill','#3a5070').attr('font-size','9.5px')
     .attr('font-family',"'JetBrains Mono',monospace").attr('letter-spacing','2').text('↑ YEARS OF LIFE EXTENSION');
 
-  const vis = curFilter === 'all' ? DATA : DATA.filter(d => d.status === curFilter);
+  // Update search count
+  const vis = filteredData();
+  document.getElementById('search-count').textContent =
+    searchQuery || curFilter !== 'all' ? `${vis.length} / ${DATA.length}` : '';
 
-  vis.filter(d => d.lev >= 5 && d.ev < 5).forEach(d => {
-    const ring = g.append('circle')
+  // Priority gap pulse rings
+  vis.filter(d=>d.lev>=5&&d.ev<5).forEach(d=>{
+    const ring=g.append('circle')
       .attr('cx',xSc(d.ev)).attr('cy',ySc(d.lev))
       .attr('r',0).attr('fill','none').attr('stroke','#ff6b35').attr('stroke-width',.8).attr('opacity',0);
     (function pulse(){
-      ring.attr('r',rSc(d.n)+2).attr('opacity',.7)
+      ring.attr('r',rSc(d.n||10)+2).attr('opacity',.7)
         .transition().duration(2200).ease(d3.easeExpOut)
-        .attr('r',rSc(d.n)+26).attr('opacity',0)
+        .attr('r',rSc(d.n||10)+26).attr('opacity',0)
         .on('end',()=>setTimeout(pulse,Math.random()*1500));
     })();
   });
 
-  const opac = {validated:1,promising:.87,emerging:.72,contested:.62,speculative:.5};
+  const opac  = {validated:1,promising:.87,emerging:.72,contested:.62,speculative:.5};
   const dash  = {validated:'none',promising:'none',emerging:'4,3',contested:'2,3',speculative:'3,5'};
+  const scol  = {validated:'#00ff88',promising:'#00d4ff',emerging:'#ffd700',contested:'#ff6b35',speculative:'#888'};
 
   const nodes = g.selectAll('.nd').data(vis).enter().append('g').attr('class','nd')
     .attr('transform',d=>`translate(${xSc(d.ev)},${ySc(d.lev)})`).style('cursor','crosshair');
 
-  nodes.append('circle').attr('r',d=>rSc(d.n)+4).attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('opacity',.13);
+  // Glow halo
+  nodes.append('circle').attr('r',d=>rSc(d.n||10)+4)
+    .attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('opacity',.13);
 
+  // Main dot
   nodes.append('circle')
-    .attr('r',d=>rSc(d.n))
+    .attr('r',d=>rSc(d.n||10))
     .attr('fill',d=>MECH_COLORS[d.mech]||'#888')
     .attr('opacity',d=>opac[d.status]||.7)
     .attr('stroke',d=>MECH_COLORS[d.mech]||'#888')
@@ -953,69 +1432,100 @@ function buildScatter() {
     .attr('stroke-opacity',.9)
     .attr('filter',d=>'url(#glow'+d.mech.replace(/\W/g,'')+')');
 
+  // Labels for prominent nodes
   nodes.filter(d=>d.ev>6.8||d.lev>7.5).append('text')
-    .attr('y',d=>-rSc(d.n)-5).attr('text-anchor','middle')
+    .attr('y',d=>-rSc(d.n||10)-5).attr('text-anchor','middle')
     .attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('font-size','9px')
     .attr('font-family',"'JetBrains Mono',monospace").attr('opacity',.9)
-    .text(d=>d.name.length>20?d.name.slice(0,18)+'…':d.name);
+    .text(d=>d.name.length>22?d.name.slice(0,20)+'…':d.name);
+
+  // Search highlight ring
+  if (searchQuery) {
+    nodes.filter(d=>d.name.toLowerCase().includes(searchQuery)||d.mech.toLowerCase().includes(searchQuery))
+      .append('circle').attr('r',d=>rSc(d.n||10)+8).attr('fill','none')
+      .attr('stroke','var(--gold)').attr('stroke-width',1.5).attr('opacity',.6)
+      .attr('stroke-dasharray','3,2');
+  }
 
   nodes.attr('opacity',0).transition().duration(500).delay((_,i)=>i*35).attr('opacity',1);
 
   const tip = document.getElementById('tip');
-  const scol = {validated:'#00ff88',promising:'#00d4ff',emerging:'#ffd700',contested:'#ff6b35',speculative:'#888'};
-
   nodes.on('mousemove',(e,d)=>{
+    hoveredDatum = d;
     document.getElementById('tn').textContent = d.name;
     document.getElementById('tm').textContent = d.mech;
-    const tb = document.getElementById('tb');
-    tb.textContent = d.status.toUpperCase();
-    tb.style.cssText = `background:${scol[d.status]}22;color:${scol[d.status]};border:1px solid ${scol[d.status]}55`;
-    document.getElementById('te').textContent = d.ev.toFixed(1);
-    document.getElementById('tl').textContent = d.lev.toFixed(1);
-    document.getElementById('tst').textContent = d.n.toLocaleString();
-    document.getElementById('td').textContent = d.desc;
-    document.getElementById('t-priority').style.display = (d.lev >= 5 && d.ev < 5) ? 'block' : 'none';
-    tip.style.display = 'block';
-    tip.style.left = (e.clientX+14)+'px';
-    tip.style.top  = Math.min(e.clientY-10, window.innerHeight-240)+'px';
-  }).on('mouseleave',()=>{ tip.style.display='none'; });
+    const tb=document.getElementById('tb');
+    tb.textContent=d.status.toUpperCase();
+    tb.style.cssText=`background:${scol[d.status]}22;color:${scol[d.status]};border:1px solid ${scol[d.status]}55`;
+    document.getElementById('te').textContent  = d.ev.toFixed(1);
+    document.getElementById('tl').textContent  = d.lev.toFixed(1);
+    document.getElementById('tst').textContent = (d.n||'—').toLocaleString();
+    document.getElementById('td').textContent  = d.desc;
+    // PubMed link
+    const pmidLink = document.getElementById('tip-pubmed');
+    if (d.pmid) {
+      pmidLink.href    = `https://pubmed.ncbi.nlm.nih.gov/${d.pmid}/`;
+      pmidLink.style.display = 'inline-flex';
+    } else {
+      pmidLink.style.display = 'none';
+    }
+    document.getElementById('t-priority').style.display = (d.lev>=5&&d.ev<5)?'block':'none';
+    tip.style.display='block';
+    tip.style.left=Math.min(e.clientX+14, window.innerWidth-310)+'px';
+    tip.style.top=Math.min(e.clientY-10, window.innerHeight-260)+'px';
+  }).on('mouseleave',()=>{ tip.style.display='none'; hoveredDatum=null; });
 
   nodes.on('click',(_,d)=>{
-    bsel.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
-    document.getElementById('bi').value = '';
-    document.getElementById('bo').innerHTML = '<span class="ph-text">Ready to generate protocol for: <strong style="color:var(--magenta)">' + d.name + '</strong></span>';
+    document.getElementById('bsel').value = d.name+' ('+d.mech+', evidence '+d.ev+'/10, LEV impact '+d.lev+' yrs)';
+    document.getElementById('bi').value='';
+    document.getElementById('bo').innerHTML='<span class="ph-text">Ready to generate protocol for: <strong style="color:var(--magenta)">'+d.name+'</strong></span>';
   });
 
+  // Zoom/pan
   svg.call(d3.zoom().scaleExtent([.45,8]).on('zoom',e=>{
     g.attr('transform',`translate(${M.left+e.transform.x},${M.top+e.transform.y}) scale(${e.transform.k})`);
   }));
 }
 
-// ── Filters ───────────────────────────────────────────────────────────────────
-
-document.querySelectorAll('.fb').forEach(b => b.addEventListener('click',()=>{
+// ── Filters ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.fb').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
-  curFilter = b.dataset.f;
+  curFilter=b.dataset.f;
   buildScatter();
 }));
 
-// ── Live swarm sync ───────────────────────────────────────────────────────────
-
+// ── Live swarm sync ───────────────────────────────────────────────────────
 async function syncSwarm() {
   try {
-    const r = await fetch('/api/stats');
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.nodes > 0) document.getElementById('s-int').textContent = DATA.length + '+' + d.nodes;
+    const r=await fetch('/api/stats');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.nodes>0) document.getElementById('s-int').textContent=DATA.length+'+'+d.nodes;
+    // Load community interventions from server
+    const ir=await fetch('/api/interventions');
+    if(ir.ok){
+      const idata=await ir.json();
+      (idata.interventions||[]).forEach(entry=>{
+        if(!DATA.find(x=>x.name===entry.name)) DATA.push(entry);
+      });
+      refreshStats(); populateSelect(); buildScatter();
+    }
   } catch {}
 }
-syncSwarm();
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await loadHistory();
+  await loadCommunityInterventions();
+  buildScatter();
+  syncSwarm();
+}
 
 buildScatter();
 window.addEventListener('resize', buildScatter);
+init();
 </script>
 </body>
 </html>
