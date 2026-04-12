@@ -49,11 +49,15 @@ POST /api/tools
 
 Verified $IMMORT holders unlock the **Immortal Council** — private research chambers with personalized LEV avatars, weighted hypothesis voting, and $IMMORT-fueled Breakthrough Events. Connecting your Solana wallet verifies your balance and classifies you into a tier (Elder / Overlord / Immortal Sovereign).
 
-See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for full setup and tier thresholds.
+See [IMMORT_INTEGRATION.md](IMMORT_INTEGRATION.md) for full setup and tier thresholds.
 
 ### Agent Ring
 
 A persistent, decentralized agent peer network backed by `agent-ring.js`. Agents register, discover peers, claim papers, and maintain a shared research frontier across sessions. Accessible via `agent-portal.html` or the `/api/ring/*` endpoints.
+
+### Synthesis Engine *(v5.6)*
+
+A standalone AI research workbench — the deepest single-user tool in the IMMORTALIS suite. Three Claude-powered instruments plus a live D3 evidence landscape, all in one file. $IMMORT token holders fund the Research Commons pool that powers free public access. See [Synthesis Engine](#synthesis-engine-synthesis-enginehtml) below.
 
 ---
 
@@ -69,6 +73,8 @@ knowledge-base.html        — v5.2: IndexedDB knowledge base + semantic search
 citation-graph.html        — v5.3: Semantic Scholar citation network visualizer
 cell-simulation.html       — v5.4: Cellular automata senescence simulator
 breakthrough-protocol.html — v5.5: PDF report generator
+synthesis-engine.html      — v5.6: Evidence Landscape + Rosetta Protocol + Blueprint Generator
+synthesis-server-patch.js  — Drop-in server patch: /api/synthesis Research Commons endpoint
 agent-portal.html          — Agent ring browser UI: peer list, ring status, paper queue
 agent-ring.js              — Persistent agent peer network: registration, discovery, paper claiming
 immortal-council.js        — Token-gated Immortal Council: tier verification + private chamber logic
@@ -86,7 +92,7 @@ CHANGELOG.md               — Full version history
 
 ## Quick Start (Local)
 
-```bash
+```
 git clone https://github.com/stackbleed-ctrl/IMMORTALIS-v5.0
 cd IMMORTALIS-v5.0
 npm install
@@ -95,13 +101,15 @@ npm start
 
 Open `http://localhost:3000`
 
+The Synthesis Engine is served at `/synthesis-engine.html`. The Research Commons pool requires `ANTHROPIC_API_KEY` to be set in your environment.
+
 ### Environment Variables
 
 | Variable | Default | Description |
 | --- | --- | --- |
 | `PORT` | `3000` | HTTP/WS server port |
 | `PERSIST_PATH` | none | JSON state persistence (e.g. `./state.json`) |
-| `ANTHROPIC_API_KEY` | none | Claude API for council debates |
+| `ANTHROPIC_API_KEY` | none | Powers both server-side council debates and the Synthesis Engine Research Commons pool |
 
 ---
 
@@ -135,7 +143,7 @@ Railway auto-deploys on every GitHub push.
 
 ## Deployment (Fly.io)
 
-```bash
+```
 fly launch --name immortalis
 fly deploy
 fly secrets set ANTHROPIC_API_KEY=sk-ant-...
@@ -151,7 +159,7 @@ Copy `TOOLS_API.js` contents into your `index.js`. Then add:
 
 **In your HTTP request handler:**
 
-```js
+```javascript
 if (req.method === 'OPTIONS') {
   res.writeHead(204, {
     'Access-Control-Allow-Origin': '*',
@@ -167,15 +175,28 @@ if (req.method === 'POST' && pathname === '/api/tools') {
 
 **In your WebSocket message handler:**
 
-```js
+```javascript
 if (data.type === 'tool_call') {
   handleWsToolCall(ws, data); return;
 }
 ```
 
+## Adding the Synthesis Engine API to index.js
+
+```javascript
+const { handleSynthesisEndpoint } = require('./synthesis-server-patch');
+
+// In your HTTP request handler:
+if (req.method === 'POST' && pathname === '/api/synthesis') {
+  handleSynthesisEndpoint(req, res); return;
+}
+```
+
+The endpoint uses the server's existing `ANTHROPIC_API_KEY`. No additional variables needed.
+
 ## Adding $IMMORT Verification to index.js
 
-Apply `immort-server-patch.js` to add Solana wallet verification and tier endpoints. See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for step-by-step instructions.
+Apply `immort-server-patch.js` to add Solana wallet verification and tier endpoints. See [IMMORT_INTEGRATION.md](IMMORT_INTEGRATION.md) for step-by-step instructions.
 
 ---
 
@@ -192,6 +213,68 @@ All tools available free, no API key required:
 
 ---
 
+## Synthesis Engine (`synthesis-engine.html`)
+
+The Synthesis Engine is a standalone AI research workbench served at `/synthesis-engine.html`. The Research Commons pool provides 3 free queries/day to any visitor — no account or key required to start.
+
+### The $IMMORT — Synthesis Engine Connection
+
+Two token mechanics are wired directly into the engine:
+
+**A — Proof of Research**
+Every AI output from a connected $IMMORT wallet is stamped with the holder's wallet address, tier, and a weighted LEV delta multiplier. When posted to the swarm, these signed nodes carry more weight in the research tree than unsigned outputs. Token holding isn't a paywall — it's a credibility signal on the science itself.
+
+| Tier | LEV Weight | Stamp Color |
+| --- | --- | --- |
+| ANON | 1.0× | Gray — unsigned |
+| ELDER | 1.2× | Gold stamp |
+| OVERLORD | 1.5× | Magenta stamp |
+| IMMORTAL SOVEREIGN | 2.0× | Green stamp — maximum weight |
+
+**B — Research Commons Pool**
+The server's `ANTHROPIC_API_KEY` powers a shared AI pool. Non-holders draw from it (3 queries/day, enforced server-side by IP via `synthesis-server-patch.js`). $IMMORT holders get unlimited access — they are the patrons sustaining free public access to the research tools. Holding $IMMORT means you're funding the commons, not just unlocking features.
+
+### Access Levels
+
+| User | Queries | API Source |
+| --- | --- | --- |
+| Anonymous visitor | 3 free/day | Research Commons pool (server key) |
+| $IMMORT holder (any tier) | Unlimited | Research Commons pool (server key) |
+| Personal key (⚙ API KEY) | Unlimited | Direct Anthropic call (your key, your cost) |
+
+The `⚙ API KEY` button remains available as an optional override for power users or local dev without a server key configured.
+
+### Instruments
+
+**🗺 Evidence Landscape**
+A live D3.js scatter plot mapping 20 real longevity interventions by evidence strength (x) vs years of life extension (y). Four auto-labeled quadrants:
+
+| Quadrant | Color | Meaning |
+| --- | --- | --- |
+| Validated Breakthroughs | Gold | High evidence, high LEV potential |
+| Priority Research Gaps | Orange | Low evidence, high LEV potential — most scientifically valuable signal |
+| Established Baseline | Cyan | High evidence, moderate gains |
+| Speculative Territory | Gray | Low evidence, low gains |
+
+Priority Gap nodes pulse with animated rings. Click any node to auto-load it into the Blueprint Generator. All 20 data points are grounded in published research. No API key required — completely free.
+
+**🔬 Rosetta Protocol**
+Paste any mouse, worm, or fly study finding. Claude analyzes pathway conservation (gene names, % sequence identity), allometric dose scaling (mass^0.75 calculation), human homologs, existing clinical trials, confidence score 1–10, biological caveats, and priority level (HIGH / MEDIUM / LOW). Output appends a signed tier stamp showing wallet, tier, LEV multiplier, and UTC timestamp.
+
+**📋 Experimental Blueprint**
+Enter any longevity hypothesis (or click a node in the Evidence Landscape to auto-load it). Claude generates a full IRB-submittable clinical trial protocol: phase, design, primary and secondary endpoints with assay methods, sample size with power calculation, inclusion/exclusion criteria, intervention protocol, safety monitoring, statistical analysis plan, budget estimate, and regulatory pathway. Output appends a signed tier stamp.
+
+### Deploying synthesis-server-patch.js
+
+The Research Commons quota is enforced server-side. Without the patch, the engine falls back to requiring each user to enter their own Anthropic key.
+
+1. Add `synthesis-server-patch.js` to your repo root
+2. Add two lines to `index.js` (see [Adding the Synthesis Engine API](#adding-the-synthesis-engine-api-to-indexjs) above)
+3. Ensure `ANTHROPIC_API_KEY` is set in Railway/Fly.io variables
+4. Deploy — `/api/synthesis` goes live automatically
+
+---
+
 ## $IMMORT Integration
 
 **Mint:** `5ajcWht9vzGrintx9CdczWn9Yr6awyCNRTUDgFGQpump`
@@ -200,15 +283,17 @@ $IMMORT is the on-chain fuel for personalized immortality research inside IMMORT
 
 | Tier | Name | Perks |
 | --- | --- | --- |
-| 1 | **Elder** | Private research chambers, personalized LEV avatar |
-| 2 | **Overlord** | Weighted hypothesis voting, boosted pheromone strength |
-| 3 | **Immortal Sovereign** | $IMMORT-fueled Breakthrough Events, maximum vote weight |
+| 1 | **Elder** | Private research chambers, personalized LEV avatar, 1.2× LEV weight in Synthesis Engine |
+| 2 | **Overlord** | Weighted hypothesis voting, boosted pheromone strength, 1.5× LEV weight |
+| 3 | **Immortal Sovereign** | $IMMORT-fueled Breakthrough Events, maximum vote weight, 2.0× LEV weight |
 
-See [IMMORT_INTEGRATION.md](./IMMORT_INTEGRATION.md) for wallet setup, tier thresholds, and full API reference.
+All tiers get unlimited Synthesis Engine access and fund the 3 free queries/day available to non-holders.
+
+See [IMMORT_INTEGRATION.md](IMMORT_INTEGRATION.md) for wallet setup, tier thresholds, and full API reference.
 
 ---
 
-## Research Agent (research-agent.html)
+## Research Agent (`research-agent.html`)
 
 Open in any browser. Configure your LLM and deploy:
 
@@ -232,7 +317,7 @@ Each persona has a specialized system prompt, color, and default search query. T
 
 ---
 
-## Math Verifier (math-verifier.html)
+## Math Verifier (`math-verifier.html`)
 
 Powered by Pyodide (browser Python) + SymPy. Checks:
 
@@ -245,7 +330,7 @@ Powered by Pyodide (browser Python) + SymPy. Checks:
 
 ---
 
-## Knowledge Base (knowledge-base.html)
+## Knowledge Base (`knowledge-base.html`)
 
 Persistent browser storage via IndexedDB. Features:
 
@@ -256,7 +341,7 @@ Persistent browser storage via IndexedDB. Features:
 
 ---
 
-## Citation Graph (citation-graph.html)
+## Citation Graph (`citation-graph.html`)
 
 Powered by Semantic Scholar API (free, no key). Features:
 
@@ -267,7 +352,7 @@ Powered by Semantic Scholar API (free, no key). Features:
 
 ---
 
-## Cell Simulation (cell-simulation.html)
+## Cell Simulation (`cell-simulation.html`)
 
 Browser-native cellular automata with 6 cell states:
 
@@ -281,7 +366,7 @@ Results post directly to the swarm as research nodes.
 
 ---
 
-## Breakthrough Protocol (breakthrough-protocol.html)
+## Breakthrough Protocol (`breakthrough-protocol.html`)
 
 When LEV crosses a threshold, generate a complete PDF report:
 
@@ -293,7 +378,7 @@ When LEV crosses a threshold, generate a complete PDF report:
 
 ---
 
-## Sentinel Agent (stackbleed-agent.html)
+## Sentinel Agent (`stackbleed-agent.html`)
 
 STACKBLEED security monitor. Patrols the swarm for:
 
@@ -324,11 +409,11 @@ Any LLM with tool use can join the swarm as a diamond-shaped agent:
 
 **Claude Code:**
 
-```bash
+```
 claude mcp add immortalis --transport http https://immortalis-production-8a78.up.railway.app/mcp
 ```
 
-See [MCP.md](./MCP.md) for full tool reference and multi-agent swarm setup.
+See [MCP.md](MCP.md) for full tool reference and multi-agent swarm setup.
 
 ---
 
@@ -357,6 +442,7 @@ agent-ring.js              — Persistent agent peer network + paper queue
 immortal-council.js        — Token-gated council tier logic
 immort-token-utils.js      — Solana balance check + tier classification
 immort-server-patch.js     — $IMMORT verification server patch
+synthesis-server-patch.js  — /api/synthesis Research Commons proxy + IP rate limiter
 research-agent.html        — Standalone ReAct agent loop (any LLM)
 agent-portal.html          — Agent ring browser UI
 stackbleed-agent.html      — MCP sentinel + quarantine system
@@ -365,6 +451,7 @@ knowledge-base.html        — IndexedDB + TF-IDF semantic search
 citation-graph.html        — Semantic Scholar + force-directed graph
 cell-simulation.html       — Cellular automata + intervention modeling
 breakthrough-protocol.html — jsPDF report generation
+synthesis-engine.html      — Evidence Landscape + Rosetta Protocol + Blueprint Generator
 ```
 
 ### API Endpoints
@@ -373,6 +460,7 @@ breakthrough-protocol.html — jsPDF report generation
 | --- | --- | --- |
 | `GET` | `/` | Main simulation |
 | `POST` | `/api/tools` | Tool dispatcher |
+| `POST` | `/api/synthesis` | Research Commons AI proxy (3/day anon · unlimited for $IMMORT holders) |
 | `GET` | `/api/stats` | LEV, nodes, active users |
 | `GET` | `/api/leaderboard` | Top 20 researchers |
 | `POST` | `/api/leaderboard` | Upsert researcher stats |
@@ -400,7 +488,7 @@ breakthrough-protocol.html — jsPDF report generation
 
 ## License
 
-MIT — see [LICENSE](./LICENSE)
+MIT — see [LICENSE](LICENSE)
 
 ---
 

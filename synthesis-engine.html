@@ -34,7 +34,7 @@ body::before{
 /* ── Header ── */
 #hdr{
   position:relative;z-index:20;height:50px;display:flex;align-items:center;
-  padding:0 18px;gap:18px;
+  padding:0 18px;gap:12px;
   background:rgba(4,5,15,.98);border-bottom:1px solid var(--border);
 }
 #logo{
@@ -52,13 +52,27 @@ body::before{
   color:var(--red);text-align:right;white-space:nowrap;line-height:1.5;
 }
 #mort strong{font-size:13px;font-weight:700;}
-#key-btn{
+
+/* ── Header buttons ── */
+#hdr-right{display:flex;gap:7px;align-items:center;flex-shrink:0;}
+#quota-display{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  white-space:nowrap;padding:0 4px;
+}
+.hdr-btn{
   font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;
   padding:4px 10px;border:1px solid var(--dim);background:transparent;
   color:var(--dim);cursor:pointer;border-radius:2px;white-space:nowrap;
   transition:all .2s;
 }
-#key-btn:hover{border-color:var(--gold);color:var(--gold);}
+.hdr-btn:hover{border-color:var(--gold);color:var(--gold);}
+#wallet-btn.connected{border-color:var(--green) !important;color:var(--green) !important;}
+#wallet-btn.elder{border-color:var(--gold) !important;color:var(--gold) !important;}
+#wallet-btn.overlord{border-color:var(--magenta) !important;color:var(--magenta) !important;}
+#wallet-btn.sovereign{
+  border-color:var(--green) !important;color:var(--green) !important;
+  box-shadow:0 0 10px rgba(0,255,136,.25);
+}
 
 /* ── Main grid ── */
 #main{
@@ -159,6 +173,13 @@ select.cs:focus{border-color:var(--magenta);}
 .spin::after{content:'▋';animation:blink .7s steps(1) infinite;}
 @keyframes blink{50%{opacity:0}}
 
+/* ── Tier stamp ── */
+.tier-stamp{
+  margin-top:10px;padding:6px 10px;border-radius:3px;
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+}
+
 /* ── Tooltip ── */
 #tip{
   position:fixed;pointer-events:none;display:none;z-index:200;
@@ -173,25 +194,43 @@ select.cs:focus{border-color:var(--magenta);}
 .tsc strong{color:var(--text);font-family:'Orbitron',sans-serif;font-size:11.5px;}
 .td{font-size:9.5px;color:#8090b0;line-height:1.55;}
 
-/* ── API key modal ── */
-#key-modal{
+/* ── Modals ── */
+.modal{
   display:none;position:fixed;inset:0;z-index:300;
   background:rgba(0,0,0,.7);align-items:center;justify-content:center;
 }
-#key-modal.open{display:flex;}
-#key-box{
+.modal.open{display:flex;}
+.modal-box{
   background:var(--bg2);border:1px solid var(--border);border-radius:5px;
-  padding:24px;width:380px;max-width:90vw;
+  padding:24px;width:400px;max-width:90vw;
 }
-#key-box h3{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;}
-#key-box p{font-size:10.5px;color:var(--dim);margin-bottom:14px;line-height:1.6;}
-#key-box input{
+.modal-box h3{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;margin-bottom:8px;}
+.modal-box p{font-size:10.5px;color:var(--dim);margin-bottom:14px;line-height:1.6;}
+.modal-box input{
   width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:11px;padding:9px;
   border-radius:3px;outline:none;margin-bottom:10px;
 }
-#key-box input:focus{border-color:var(--gold);}
+.modal-box input:focus{border-color:var(--gold);}
 .kb-row{display:flex;gap:8px;}
+.tier-info{
+  background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+  padding:10px;margin-bottom:12px;
+}
+.tier-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;
+  font-family:'JetBrains Mono',monospace;
+}
+.tier-row:last-child{border-bottom:none;}
+.tier-row .tname{font-weight:700;}
+.tier-row .tperks{color:var(--dim);font-size:9px;}
+.wallet-status{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:8px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:3px;margin-bottom:10px;min-height:32px;
+  color:var(--dim);
+}
 
 /* ── Responsive ── */
 @media(max-width:780px){
@@ -213,7 +252,11 @@ select.cs:focus{border-color:var(--magenta);}
     <div class="stat"><div class="sv" id="s-pr">0</div><div class="sl">Protocols</div></div>
   </div>
   <div id="mort">deaths to aging this session<br><strong id="mort-n">0</strong></div>
-  <button id="key-btn" onclick="openKeyModal()">⚙ API KEY</button>
+  <div id="hdr-right">
+    <div id="quota-display"></div>
+    <button class="hdr-btn" id="wallet-btn" onclick="openWalletModal()">◈ CONNECT $IMMORT</button>
+    <button class="hdr-btn" id="key-btn" onclick="openKeyModal()">⚙ API KEY</button>
+  </div>
 </div>
 
 <!-- Main -->
@@ -312,14 +355,48 @@ select.cs:focus{border-color:var(--magenta);}
   <div id="t-priority" style="display:none;margin-top:6px;font-size:9px;color:var(--orange);font-family:'JetBrains Mono',monospace;letter-spacing:1px;">⚠ PRIORITY RESEARCH GAP — HIGH LEV / LOW EVIDENCE</div>
 </div>
 
+<!-- Wallet Modal -->
+<div class="modal" id="wallet-modal">
+  <div class="modal-box">
+    <h3 style="color:var(--gold)">◈ CONNECT $IMMORT WALLET</h3>
+    <p>Token holders fund the Research Commons. $IMMORT holders get unlimited Synthesis Engine queries — non-holders get 3 free/day from the shared pool. Your outputs receive a signed tier stamp and carry weighted LEV delta in the swarm.</p>
+    <div class="tier-info">
+      <div class="tier-row">
+        <span class="tname" style="color:var(--dim)">ANON</span>
+        <span class="tperks">3 free queries/day · 1.0× LEV weight · unsigned</span>
+      </div>
+      <div class="tier-row">
+        <span class="tname" style="color:var(--gold)">ELDER</span>
+        <span class="tperks">Unlimited · 1.2× LEV weight · signed stamp</span>
+      </div>
+      <div class="tier-row">
+        <span class="tname" style="color:var(--magenta)">OVERLORD</span>
+        <span class="tperks">Unlimited · 1.5× LEV weight · signed stamp</span>
+      </div>
+      <div class="tier-row">
+        <span class="tname" style="color:var(--green)">IMMORTAL SOVEREIGN</span>
+        <span class="tperks">Unlimited · 2.0× LEV weight · signed stamp</span>
+      </div>
+    </div>
+    <div class="wallet-status" id="wallet-status">No wallet connected.</div>
+    <div class="kb-row">
+      <button class="ab" id="phantom-btn" onclick="connectPhantom()">PHANTOM</button>
+      <button class="ab" id="solflare-btn" onclick="connectSolflare()">SOLFLARE</button>
+      <button class="ab" style="border-color:var(--dim);color:var(--dim)" onclick="closeWalletModal()">CLOSE</button>
+    </div>
+    <p style="margin-top:10px;font-size:9px;color:var(--dim)">Mint: 5ajcWht9vzGrintx9CdczWn9Yr6awyCNRTUDgFGQpump</p>
+  </div>
+</div>
+
 <!-- API Key Modal -->
-<div id="key-modal">
-  <div id="key-box">
-    <h3>⚙ ANTHROPIC API KEY</h3>
-    <p>Required for Rosetta Protocol and Experimental Blueprint Generator. Your key is stored locally and never transmitted to IMMORTALIS servers.</p>
+<div class="modal" id="key-modal">
+  <div class="modal-box">
+    <h3 style="color:var(--gold)">⚙ PERSONAL API KEY</h3>
+    <p>Optional override. If set, your own Anthropic key is used directly — bypassing the shared pool entirely. Stored locally, never sent to IMMORTALIS servers. Leave blank to use the Research Commons pool.</p>
     <input type="password" id="key-input" placeholder="sk-ant-api03-...">
     <div class="kb-row">
       <button class="ab" onclick="saveKey()">SAVE KEY</button>
+      <button class="ab" style="border-color:var(--red);color:var(--red)" onclick="clearKey()">CLEAR KEY</button>
       <button class="ab" style="border-color:var(--dim);color:var(--dim)" onclick="closeKeyModal()">CANCEL</button>
     </div>
   </div>
@@ -357,15 +434,66 @@ const DATA = [
   {name:"CRISPR Longevity Edits",mech:"Genetic",ev:2.8,lev:9.8,n:12,status:"speculative",desc:"Polygenic germline or somatic edits: APOE4→APOE2, PCSK9 KO, klotho gain-of-function, p16INK4a regulatory modifications. Theoretically uncapped LEV potential if delivery and off-target issues solved. IVF embryo editing demonstrably feasible technically."},
 ];
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const FREE_DAILY_LIMIT = 3;
+const LEV_MULTIPLIERS  = { '': 1.0, elder: 1.2, overlord: 1.5, sovereign: 2.0 };
+const TIER_LABELS      = { '': 'ANON', elder: 'ELDER', overlord: 'OVERLORD', sovereign: 'IMMORTAL SOVEREIGN' };
+const TIER_COLORS      = { '': '#3a5070', elder: '#ffd700', overlord: '#cc44ff', sovereign: '#00ff88' };
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
-let apiKey = localStorage.getItem('immortalis_api_key') || '';
-let curFilter = 'all';
-let trCount = +localStorage.getItem('s_tr') || 0;
-let prCount = +localStorage.getItem('s_pr') || 0;
-let sessionStart = Date.now();
-let lastRosettaOutput = '';
+let apiKey        = localStorage.getItem('immortalis_api_key') || '';
+let walletAddress = localStorage.getItem('immortalis_wallet')  || '';
+let immortTier    = localStorage.getItem('immortalis_tier')    || '';
+let curFilter     = 'all';
+let trCount       = +localStorage.getItem('s_tr') || 0;
+let prCount       = +localStorage.getItem('s_pr') || 0;
+let sessionStart  = Date.now();
+let lastRosettaOutput   = '';
 let lastBlueprintOutput = '';
+
+// ── Free quota helpers ────────────────────────────────────────────────────────
+
+function getFreeQueriesUsed() {
+  const stored = JSON.parse(localStorage.getItem('s_free_quota') || '{}');
+  if (stored.date !== new Date().toDateString()) return 0;
+  return stored.count || 0;
+}
+
+function incrementFreeQueries() {
+  const today = new Date().toDateString();
+  const used  = getFreeQueriesUsed() + 1;
+  localStorage.setItem('s_free_quota', JSON.stringify({ date: today, count: used }));
+}
+
+function canQuery(outputId) {
+  if (apiKey)                        return true; // own key, unlimited
+  if (walletAddress && immortTier)   return true; // token holder, unlimited
+  if (getFreeQueriesUsed() < FREE_DAILY_LIMIT) return true; // free tier
+  document.getElementById(outputId).innerHTML =
+    `<span style="color:var(--gold)">⚡ Daily free limit reached (${FREE_DAILY_LIMIT}/day from the Research Commons pool).<br><br>` +
+    `Connect your $IMMORT wallet for unlimited access — or add your own Anthropic key via ⚙ API KEY.</span>`;
+  return false;
+}
+
+// ── Quota UI ──────────────────────────────────────────────────────────────────
+
+function updateQuotaUI() {
+  const el = document.getElementById('quota-display');
+  if (!el) return;
+  if (apiKey) {
+    el.innerHTML = `<span style="color:var(--gold)">⚙ OWN KEY</span>`;
+  } else if (walletAddress && immortTier) {
+    const color = TIER_COLORS[immortTier];
+    el.innerHTML = `<span style="color:${color}">◈ ${TIER_LABELS[immortTier]}</span>`;
+  } else {
+    const remaining = Math.max(0, FREE_DAILY_LIMIT - getFreeQueriesUsed());
+    const color = remaining > 0 ? 'var(--cyan)' : 'var(--red)';
+    el.innerHTML = `<span style="color:${color}">${remaining}/${FREE_DAILY_LIMIT} FREE</span>`;
+  }
+}
+updateQuotaUI();
 
 // ── Mortality counter ─────────────────────────────────────────────────────────
 
@@ -397,6 +525,81 @@ DATA.forEach(d => {
 });
 bsel.addEventListener('change', () => { if (bsel.value) document.getElementById('bi').value = ''; });
 
+// ── Wallet Modal ──────────────────────────────────────────────────────────────
+
+function openWalletModal() {
+  updateWalletStatus();
+  document.getElementById('wallet-modal').classList.add('open');
+}
+function closeWalletModal() { document.getElementById('wallet-modal').classList.remove('open'); }
+document.getElementById('wallet-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeWalletModal();
+});
+
+function updateWalletStatus() {
+  const el = document.getElementById('wallet-status');
+  if (!walletAddress) {
+    el.textContent = 'No wallet connected.';
+    el.style.color = 'var(--dim)';
+  } else {
+    const short = walletAddress.slice(0,6) + '...' + walletAddress.slice(-6);
+    const color = TIER_COLORS[immortTier] || 'var(--dim)';
+    el.innerHTML = `<span style="color:${color}">◈ ${TIER_LABELS[immortTier] || 'CONNECTED'}</span> &nbsp;<span style="color:var(--dim)">${short}</span>`;
+  }
+}
+
+function updateWalletBtn() {
+  const btn = document.getElementById('wallet-btn');
+  if (!walletAddress) {
+    btn.className = 'hdr-btn';
+    btn.textContent = '◈ CONNECT $IMMORT';
+  } else {
+    btn.className = `hdr-btn connected ${immortTier}`;
+    const short = walletAddress.slice(0,4) + '..' + walletAddress.slice(-4);
+    btn.textContent = `◈ ${TIER_LABELS[immortTier] || 'CONNECTED'} ${short}`;
+  }
+}
+updateWalletBtn();
+
+async function connectWallet(provider, providerName) {
+  const statusEl = document.getElementById('wallet-status');
+  if (!provider) {
+    statusEl.innerHTML = `<span style="color:var(--red)">${providerName} not detected. Install the extension and reload.</span>`;
+    return;
+  }
+  statusEl.innerHTML = `<span style="color:var(--cyan)">Connecting to ${providerName}...</span>`;
+  try {
+    const resp = await provider.connect();
+    walletAddress = resp.publicKey.toString();
+    localStorage.setItem('immortalis_wallet', walletAddress);
+
+    statusEl.innerHTML = `<span style="color:var(--cyan)">Verifying $IMMORT balance...</span>`;
+
+    // Verify tier via server
+    try {
+      const r = await fetch('/api/immort/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet: walletAddress })
+      });
+      const data = await r.json();
+      immortTier = data.tier || '';
+    } catch {
+      immortTier = ''; // server offline / local dev — still connected, just anon tier
+    }
+    localStorage.setItem('immortalis_tier', immortTier);
+
+    updateWalletStatus();
+    updateWalletBtn();
+    updateQuotaUI();
+  } catch (e) {
+    statusEl.innerHTML = `<span style="color:var(--red)">Connection rejected: ${e.message}</span>`;
+  }
+}
+
+function connectPhantom()  { connectWallet(window.phantom?.solana,  'Phantom'); }
+function connectSolflare() { connectWallet(window.solflare,          'Solflare'); }
+
 // ── API Key Modal ─────────────────────────────────────────────────────────────
 
 function openKeyModal() {
@@ -407,41 +610,94 @@ function closeKeyModal() { document.getElementById('key-modal').classList.remove
 function saveKey() {
   const v = document.getElementById('key-input').value.trim();
   if (v && !v.startsWith('•')) { apiKey = v; localStorage.setItem('immortalis_api_key', v); }
+  updateQuotaUI();
   closeKeyModal();
 }
-document.getElementById('key-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeKeyModal(); });
-
-function requireKey(outputId) {
-  if (apiKey) return true;
-  document.getElementById(outputId).innerHTML =
-    '<span style="color:var(--gold)">⚙ API key required — click ⚙ API KEY in the header to add your Anthropic key.</span>';
-  return false;
+function clearKey() {
+  apiKey = '';
+  localStorage.removeItem('immortalis_api_key');
+  document.getElementById('key-input').value = '';
+  updateQuotaUI();
+  closeKeyModal();
 }
+document.getElementById('key-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeKeyModal();
+});
 
 // ── Format output ─────────────────────────────────────────────────────────────
 
 function fmt(text, color) {
-  // Colorize ALL-CAPS section headers like "PATHWAY CONSERVATION:" or "STUDY DESIGN:"
   return text.replace(/^([A-Z][A-Z &\/\-\+]+:)/gm,
     `<span class="sec${color === 'mg' ? ' mg' : ''}">$1</span>`);
+}
+
+// ── Tier stamp ────────────────────────────────────────────────────────────────
+
+function buildStamp() {
+  const tier   = immortTier || '';
+  const color  = TIER_COLORS[tier];
+  const label  = TIER_LABELS[tier];
+  const mult   = LEV_MULTIPLIERS[tier];
+  const wallet = walletAddress
+    ? (walletAddress.slice(0,4) + '...' + walletAddress.slice(-4))
+    : 'UNSIGNED';
+  const ts = new Date().toISOString().slice(0,19) + 'Z';
+  return `<div class="tier-stamp" style="border:1px solid ${color}33;">
+    <span style="color:${color};letter-spacing:1px;font-weight:700">◈ ${label}</span>
+    <span style="color:var(--dim)">${wallet}</span>
+    <span style="color:var(--dim)">LEV WEIGHT</span>
+    <span style="color:${color};font-weight:700">${mult}×</span>
+    <span style="color:#3a5070;margin-left:auto">${ts}</span>
+  </div>`;
 }
 
 // ── Claude API ────────────────────────────────────────────────────────────────
 
 async function callClaude(system, user) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  // Path 1: own API key — direct browser call, unlimited, user's cost
+  if (apiKey) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system,
+        messages: [{ role: 'user', content: user }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.content.map(b => b.text || '').join('');
+  }
+
+  // Path 2: server proxy (Research Commons pool)
+  // Token holders: unlimited. Non-holders: 3/day enforced server-side.
+  const body = { system, user };
+  if (walletAddress && immortTier) {
+    body.wallet = walletAddress;
+    body.tier   = immortTier;
+  }
+
+  const res = await fetch('/api/synthesis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system,
-      messages: [{ role: 'user', content: user }]
-    })
+    body: JSON.stringify(body)
   });
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.content.map(b => b.text || '').join('');
+  if (data.error) throw new Error(data.error);
+
+  // Decrement local free counter only for non-holders (server also enforces)
+  if (!walletAddress || !immortTier) {
+    incrementFreeQueries();
+    updateQuotaUI();
+  }
+  return data.text;
 }
 
 // ── Rosetta Protocol ──────────────────────────────────────────────────────────
@@ -449,7 +705,7 @@ async function callClaude(system, user) {
 async function runRosetta() {
   const input = document.getElementById('ri').value.trim();
   if (!input) return;
-  if (!requireKey('ro')) return;
+  if (!canQuery('ro')) return;
 
   const btn = document.getElementById('r-btn');
   const out = document.getElementById('ro');
@@ -486,8 +742,8 @@ Be scientifically exact. Cite specific proteins, gene names, concentrations, tim
 
   try {
     const result = await callClaude(SYSTEM, `Translate this animal model finding to human clinical relevance:\n\n${input}`);
-    out.innerHTML = fmt(result);
     lastRosettaOutput = result;
+    out.innerHTML = fmt(result) + buildStamp();
     document.getElementById('r-post').style.display = 'inline-block';
     trCount++; localStorage.setItem('s_tr', trCount);
     refreshStats();
@@ -502,7 +758,7 @@ Be scientifically exact. Cite specific proteins, gene names, concentrations, tim
 async function runBlueprint() {
   const hypothesis = bsel.value || document.getElementById('bi').value.trim();
   if (!hypothesis) return;
-  if (!requireKey('bo')) return;
+  if (!canQuery('bo')) return;
 
   const btn = document.getElementById('b-btn');
   const out = document.getElementById('bo');
@@ -554,8 +810,8 @@ Be specific. Use validated biomarker names (e.g., "GrimAge epigenetic clock by I
 
   try {
     const result = await callClaude(SYSTEM, `Generate a complete experimental protocol for testing this longevity hypothesis:\n\n${hypothesis}`);
-    out.innerHTML = fmt(result, 'mg');
     lastBlueprintOutput = result;
+    out.innerHTML = fmt(result, 'mg') + buildStamp();
     document.getElementById('b-post').style.display = 'inline-block';
     prCount++; localStorage.setItem('s_pr', prCount);
     refreshStats();
@@ -568,26 +824,40 @@ Be specific. Use validated biomarker names (e.g., "GrimAge epigenetic clock by I
 // ── Post to Swarm ─────────────────────────────────────────────────────────────
 
 async function postToSwarm(source) {
-  const text = source === 'rosetta' ? lastRosettaOutput : lastBlueprintOutput;
-  const type = source === 'rosetta' ? 'hypothesis' : 'breakthrough';
+  const text     = source === 'rosetta' ? lastRosettaOutput : lastBlueprintOutput;
+  const type     = source === 'rosetta' ? 'hypothesis' : 'breakthrough';
+  const tier     = immortTier || '';
+  const mult     = LEV_MULTIPLIERS[tier];
+  const baseDelta = source === 'blueprint' ? 1.5 : 0.5;
+  const levDelta  = +(baseDelta * mult).toFixed(2);
+
+  // Author label: tier + truncated wallet, or anonymous
+  const author = walletAddress
+    ? `${TIER_LABELS[tier]}:${walletAddress.slice(0,8)}`
+    : 'SynthesisEngine';
+
   try {
     await fetch('/api/nodes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: text.slice(0, 500),
+        text:            text.slice(0, 500),
         type,
-        author: 'SynthesisEngine',
-        lev_delta: source === 'blueprint' ? 1.5 : 0.5,
-        source: 'synthesis-engine'
+        author,
+        lev_delta:       levDelta,
+        source:          'synthesis-engine',
+        wallet:          walletAddress || null,
+        tier:            tier || null,
+        lev_multiplier:  mult,
+        signed:          !!walletAddress
       })
     });
     const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
-    btn.textContent = '✓ POSTED';
+    const tierLabel = tier ? ` [${mult}× LEV]` : '';
+    btn.textContent = `✓ POSTED${tierLabel}`;
     btn.disabled = true;
     setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 3000);
   } catch(e) {
-    // Server not running locally — silent fail
     const btn = document.getElementById(source === 'rosetta' ? 'r-post' : 'b-post');
     btn.textContent = '✓ POSTED (OFFLINE)'; btn.disabled = true;
     setTimeout(() => { btn.textContent = '↑ POST TO SWARM'; btn.disabled = false; }, 2000);
@@ -606,7 +876,6 @@ function buildScatter() {
   const w = W - M.left - M.right;
   const h = H - M.top  - M.bottom;
 
-  // Defs (glow filters)
   const defs = svg.append('defs');
   Object.entries(MECH_COLORS).forEach(([m, c]) => {
     const fid = 'glow' + m.replace(/\W/g,'');
@@ -623,7 +892,6 @@ function buildScatter() {
   const ySc = d3.scaleLinear().domain([0,11]).range([h,0]);
   const rSc = d3.scaleSqrt().domain([0,1300]).range([5,21]);
 
-  // Quadrant backgrounds
   const quads = [
     {x:w/2,y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,215,0,.04)',  stroke:'rgba(255,215,0,.12)', label:'VALIDATED BREAKTHROUGHS', lx:w*.75, ly:16,   lc:'#ffd700'},
     {x:0,  y:0,     wd:w/2,ht:h/2-6, fill:'rgba(255,80,0,.05)',   stroke:'rgba(255,80,0,.15)',  label:'PRIORITY RESEARCH GAPS',  lx:w*.25, ly:16,   lc:'#ff6b35'},
@@ -638,12 +906,10 @@ function buildScatter() {
       .attr('letter-spacing','2').attr('opacity',.45).text(q.label);
   });
 
-  // Dividers
   [['line',w/2,0,w/2,h],['line',0,h/2,w,h/2]].forEach(([,x1,y1,x2,y2]) =>
     g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
       .attr('stroke','rgba(255,255,255,.07)').attr('stroke-width',1).attr('stroke-dasharray','5,5'));
 
-  // Axes
   g.append('g').attr('transform',`translate(0,${h})`).call(d3.axisBottom(xSc).ticks(5).tickSize(-h))
     .call(ax=>{ax.select('.domain').remove();ax.selectAll('.tick line').attr('stroke','rgba(255,255,255,.04)');ax.selectAll('.tick text').attr('fill',getComputedStyle(document.documentElement).getPropertyValue('--dim')).attr('font-size','8.5px').attr('font-family',"'JetBrains Mono',monospace");});
   g.append('g').call(d3.axisLeft(ySc).ticks(6).tickSize(-w))
@@ -655,15 +921,12 @@ function buildScatter() {
     .attr('text-anchor','middle').attr('fill','#3a5070').attr('font-size','9.5px')
     .attr('font-family',"'JetBrains Mono',monospace").attr('letter-spacing','2').text('↑ YEARS OF LIFE EXTENSION');
 
-  // Filtered data
   const vis = curFilter === 'all' ? DATA : DATA.filter(d => d.status === curFilter);
 
-  // Priority pulse rings
   vis.filter(d => d.lev >= 5 && d.ev < 5).forEach(d => {
     const ring = g.append('circle')
       .attr('cx',xSc(d.ev)).attr('cy',ySc(d.lev))
       .attr('r',0).attr('fill','none').attr('stroke','#ff6b35').attr('stroke-width',.8).attr('opacity',0);
-    const delay = Math.random()*2000;
     (function pulse(){
       ring.attr('r',rSc(d.n)+2).attr('opacity',.7)
         .transition().duration(2200).ease(d3.easeExpOut)
@@ -672,17 +935,14 @@ function buildScatter() {
     })();
   });
 
-  // Status styling
   const opac = {validated:1,promising:.87,emerging:.72,contested:.62,speculative:.5};
   const dash  = {validated:'none',promising:'none',emerging:'4,3',contested:'2,3',speculative:'3,5'};
 
   const nodes = g.selectAll('.nd').data(vis).enter().append('g').attr('class','nd')
     .attr('transform',d=>`translate(${xSc(d.ev)},${ySc(d.lev)})`).style('cursor','crosshair');
 
-  // Glow halo
   nodes.append('circle').attr('r',d=>rSc(d.n)+4).attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('opacity',.13);
 
-  // Main circle
   nodes.append('circle')
     .attr('r',d=>rSc(d.n))
     .attr('fill',d=>MECH_COLORS[d.mech]||'#888')
@@ -693,17 +953,14 @@ function buildScatter() {
     .attr('stroke-opacity',.9)
     .attr('filter',d=>'url(#glow'+d.mech.replace(/\W/g,'')+')');
 
-  // Name labels for prominent nodes
   nodes.filter(d=>d.ev>6.8||d.lev>7.5).append('text')
     .attr('y',d=>-rSc(d.n)-5).attr('text-anchor','middle')
     .attr('fill',d=>MECH_COLORS[d.mech]||'#888').attr('font-size','9px')
     .attr('font-family',"'JetBrains Mono',monospace").attr('opacity',.9)
     .text(d=>d.name.length>20?d.name.slice(0,18)+'…':d.name);
 
-  // Entrance animation
   nodes.attr('opacity',0).transition().duration(500).delay((_,i)=>i*35).attr('opacity',1);
 
-  // Tooltip
   const tip = document.getElementById('tip');
   const scol = {validated:'#00ff88',promising:'#00d4ff',emerging:'#ffd700',contested:'#ff6b35',speculative:'#888'};
 
@@ -717,21 +974,18 @@ function buildScatter() {
     document.getElementById('tl').textContent = d.lev.toFixed(1);
     document.getElementById('tst').textContent = d.n.toLocaleString();
     document.getElementById('td').textContent = d.desc;
-    const priority = d.lev >= 5 && d.ev < 5;
-    document.getElementById('t-priority').style.display = priority ? 'block' : 'none';
+    document.getElementById('t-priority').style.display = (d.lev >= 5 && d.ev < 5) ? 'block' : 'none';
     tip.style.display = 'block';
     tip.style.left = (e.clientX+14)+'px';
     tip.style.top  = Math.min(e.clientY-10, window.innerHeight-240)+'px';
   }).on('mouseleave',()=>{ tip.style.display='none'; });
 
-  // Click: auto-populate Blueprint with this intervention
   nodes.on('click',(_,d)=>{
     bsel.value = d.name + ' (' + d.mech + ', evidence ' + d.ev + '/10, LEV impact ' + d.lev + ' yrs)';
     document.getElementById('bi').value = '';
     document.getElementById('bo').innerHTML = '<span class="ph-text">Ready to generate protocol for: <strong style="color:var(--magenta)">' + d.name + '</strong></span>';
   });
 
-  // Zoom + pan
   svg.call(d3.zoom().scaleExtent([.45,8]).on('zoom',e=>{
     g.attr('transform',`translate(${M.left+e.transform.x},${M.top+e.transform.y}) scale(${e.transform.k})`);
   }));
@@ -746,7 +1000,7 @@ document.querySelectorAll('.fb').forEach(b => b.addEventListener('click',()=>{
   buildScatter();
 }));
 
-// ── Live swarm data ───────────────────────────────────────────────────────────
+// ── Live swarm sync ───────────────────────────────────────────────────────────
 
 async function syncSwarm() {
   try {
